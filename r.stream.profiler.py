@@ -169,6 +169,11 @@ for i in range(len(points_in_streams)):
   # Areas
   cur.execute("update streams set drainageArea_km2_1="+str(_A_point1)+" where cat="+str(cat_of_line_segment[i]))
   cur.execute("update streams set drainageArea_km2_2="+str(_A_point2)+" where cat="+str(cat_of_line_segment[i]))
+  cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
+  cur.execute("update streams set y1="+str(points_in_streams[i][0].y)+" where cat="+str(cat_of_line_segment[i]))
+  cur.execute("update streams set x2="+str(points_in_streams[i][-1].x)+" where cat="+str(cat_of_line_segment[i]))
+  cur.execute("update streams set y2="+str(points_in_streams[i][-1].y)+" where cat="+str(cat_of_line_segment[i]))
+  """
   if _A_point1 > _A_point2:
     # Points
     cur.execute("update streams set x1="+str(points_in_streams[i][-1].x)+" where cat="+str(cat_of_line_segment[i]))
@@ -182,6 +187,7 @@ for i in range(len(points_in_streams)):
     cur.execute("update streams set y1="+str(points_in_streams[i][0].y)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set x2="+str(points_in_streams[i][-1].x)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set y2="+str(points_in_streams[i][-1].y)+" where cat="+str(cat_of_line_segment[i]))
+  """
   print i
 #streamsTopo.write()
 streamsTopo.table.conn.commit()
@@ -336,7 +342,7 @@ full_river_cats_csv = ','.join(full_river_cats_str)
 v.extract(input='streams', output='specific_stream', cats=full_river_cats_csv, overwrite=True)
 
 
-
+# REPLACE THIS WITH LOWER-LEVEL COMMANDS!!!
 #v.dissolve(input='specific_stream_segmented', output='specific_stream', column='river_number', overwrite=True)
 #v.db_addtable('specific_stream')
 #v.category('specific_stream')
