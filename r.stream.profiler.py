@@ -166,10 +166,10 @@ for i in range(len(points_in_streams)):
   #streamsTopo[i+1] = points_in_streams[i].reverse()
   # 5. Upload small area as x1, y1; large area as x2, y2
   # CATS had better be in unbroken ascending order!
+  # Areas
+  cur.execute("update streams set drainageArea_km2_1="+str(_A_point1)+" where cat="+str(cat_of_line_segment[i]))
+  cur.execute("update streams set drainageArea_km2_2="+str(_A_point2)+" where cat="+str(cat_of_line_segment[i]))
   if _A_point1 > _A_point2:
-    # Areas
-    cur.execute("update streams set drainageArea_km2_1="+str(_A_point2)+" where cat="+str(cat_of_line_segment[i]))
-    cur.execute("update streams set drainageArea_km2_2="+str(_A_point1)+" where cat="+str(cat_of_line_segment[i]))
     # Points
     cur.execute("update streams set x1="+str(points_in_streams[i][-1].x)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set y1="+str(points_in_streams[i][-1].y)+" where cat="+str(cat_of_line_segment[i]))
@@ -177,8 +177,6 @@ for i in range(len(points_in_streams)):
     cur.execute("update streams set y2="+str(points_in_streams[i][0].y)+" where cat="+str(cat_of_line_segment[i]))
   else:
     print "WARNING!!!!"
-    cur.execute("update streams set drainageArea_km2_1="+str(_A_point1)+" where cat="+str(cat_of_line_segment[i]))
-    cur.execute("update streams set drainageArea_km2_2="+str(_A_point2)+" where cat="+str(cat_of_line_segment[i]))
     # Points
     cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set y1="+str(points_in_streams[i][0].y)+" where cat="+str(cat_of_line_segment[i]))
