@@ -40,11 +40,12 @@ Then run r.slope.aspect
 ##########
 
 # Full set of commands:
-elevation = 'srtm3'
+elevation = 'topoclip'
 #slope = 'srtm.slope'
 #streams = 'srtm.stream
 # or THRESH if not STREAMS -- in km**2
-thresh = 10 # 1 km2 = minimum catchment size
+thresh = 0.2 # 10 km2 = minimum catchment size
+thresh = 10000 # m2
 
 # Made to work on a projected coordinate system PROJECTED!
 reg = region.Region()
@@ -65,13 +66,18 @@ r.mapcalc('cellArea_meters2 = '+str(reg.nsres)+' * '+str(reg.ewres), overwrite=T
 r.mapcalc("cellArea_km2 = cellArea_meters2 / 10^6", overwrite=True)
 
 print "Running r.watershed"
-r.watershed(elevation=elevation, flow='cellArea_km2', accumulation='drainageArea_km2', drainage='drainageDirection', stream='streams_tmp', threshold=thresh, flags='s', overwrite=True)
+r.watershed(elevation=elevation, flow='cellArea_meters2', accumulation='drainageArea_m2', drainage='drainageDirection', stream='streams', threshold=thresh, flags='s', overwrite=True)
+# for irregular outlines on topo
+r.mapcalc("drainageArea_m2 = drainageArea_m2 + 0*"+elevation, overwrite=True)
+#r.watershed(elevation=elevation, flow='cellArea_km2', accumulation='drainageArea_km2', drainage='drainageDirection', stream='streams', threshold=thresh, flags='s', overwrite=True)
 # Remove areas of negative (offmap) accumulation
 #r.mapcalc('drainageArea_km2 = drainageArea_km2 * (drainageArea_km2 > 0)', overwrite=True)
 #r.null(map='drainageArea_km2', setnull=0)
+#r.mapcalc(elevation+" = "+elevation+"*drainageArea_km2*0", overwrite=True)
+
 # Get watershed
 print "Building drainage network"
-r.stream_extract(elevation=elevation, accumulation='drainageArea_km2', threshold=thresh, d8cut=0, mexp=0, stream_raster='streams', stream_vector='streams', direction='draindir', overwrite=True)
+r.stream_extract(elevation=elevation, accumulation='drainageArea_m2', threshold=thresh, d8cut=0, mexp=0, stream_raster='streams', stream_vector='streams', direction='draindir', overwrite=True)
 
 """
 # Get slope and area
@@ -80,11 +86,12 @@ v.what_rast(map='streams_points', type='point', raster='slope', column='slope')
 v.what_rast(map='streams_points', type='point', raster='drainageArea_km2', column='area_km2')
 """
 
+"""
 ~~~~~~~~~~~~~~~~~~~~~
 awickert@dakib:~$ Now that I have a good ordering scheme, find adjacency between units based on starting and ending points and then convert each of these to points and get the slopes and areas between them. Concatenate these all into a single line and see what kind of averaging is needed -- of position, slope, and area. Poisition should include a base downstream distance as well, so we can keep averaged lines on the same course.
 06 NOV
 ~~~~~~~~~~~~~~~~~~~~~
-
+"""
 
 ####################
 # COMPUTE NETWORKS #
@@ -115,12 +122,42 @@ for row in streamsTopo:
 # 3. Get areas at coordinates
 drainageArea_km2 =  RasterRow('drainageArea_km2')
 drainageArea_km2.open('r')
+"""
+##########
+streamsTopo.open(mode='rw')
+for row in streamsTopo:
+  row = a
+streamsTopo.build()
+streamsTopo.close()
+
+vector.libvect.Vect_cat_set(geo_obj.c_cats, 1, 1)
+result = libvect.Vect_rewrite_line(self.c_mapinfo,
+                                   cat, geo_obj.gtype,
+                                   geo_obj.c_points,
+                                   geo_obj.c_cats)
+
+
+streamsTopo.open(mode='rw')
+for i in range(1,len(streamsTopo)+1):
+  cat = i
+  geometry = streamsTopo.cat(cat,'lines')[0]
+  _A_point1 = drainageArea_km2.get_value(points_in_streams[i][0])
+  _A_point2 = drainageArea_km2.get_value(points_in_streams[i][-1])
+  if _A_point1 > _A_point2:
+    streamsTopo.rewrite(geometry.reverse(), cat=i, attrs=None)
+    #row = vector.geometry.Line(row[::-1])
+streamsTopo.build()
+streamsTopo.write()c
+streamsTopo.close()
+##########
+"""
 streamsTopo.table.columns.add('drainageArea_km2_1','double precision')
 streamsTopo.table.columns.add('drainageArea_km2_2','double precision')
 streamsTopo.table.columns.add('x1','double precision')
 streamsTopo.table.columns.add('y1','double precision')
 streamsTopo.table.columns.add('x2','double precision')
 streamsTopo.table.columns.add('y2','double precision')
+
 cur = streamsTopo.table.conn.cursor()
 for i in range(len(points_in_streams)):
   _A_point1 = drainageArea_km2.get_value(points_in_streams[i][0])
@@ -139,6 +176,7 @@ for i in range(len(points_in_streams)):
     cur.execute("update streams set x2="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set y2="+str(points_in_streams[i][0].y)+" where cat="+str(cat_of_line_segment[i]))
   else:
+    print "WARNING!!!!"
     cur.execute("update streams set drainageArea_km2_1="+str(_A_point1)+" where cat="+str(cat_of_line_segment[i]))
     cur.execute("update streams set drainageArea_km2_2="+str(_A_point2)+" where cat="+str(cat_of_line_segment[i]))
     # Points
@@ -154,6 +192,7 @@ streamsTopo.build()
 # THEN:
 # 5. Every line should have 
 
+"""
 # CLOSE TO BEING DONE WITH OLD RIVER NUMBERS,
 # NOW THAT I JUST THRESHOLD DRAINAGE AREA
 colNames = np.array(vector_db_select('streams')['columns'])
@@ -164,6 +203,7 @@ drainageArea_km2_1 = colValues[:,colNames == 'drainageArea_km2_1'].astype(float)
 xy1 = colValues[:,(colNames == 'x1') + (colNames == 'y1')].astype(float) # upstream
 xy2 = colValues[:,(colNames == 'x2') + (colNames == 'y2')].astype(float) # downstream
 xy  = np.vstack((xy1, xy2))
+"""
 
 """
 # new river numbers: ascending order from headwaters downstream.
@@ -223,7 +263,9 @@ colValues = np.array(vector_db_select('streams')['values'].values())
 cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
 # CAT IS RIVER NUMBER FOR R.STREAM....
 river_numbers = colValues[:,colNames == 'cat'].astype(int).squeeze()
-drainageArea_km2_1 = colValues[:,colNames == 'drainageArea_km2_1'].astype(float).squeeze() # area at upstream end
+"""
+drainageArea_km2_1 = colValues[:,colNames == 'drainageArea_km2_1'].astype(float).squeeze() """
+# area at upstream end
 xy1 = colValues[:,(colNames == 'x1') + (colNames == 'y1')].astype(float) # upstream
 xy2 = colValues[:,(colNames == 'x2') + (colNames == 'y2')].astype(float) # downstream
 xy  = np.vstack((xy1, xy2))
@@ -281,7 +323,9 @@ tostream = colValues[:,colNames == 'tostream'].astype(int).squeeze()
 # We can loop over this list to get the shape of the full river network.
 full_river_cats = []
 #segment = 406
-segment = 17 # CHANGEABLE  -- MAKE INPUT TO A DIFFERENT FUNCTION!!!
+#segment = 712 # Machai?
+# 92, 597X, 114, 64
+segment = 64 # CHANGEABLE  -- MAKE INPUT TO A DIFFERENT FUNCTION!!!
 #segment=1
 full_river_cats.append(segment)
 while full_river_cats[-1] != 0:
@@ -305,7 +349,7 @@ v.what_rast(map='specific_stream_points', type='point', raster='drainageArea_km2
 
 # Elevation
 v.db_addcolumn(map='specific_stream_points', layer=2, columns=('elevation double precision'))
-v.what_rast(map='specific_stream_points', type='point', raster='srtm3', column='elevation', layer=2)
+v.what_rast(map='specific_stream_points', type='point', raster=elevation, column='elevation', layer=2)
 
 ########################################
 # THIS CREATES THE RIVER PROFILE PLOTS #
@@ -334,7 +378,7 @@ _S = []
 _A = []
 _z = []
 # window
-L = 100 # km window
+L = 50 # m window
 dL = L # moving steps
 l = 0
 r = L
@@ -349,12 +393,38 @@ while r < rmax:
   r += dL
 
 plt.ion()
-plt.figure(1)
+plt.figure('Long profile')
+plt.title('Long profile', fontsize=16)
+plt.xlabel('$x$ [m]', fontsize=16)
+plt.ylabel('$z$ [m]', fontsize=16)
 plt.plot(_x,_z)
-plt.figure(2)
+plt.savefig('Long profile.png')
+plt.figure('Slope--distance')
 plt.plot(_x,_S, 'ko')
-plt.figure(3)
-plt.loglog(_A, _S, 'k.')
+plt.title('Slope--distance', fontsize=16)
+plt.xlabel('$x$ [m]', fontsize=16)
+plt.ylabel('$S$ [--]', fontsize=16)
+plt.savefig('Sx.png')
+plt.figure('Slope--area')
+plt.title('Slope--area', fontsize=16)
+plt.xlabel('$A$ [m^2]', fontsize=16)
+plt.ylabel('$S$ [--]', fontsize=16)
+plt.loglog(np.array(_A)*1E6, _S, 'k.')
+plt.ylim((1E-2, 10))
+plt.savefig('SA.png')
+plt.figure('Slope--area tall', figsize=(8,12))
+plt.title('Slope--area', fontsize=16)
+plt.xlabel('$A$ [m^2]', fontsize=16)
+plt.ylabel('$S$ [--]', fontsize=16)
+plt.loglog(np.array(_A)*1E6, _S, 'k.')
+plt.ylim((1E-2, 100))
+plt.savefig('SAtall.png')
+plt.figure('Area--distance')
+plt.title('Area--distance', fontsize=16)
+plt.xlabel('$x$ [m]', fontsize=16)
+plt.ylabel('$A$ [m^2]', fontsize=16)
+plt.plot(_x, np.array(_A)*1E6, 'k.')
+plt.savefig('Ax.png')
 plt.show()
 
 # Get segment connectivity
