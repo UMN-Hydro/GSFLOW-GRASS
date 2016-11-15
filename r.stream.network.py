@@ -116,6 +116,7 @@
 # PYTHON
 import numpy as np
 from matplotlib import pyplot as plt
+import sys
 # GRASS
 from grass.pygrass.modules.shortcuts import general as g
 from grass.pygrass.modules.shortcuts import raster as r
@@ -126,6 +127,223 @@ from grass.script import vector_db_select
 from grass.pygrass.vector import Vector, VectorTopo
 from grass.pygrass.raster import RasterRow
 from grass.pygrass import utils
+
+#############
+# WORKSPACE #
+#############
+
+# Unsorted arrays: what is at start and what is at end?
+streamsTopo = VectorTopo('streams', overwrite=True)
+streamsTopo.build()
+streamsTopo.open(mode='rw')
+
+# Order everything
+cats_full = [] # points and lines
+for row in streamsTopo:
+  cats_full.append(row.cat)
+streamsTopo.rewind()
+cats_full_order = np.argsort(cats)
+streamsTopo_a = np.array(streamsTopo)
+streamsTopo_a = streamsTopo_a[cats_full_order] # Place in order of ascending category
+
+# NEW STRATEGY -- NO NEED TO ORGANIZE. SIMPLY FIND START AND END POINTS!
+# Those points with id 0 will occur only at the start of the whole system.
+# These are the headwaters; march downstream from here.
+points = []
+point_type_codes = [] # 0 = headwaters; 1 = downstream
+point_cats = []
+lines = []
+line_type_codes = [] # 0 = headwaters; 1 = downstream
+line_cats = []
+streamsTopo = VectorTopo('streams', overwrite=True)
+streamsTopo.build()
+streamsTopo.open(mode='rw')
+for i in range(1, len(streamsTopo)+1):
+  if type(streamsTopo[i]) == vector.geometry.Line:
+    lines.append(streamsTopo[i].tolist())
+    line_type_codes.append(streamsTopo[i].attrs['type_code'])
+    line_cats.append(streamsTopo[i].cat)
+  elif type(streamsTopo[i]) == vector.geometry.Point:
+    points.append(streamsTopo[i].coords())
+    point_type_codes.append(streamsTopo[i].attrs['type_code'])
+    point_cats.append(streamsTopo[i].cat)
+  else:
+    sys.exit("Non-line, non-point, in stream network. Why?")
+points = np.asarray(points)
+point_type_codes = np.asarray(point_type_codes)
+point_cats = np.asarray(point_cats)
+lines = np.asarray(lines)
+line_type_codes = np.asarray(line_type_codes)
+line_cats = np.asarray(line_cats)
+
+# Order everything -- at least will make thinking easier
+point_cats_order = np.argsort(point_cats)
+line_cats_order = np.argsort(line_cats)
+points = points[point_cats_order]
+point_type_codes = point_type_codes[point_cats_order]
+point_cats = point_cats[point_cats_order]
+lines = lines[line_cats_order]
+line_type_codes = line_type_codes[line_cats_order]
+line_cats = line_cats[line_cats_order]
+
+# Gives repeat points, but not line segments. Still, be cautious with both
+_cat, index = np.unique(point_cats, return_index=True)
+points = points[index]
+point_type_codes = point_type_codes[index]
+point_cats = point_cats[index]
+# ADD MATCHING LINE SECTION HERE IF IT BECOMES NECESSARY!
+
+# Use the type codes as a mask: 
+# Define those points and lines at the headwaters (start) and downstream
+headwaters_points = points[point_type_codes == 0]
+headwaters_point_cats = point_cats[point_type_codes == 0]
+lower_points = points[point_type_codes]
+lower_point_cats =  point_cats[point_type_codes]
+headwaters_lines = lines[line_type_codes == 0]
+headwaters_line_cats = line_cats[line_type_codes == 0]
+lower_lines = lines[line_type_codes]
+lower_line_cats =  line_cats[line_type_codes]
+
+# THIS SHOWS THAT THEY ARE ALL IN THE PROPER ORDER!
+for i in range(len(headwaters_lines)):
+  _mask = np.prod(headwaters_points == headwaters_lines[i][0], axis=1)
+  if np.sum(_mask):
+    pass
+  else:
+    print i
+    
+    
+# SO ASSUMING EVERYTHING IS IN ORDER, THEN WE CAN SIMPLIFY THINGS:
+# LET'S SEE IF THIS WORKS
+# Lower in-network points: up- and down-stream
+lower_upstream_points = []
+lower_downstream_points = []
+for line in lower_lines:
+  lower_upstream_points.append(line[0])
+  lower_downstream_points.append(line[-1])
+
+upstream_points = []
+downstream_points = []
+for line in lines:
+  upstream_points.append(line[0])
+  downstream_points.append(line[-1])
+upstream_points = np.asarray(upstream_points)
+downstream_points = np.asarray(downstream_points)
+
+tocat = []
+for i in range(len(lines)):
+  tosegment_mask = np.prod(upstream_points == downstream_points[i], axis=1)
+  if np.sum(tosegment_mask) == 0:
+    tocat.append(0)
+  else:
+    tocat.append(tosegment_mask.nonzero()[0][0])
+  
+  
+# Number of networks = headwaters
+toline_lol = []
+for i in range(len(headwaters_lines)):
+  topoint = headwaters_lines[i][-1]
+  nextline = downstream_lines[
+  toline_list = []
+  toline_list.append()
+
+
+
+  print np.prod(headwaters_points == headwaters_lines[i][0], axis=1).nonzero()[0][0]
+  print (headwaters_points == headwaters_lines[i][0]).nonzero()[0][0]
+
+
+
+
+
+
+
+
+
+
+
+
+# Lists for lines in proper order
+#lines_in_order = lines.copy()
+
+
+# Points and start/end of lines -- and orient lines properly!
+P1 = []
+P2 = []
+P1a = []
+P2a = []
+cats = []
+for row in streamsTopo:
+  if type(row) == vector.geometry.Line:
+    #print row.cat
+    line = row
+    P1.append(line[0])
+    P2.append(line[-1])
+    P1a.append(line[0].coords())
+    P2a.append(line[-1].coords())
+    cats.append(line.cat)
+
+
+
+
+
+
+
+
+
+# Points and start/end of lines
+P1 = []
+P2 = []
+P1a = []
+P2a = []
+cats = []
+for row in streamsTopo:
+  if type(row) == vector.geometry.Line:
+    #print row.cat
+    line = row
+    P1.append(line[0])
+    P2.append(line[-1])
+    P1a.append(line[0].coords())
+    P2a.append(line[-1].coords())
+    cats.append(line.cat)
+    
+# Indices for categories in order
+cats_order = np.argsort(cats)
+
+# Create arrays to make comparisons easier, and put in order.
+P1a = np.array(P1a)[cats_order]
+P2a = np.array(P2a)[cats_order]
+
+# Check if this river is either the start or end of the network
+isterminal = []
+isterminal1 = []
+isterminal2 = []
+for i in range(P1a.shape[0]):
+  _is_not_terminal1 = (P1a[i,:] == P1a[:i]).any() or \
+                      (P1a[i,:] == P1a[i+1:]).any() or \
+                      (P1a[i,:] == P2a).any()
+  _is_not_terminal2 = (P2a[i,:] == P2a[:i]).any() or \
+                      (P2a[i,:] == P2a[i+1:]).any() or \
+                      (P2a[i,:] == P1a).any()
+  isterminal1.append(_is_not_terminal1 == False)
+  isterminal2.append(_is_not_terminal2 == False)
+  if isterminal1[-1] and isterminal2[-1]:
+    isterminal.append(-1) # start and end
+  elif isterminal1[-1] or isterminal2[-1]:
+    isterminal.append(1) # start or end
+  else:
+    isterminal.append(0) # intermediate
+isterminal1 = np.array(isterminal1)
+isterminal2 = np.array(isterminal2)
+isterminal = np.array(isterminal)
+  
+  if :
+     # Potential to be terminal -- 
+    if (P1a[i,:] == P1a[:i]).any() or (P1a[i,:] == P1a[i+1:]).any() or \
+       (P1a[i,:] == P2a).any():
+    isterminal.append(False)
+  else:
+    isterminal.append(True)
 
 #####################
 # UTILITY FUNCTIONS #
@@ -143,10 +361,10 @@ def add_upstream_downstream_points(streams,)
     # 1. Get vectorTopo
     streamsTopo.open(mode='rw')
     points_in_streams = []
-    cat_of_line_segment = []
+    cat_of_line = []
     # 2. Get coordinates
     for row in streamsTopo:
-      cat_of_line_segment.append(row.cat)
+      cat_of_line.append(row.cat)
       if type(row) == vector.geometry.Line:
         points_in_streams.append(row)
     # 3. Get areas at coordinates
@@ -170,37 +388,36 @@ def add_upstream_downstream_points(streams,)
         # Areas
         cur.execute("update streams set drainageArea_km2_1="+\
                     str(_A_point2)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set drainageArea_km2_2="+str(_A_point1)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         # Points
         cur.execute("update streams set x1="+str(points_in_streams[i][-1].x)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set y1="+str(points_in_streams[i][-1].y)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set x2="+str(points_in_streams[i][0].x)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set y2="+str(points_in_streams[i][0].y)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
       else:
         cur.execute("update streams set drainageArea_km2_1="+str(_A_point1)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set drainageArea_km2_2="+str(_A_point2)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         # Points
         cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set y1="+str(points_in_streams[i][0].y)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set x2="+str(points_in_streams[i][-1].x)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
         cur.execute("update streams set y2="+str(points_in_streams[i][-1].y)+\
-                    " where cat="+str(cat_of_line_segment[i]))
+                    " where cat="+str(cat_of_line[i]))
       print i
     #streamsTopo.write()
     streamsTopo.table.conn.commit()
     streamsTopo.build()
-
 
 
 ############################
