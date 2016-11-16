@@ -30,10 +30,20 @@
 #% keyword: geomorphology
 #%end
 #%option
-#%  key: segment_cat
+#%  key: cat
 #%  label: Starting line segment category
 #%  required: yes
 #%  guidependency: layer,column
+#%end
+#%option G_OPT_V_INPUT
+#%  key: streams
+#%  label: Vector input of stream network created by r.stream.extract
+#%  required: yes
+#%end
+#%option G_OPT_V_OUTPUT
+#%  key: outstream
+#%  label: Vector output stream
+#%  required: yes
 #%end
 #%option
 #%  key: direction
@@ -42,11 +52,6 @@
 #%  options: upstream,downstream
 #%  answer: downstream
 #%  required: no
-#%end
-#%option G_OPT_V_INPUT
-#%  key: streams
-#%  label: Vector input of stream network created by r.stream.extract
-#%  required: yes
 #%end
 #%option G_OPT_R_INPUT
 #%  key: elevation
@@ -58,6 +63,16 @@
 #%  label: Flow accumulation
 #%  required: no
 #%end
+#%option G_OPT_R_INPUT
+#%  key: slope
+#%  label: Map of slope created by r.slope.area
+#%  required: no
+#%end
+#%option G_OPT_R_INPUT
+#%  key: window
+#%  label: Distance over which to average in river profiles and slope-area plots
+#%  required: no
+#%end
 #%option
 #%  key: units
 #%  type: string
@@ -66,16 +81,11 @@
 #%  required: no
 #%end
 #%option
-#%  key: units
+#%  key: plots
 #%  type: string
-#%  label: Plots
+#%  label: Plots to generate
 #%  options: LongProfile,SlopeArea,SlopeDistance,AreaDistance
 #%  required: no
-#%end
-#%option G_OPT_V_OUTPUT
-#%  key: outstream
-#%  label: Vector output stream
-#%  required: yes
 #%end
 
 ##################
@@ -121,7 +131,7 @@ def main():
 
     # We can loop over this list to get the shape of the full river network.
     selected_cats = []
-    segment = int(options['segment_cat'])
+    segment = int(options['cat'])
     selected_cats.append(segment)
     if options['direction'] == 'downstream':
         while selected_cats[-1] != 0:
