@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ############################################################################
 #
-# MODULE:       r.stream.network
+# MODULE:       v.stream.network
 #
 # AUTHOR(S):    Andrew Wickert
 #
@@ -103,10 +103,15 @@ def main():
         streamsTopo.table.columns.add('tostream','int')
     except:
         pass
+    #streamsTopo.table.conn.commit()
+    #streamsTopo.build()
+    #streamsTopo.close()
 
     # Is this faster than v.to.db?
-    # v.to_db(map='streams', option='start', columns='x1,y1')
-    # v.to_db(map='streams', option='end', columns='x2,y2')
+    """
+    v.to_db(map=streams, option='start', columns='x1,y1')
+    v.to_db(map=streams, option='end', columns='x2,y2')
+    """
     cur = streamsTopo.table.conn.cursor()
     for i in range(len(points_in_streams)):
         cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
@@ -129,7 +134,7 @@ def main():
         if np.sum(tosegment_mask) == 0:
             tocat.append(0)
         else:
-            tocat.append(tosegment_mask.nonzero()[0][0])
+            tocat.append(cats[tosegment_mask.nonzero()[0][0]])
     tocat = np.asarray(tocat).astype(int)
 
     # This gives us a set of downstream-facing adjacencies.
