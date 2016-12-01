@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 ############################################################################
 #
-# MODULE:       v.stream.network
+# MODULE:       v.stream.profiler
 #
 # AUTHOR(S):    Andrew Wickert
 #
-# PURPOSE:      Attach IDs of upstream and downstream nodes as well as the
-#               category value of the next downstream stream segment
-#               (0 if the stream exits the map)
+# PURPOSE:      Build long profiles and slope--area diagrams of a river network
 #
 # COPYRIGHT:    (c) 2016 Andrew Wickert
 #
