@@ -71,11 +71,17 @@ def main():
     streamsTopo = VectorTopo(streams)
     streamsTopo.build()
 
+    # Is this faster than v.to.db?
+    # Works more consistently, at least
+    v.to_db(map=streams, option='start', columns='x1,y1')
+    v.to_db(map=streams, option='end', columns='x2,y2')
+
     # 1. Get vectorTopo
     streamsTopo.open(mode='rw')
     points_in_streams = []
     cat_of_line_segment = []
 
+    """
     # 2. Get coordinates
     for row in streamsTopo:
         cat_of_line_segment.append(row.cat)
@@ -106,12 +112,8 @@ def main():
     #streamsTopo.table.conn.commit()
     #streamsTopo.build()
     #streamsTopo.close()
+    """
 
-    # Is this faster than v.to.db?
-    """
-    v.to_db(map=streams, option='start', columns='x1,y1')
-    v.to_db(map=streams, option='end', columns='x2,y2')
-    """
     cur = streamsTopo.table.conn.cursor()
     for i in range(len(points_in_streams)):
         cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
@@ -124,6 +126,7 @@ def main():
     colNames = np.array(vector_db_select('streams')['columns'])
     colValues = np.array(vector_db_select('streams')['values'].values())
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze() # river number
+    print colValues
     xy1 = colValues[:,(colNames == 'x1') + (colNames == 'y1')].astype(float) # upstream
     xy2 = colValues[:,(colNames == 'x2') + (colNames == 'y2')].astype(float) # downstream
 
