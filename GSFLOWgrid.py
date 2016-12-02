@@ -20,3 +20,28 @@ v.overlay ainput=tmp2 atype=line binput=boxtmp output=tmp3 op=and --o
 #     upstream to downstream
 # (5) Once all reaches are ordered, give them numbers. This may require
 #     adding a column as step (1.5).
+
+
+
+# UPDATE DECEMBER 1ST
+
+# Basins 3x resolution
+g.region rast=topo -p
+g.region -p nsres=92.44186047 ewres=92.87925695999999
+# Actually, if it isn't going to be perfect -- just 90x90
+# Or no -- 200
+g.region -pas res=200
+r.mapcalc "topogrid = topo" --o # topogrid is output topo on output grid
+
+# Now make grid
+v.mkgrid map=grid --o
+
+# And output
+r.out.ascii in=topogrid out=topo.asc
+r.out.ascii in=basin out=basinmask.asc null_value=0 --o
+
+
+# Now overlay basins
+# Automatically comes with b_row and b_col from the grid
+v.overlay ainput=basins binput=grid output=tmp op=and --o
+
