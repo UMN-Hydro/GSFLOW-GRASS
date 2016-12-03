@@ -21,7 +21,8 @@ reach_columns = []
 reach_columns.append('KRCH integer')
 reach_columns.append('IRCH integer')
 reach_columns.append('JRCH integer')
-reach_columns.append('ISEG integer')
+reach_columns.append('NSEG integer') # = segment_id = ISEG
+reach_columns.append('ISEG integer') # = segment_id
 reach_columns.append('IREACH integer')
 reach_columns.append('RCHLEN integer')
 reach_columns.append('STRTOP double precision')
@@ -59,6 +60,7 @@ v.db_update(map='reaches', column='KRCH', value=1)
 v.db_update(map='reaches', column='IRCH', value='row')
 v.db_update(map='reaches', column='JRCH', value='col')
 v.db_update(map='reaches', column='ISEG', value='segment_id')
+v.db_update(map='reaches', column='NSEG', value='segment_id')
 v.to_db(map='reaches', columns='RCHLEN', option='length')
 v.db_update(map='reaches', column='STRTHICK', value=0.1) # 10 cm, prescribed
 
