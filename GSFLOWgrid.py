@@ -40,8 +40,21 @@ v.mkgrid map=grid --o
 r.out.ascii in=topogrid out=topo.asc
 r.out.ascii in=basin out=basinmask.asc null_value=0 --o
 
-
 # Now overlay basins
 # Automatically comes with b_row and b_col from the grid
 v.overlay ainput=basins binput=grid output=tmp op=and --o
+
+# And rename column values to everything needed by GSFLOW
+## THIS DONE IN OTHER PROGRAMS IN GRASS-fluvial-profiler directory (here)
+
+# streams
+# repeat if needed
+v.extract in=streams out=tmp2 type=line --o
+v.overlay ainput=tmp2 atype=line binput=grid output=tmp3 op=and --o
+# (1) Add all required segments
+
+# (1) get the start and end segments of the reaches
+
+
+
 
