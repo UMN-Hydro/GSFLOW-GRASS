@@ -17,7 +17,9 @@ from grass import script as gscript
 # Segments
 segment_columns = []
 # Self ID
-segment_columns.append('id integer') # nsegment
+segment_columns.append('id integer') # segment number
+segment_columns.append('ISEG integer') # segment number
+segment_columns.append('NSEG integer') # segment number
 # Streamflow and lake routing
 #segment_columns.append('tosegment integer') # Index of downstream segment to which a segment
                                             #   flows (thus differentiating it from hru_segment,
@@ -30,6 +32,12 @@ segment_columns.append('CDPTH double precision') # depth coeff
 segment_columns.append('FDPTH double precision') # depth exp
 segment_columns.append('AWDTH double precision') # width coeff
 segment_columns.append('BWDTH double precision') # width exp
+# The below will be all 0
+segment_columns.append('IUPSEG integer') # upstream segment ID number, for diversions
+segment_columns.append('FLOW integer')
+segment_columns.append('RUNOFF integer')
+segment_columns.append('ETSW integer')
+segment_columns.append('PPTSW integer')
 
 segment_columns = ",".join(segment_columns)
 
@@ -86,6 +94,16 @@ v.db_update(map='segments', column='FDPTH', value=0.4)
 v.db_update(map='segments', column='AWDTH', value=8.)
 v.db_update(map='segments', column='BWDTH', value=0.5)
 
+# Segment IDs
+v.db_update(map='segments', column='ISEG', value='id')
+v.db_update(map='segments', column='NSEG', value='id')
+
+# values that are 0
+v.db_update(map='segments', column='IUPSEG', value=0)
+v.db_update(map='segments', column='FLOW', value=0)
+v.db_update(map='segments', column='RUNOFF', value=0)
+v.db_update(map='segments', column='ETSW', value=0)
+v.db_update(map='segments', column='PPTSW', value=0)
 """
 # Streamflow and lake routing
 # tosegment
