@@ -127,25 +127,14 @@ def main():
     
     # Many basins out -- need to use overwrite flag in future!
     SQL_OR = 'rnum = ' + ' OR rnum = '.join(map(str, basincats))
+    SQL_OR = 'cat = ' + ' OR cat = '.join(map(str, basincats))
     v.extract(input=basins, output=output_basins, where=SQL_OR, overwrite=True)
     v.extract(input=streams, output=output_streams, cats=basincats_str, overwrite=True)
 
     # We can loop over this list to get the shape of the full river network.
     selected_cats = []
-    segment = int(options['cat'])
+    segment = int(cat)
     selected_cats.append(segment)
-    if options['direction'] == 'downstream':
-        while selected_cats[-1] != 0:
-            selected_cats.append(int(tostream[cats == selected_cats[-1]]))
-        selected_cats = selected_cats[:-1] # remove 0 at end
-    elif options['direction'] == 'upstream':
-        print "Not yet active!"
-        """
-        # Add new lists for each successive upstream river
-        river_is_upstream =
-        while
-        full_river_cats
-        """
     
     selected_cats_str = list(np.array(selected_cats).astype(str))
     selected_cats_csv = ','.join(selected_cats_str)
