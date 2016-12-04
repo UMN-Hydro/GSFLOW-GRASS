@@ -195,6 +195,16 @@ cur.executemany("update segments set OUTSEG=? where tostream=?", nseg_cats)
 vect.table.conn.commit()
 vect.close()
 
-v.db_update(map='reaches', column='STRTOP', value='zr1')
+# Use these to create slope
+Smin = '0.001' # MINIMUM SLOPE -- BACKWARDS POSSIBLE ON DEM
 v.db_update(map='reaches', column='SLOPE', value='(zr1 - zr2)/RCHLEN')
+v.db_update(map='reaches', column='SLOPE', value=Smin, where='SLOPE <= 0')
+
+# srtm_local_filled_grid = srtm_local_filled @ 200m (i.e. current grid)
+#  resolution
+# r.to.vect in=srtm_local_filled_grid out=srtm_local_filled_grid col=z type=area --o#
+h_stream='1' # meter
+v.db_addcolumn(map='reaches', columns='z_topo_mean double precision')
+v.what_vect(map='reaches', query_map='srtm_local_filled_grid', column='z_topo_mean', query_column='z')
+v.db_update(map='reaches', column='STRTOP', value='z_topo_mean -'+h_stream)
 
