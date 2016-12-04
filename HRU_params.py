@@ -178,6 +178,12 @@ cur.executemany("update HRU set hru_lon=?, hru_lat=? where cat=?", lonlat_cat)
 hru.table.conn.commit()
 hru.close()
 
+# FIX!!!
+# CENTROIDS ARE NOT REALLY CENTERS, AND DO NOT WORK IF THERE ARE MULTIPLE
+# AREAS
+# Pygrass to find area edges / cells, and get the center?
+# https://grass.osgeo.org/grass70/manuals/libpython/pygrass.vector.html
+
 # Easting and Northing for other columns
 v.db_update(map='HRU', column='hru_x', query_column='centroid_x')
 v.db_update(map='HRU', column='hru_xlong', query_column='centroid_x*3.28084') # feet
