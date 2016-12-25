@@ -65,6 +65,18 @@ TO READ IN AND PLOT VARIABLES IN MODFLOW INPUT FILES
 INPUT FILES FOR MODFLOW PRE-PROCESSING
 	- Data/GIS/{various files}: for stream routing 
 
+
+===============
+TO RUN GSFLOW:
+===============
+- Decide model_mode = gsflow, modflow, prms, or write_climate
+  ('gsflow' is full coupled model; 'modflow' is useful for preliminary testing b/c MODFLOW will be most prone to convergence problems; 'write_climate' is useful for pre-processing climate inputs to create climate-hru files)
+- Create GSFLOW control file
+- Create climate data files
+- Create GSFLOW/PRMS parameter file
+- Create MODFLOW input files
+- To execute model: follow instructions printed by GSFLOW_print_controlfile4_gcng.m, can manually enter command or can run shell script that is created.
+
 =================
 POST-PROCESSING:
 =================
