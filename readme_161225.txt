@@ -1,0 +1,99 @@
+readme_161224.txt
+Crystal Ng
+
+GSFLOW pre- and post-processing scripts, used for AGU2016 poster
+
+
+=================
+PRE-PROCESSING:
+=================
+
+GSFLOW / PRMS
+-------------
+
+CONTROL FILE:
+(in GSFLOW_pre-processing/)
+	- GSFLOW_print_controlfile4_gcng.m: generic script for creating control file, specify model_mode = gsflow, modflow, or prms
+	- GSFLOW_print_controlfile4_gcng_melt30yr.m: customized version of above, to run 30-year spinup with glacier melt, for AGU2016 poster
+	- GSFLOW_print_controlfile4_gcng_melt.m: customized version of above, 5-yr run, starting from 30-yr spun-up conditions, for baseline scenario with glacial melt, for AGU2016 poster
+	- GSFLOW_print_controlfile4_gcng_NoMelt.m: customized version of above, 5-yr run, starting from 30-yr spun-up conditions, for scenario without glacial melt, for AGU2016 poster
+	- GSFLOW_print_controlfile4_gcng_NoMelt_VegTemp.m: customized version of above, 5-yr run, starting from 30-yr spun-up conditions, for scenario without glacial melt and with upslope shift of vegetation, for AGU2016 poster
+
+PARAMETER FILE:
+(in GSFLOW_pre-processing/)
+	- GSFLOW_print_PRMSparamfile4.m: generic script for creating parameter file, for model_mode=gsflow or prms. Be sure to check "CUSTOMIZE TO YOU COMPUTER!" and "CHANGE FOR SPECIFIC SITE" sections. This will guide you to set up the various scenario tests for AGU2016 poster (melt, no melt, no melt and veg shift)
+
+CLIMATE DATA FILES:
+(in GSFLOW_pre-processing/)
+	- GSFLOW_print_data_climatehru_files1.m: Script to manually apply single observed climate time series to all HRU's, sets up run to be able to use climate_hru rather than use one of PRMS' spatial interpolation schemes for climate.  Take in as input the climate data for one single climate time series (in this case: Boca Toma).
+	- GSFLOW_print_data_climatehru_files2.m: Similar to above script, but replicates 1-year climate times series multiple times to create a fake long time period time series.
+	- GSFLOW_print_data_climatehru_files2_melt.m: Similar to above script, but artificially inserts additional precip in highest elevation HRU, to represent glacial melt
+
+INPUT FILES FOR GSFLOW PRE-PROCESSING
+(note: full files are uploaded, but they may contain various unneeded files)
+	- GSFLOW/inputs/PRMS/climate/: files such as test_boca_toma_F_in.txt, which contains precip, temp data for Boca Toma, in degrees F temperature and inches/day precip
+	- Data/GIS/{various files}: Files created by Andy using GIS, for domain topology for HRU's, HRU-gravity reservoir mapping, stream segments and reaches
+
+
+MODFLOW
+-------
+
+TO CREATE ALL MODFLOW INPUT FILES
+(in GSFLOW_pre-processing/MODFLOW_scripts/)
+	- print_MODFLOW_inputs_res.m: Creates all input files using the below functions, set variable 'fil_res_in' depending on whether to use spun-up variables to initialiez the model (for "restart" run).  Note that restart runs only include a transient stress period, while non-restart runs include first a steady-state stress period and then a transient stress period. 
+
+TO CREATE INDIVIDUAL MODFLOW INPUT FILES (CALLED BY ABOVE)
+(in GSFLOW_pre-processing/MODFLOW_scripts/)
+	- write_dis_MOD2_f.m
+	- write_ba6_MOD3_2.m
+	- write_lpf_MOD2_f2_2.m
+	- uzf/make_uzf3_f_2.m
+	- make_sfr2_f_Mannings.m
+	- write_OC_PCG_MOD_f.m
+	- write_nam_MOD_f2.m
+
+TO READ IN AND PLOT VARIABLES IN MODFLOW INPUT FILES
+(useful to visualize what is being run in model)
+(in GSFLOW_pre-processing/MODFLOW_scripts/)
+	- read_dis.m
+	- read_ba6.m
+	- read_dis.m
+	- read_lpf.m
+	- read_sfr.m
+	- plot_sfr.m
+
+INPUT FILES FOR MODFLOW PRE-PROCESSING
+	- Data/GIS/{various files}: for stream routing 
+
+=================
+POST-PROCESSING:
+=================
+
+GSFLOW
+------
+(in GSFLOW_pre-processing/)
+	- plot_gsflow_csv.m: generalized script to plot time series results from gsflow.csv
+	- plot_gsflow_csv_multiRun_AGU2016.m: customized version of above for plotting results for AGU
+	- create_table_gsflowcsv.m: reference for variables in gsflow.csv
+	- read_gsflow_out.m: generalized script to plot results from gsflow.out, needed in addition to gsflow.csv for groundwater inflow and outflow
+	- read_gsflow_out_plot_AGU2016.m: customized version of above for plotting results for AGU
+
+PRMS
+----
+(in GSFLOW_pre-processing/)
+(may not be needed in addition to gsflow.csv)
+	- plot_PRMS_timeseries.m
+
+Climate
+-------
+(in GSFLOW_pre-processing/)
+	- GSFLOW_print_data_climatehru_files2.m: read in climate hru files and plot time series
+	- plot_BT_climate_data_AGU2016.m: Boca Toma climate, for AGU2016 poster
+
+MODFLOW
+-------
+(in GSFLOW_pre-processing/MODFLOW_scripts/)
+	- Plot_MODFLOW_3D_head2.m: plot head values.  Makes movie with Line 245 'pause(0.1)'; use Line 244 'pause' to control frame advancing.  Not yet set up to make 3D plots for flow (see 'return' on Line 247).
+	- Plot_MODFLOW_3D_uzf.m: Generalized script to plot recharge maps.
+	- Plot_MODFLOW_3D_uzf_AGU2016.m: Customized version of above for AGU2016 results.
+
