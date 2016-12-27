@@ -147,14 +147,14 @@ for segment_id in segment_ids:
   print len(reach_order_cats), len(reach_cats[rsel])
     
   # Reach order to database table
-  reach_order_cats_cats = []
+  reach_number__reach_order_cats = []
   for i in range(len(reach_order_cats)):
-    reach_order_cats_cats.append( (reach_order_cats[i], reach_cats[rsel][i]) )
+    reach_number__reach_order_cats.append( (i+1, reach_order_cats[i]) )
   vname = 'reaches'
   vect = VectorTopo(vname)
   vect.open('rw')
   cur = vect.table.conn.cursor()
-  cur.executemany("update "+vname+" set IREACH=? where cat=?", reach_order_cats_cats)
+  cur.executemany("update "+vname+" set IREACH=? where cat=?", reach_number__reach_order_cats)
   vect.table.conn.commit()
   vect.close()
   
