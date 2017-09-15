@@ -99,7 +99,7 @@ MODfil = in_GISdata_dir  + 'basinmask.asc' # *** NEW FOR GSFLOW, only required h
 # model_mode = 'MODFLOW' # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-parfil = PRMSinput_dir + parfil_pre + '_' + model_mode + '.param'
+parfil = PRMSinput_dir + 'py_' + parfil_pre + '_' + model_mode + '.param'
 
 # Load GIS-generated files with HRU, segment etc information
 # (pandas work like structures in matlab?)
@@ -185,7 +185,7 @@ dim_value.append(MODdata['rows'] * MODdata['cols'])
 # new for GSFLOW:
 # ****to be read in from GIS info****
 dim_name.append('nhrucell')  # total num gravity reservoirs (intersections of hru and grid cells)
-dim_value.append(gvrdata.cat)
+dim_value.append(max(gvrdata.cat))
 
 # -- Time-series input data dimensions --
 # (some of these data are not needed but are handy to output for calibration)
@@ -464,7 +464,7 @@ par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
 #par_value.append(np.ones((dim_value[ind],1)))  # merced: all 1's
-par_value.append(2*np.ones((dim_value[ind],1)))  # sagehen: mostly 2's, some 1's
+par_value.append(2*np.ones((dim_value[ind],1), int))  # sagehen: mostly 2's, some 1's
 
 # Below: Assumes transp_module=transp_tindex (phenolgy based on temp)
 #   Start summing max air temp on month 'transp_beg') when sum >=
@@ -475,14 +475,14 @@ par_name.append('transp_beg') # month to start summing max air temp
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-par_value.append(1*np.ones((dim_value[ind],1)))  # merced: all 4's, 1 for transp anytime - CHIMBORAZO
+par_value.append(1*np.ones((dim_value[ind],1), int))  # merced: all 4's, 1 for transp anytime - CHIMBORAZO
 
 # *** CHANGE FOR SPECIFIC SITE
 par_name.append('transp_end') # month to stop transp, so previous month is last with transp
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-par_value.append(13*np.ones((dim_value[ind],1)))  # max is 13, for transp anytime - CHIMBORAZO
+par_value.append(13*np.ones((dim_value[ind],1), int))  # max is 13, for transp anytime - CHIMBORAZO
 #par_value.append(12*np.ones((dim_value[ind],1)))  # max is 12??? I think GSFLOW manual is wrong about this
 
 # *** CHANGE FOR SPECIFIC SITE
@@ -503,7 +503,7 @@ par_name.append('cov_type') # 0=bare soil, 1=grasses, 2=shrubs, 3=trees, 4=conif
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-par_value.append(2*np.ones((dim_value[ind],1)))  
+par_value.append(2*np.ones((dim_value[ind],1), int))  
 
 # *** CHANGE FOR SPECIFIC SITE
 par_name.append('covden_sum') # summer veg cover density [0.0 to 1.0] (for canopy interception)
@@ -591,7 +591,7 @@ par_name.append('hru_deplcrv')
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-par_value.append(np.ones((dim_value[ind],1)))  
+par_value.append(np.ones((dim_value[ind],1), int))  
 
 par_name.append('melt_force')
 par_dim_name.append('one')
@@ -631,7 +631,7 @@ par_name.append('tstorm_mo') # 0: frontal, 1: convective
 par_dim_name.append('nmonths')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 # par_value.append([0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0])  # merced
-par_value.append(np.zeros((12,1)))
+par_value.append(np.zeros((12,1), int))
 
 
 # -- Hortonian surface runoff, infiltration, and impervious storage --
@@ -843,7 +843,7 @@ if model_mode == 'PRMS': # non-cascade
     par_dim_name.append('nsegment')
     par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
     ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-    par_value.append(0.*np.ones((dim_value[ind],1)))  
+    par_value.append(0.*np.ones((dim_value[ind],1), int))  
 
 # -- Lake routing --
 # ** No parameters here when not using strmflow_module = strmflow_lake **
@@ -983,67 +983,81 @@ print('   strmflow_in_out for strmflow_module (should also be ok for strmflow)')
 #%% -----------------------------------------------------------------------
 # Generally, do no change below here
 
-# - Write to control file
+# - Write to parameter file
 
 # -- other remaing variables
-for ii = 1: NumPars
-    par_num_dim(ii) = length(par_dim_name{ii});
-    par_num(ii) = 1;
-    for jj = 1: length(par_dim_name{ii})
-        par_num(ii) = par_num(ii) * dim_value(strcmp(dim_name, par_dim_name{ii}{jj}));
-    end
-end
-
+par_num_dim = [];
+par_num = np.ones((NumPars,1), int)
+for ii in range(NumPars):
+    par_num_dim.append(np.array(par_dim_name[ii]).size)
+    if isinstance(par_dim_name[ii], list):
+        for x in par_dim_name[ii]:
+#            print x
+            ind = np.squeeze(np.where(np.array(dim_name) == x))
+#            print ind
+            par_num[ii] = par_num[ii] * dim_value[ind]
+#            print dim_value[ind]
+    else:
+        ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[ii]))
+        par_num[ii] = par_num[ii] * dim_value[ind]        
 
 # - Write to Parameter file
-line1 = '####';
-fmt_types = {'#d', '#f', '#f', '#s'};
-fid = fopen(parfil, 'w');
-fprintf(fid,'#s\n', title_str1);
-fprintf(fid,'#s\n', title_str2);
+line1 = '####'
+fobj = open(parfil, 'w+');
+fobj.write(title_str1 + '\n')
+fobj.write(title_str2 + '\n')
 
 # * Dimensions
-dim_line = '** Dimensions **';
-fprintf(fid,'#s\n', dim_line);
-for ii = 1: NumDims
+dim_line = '** Dimensions **'
+fobj.write(dim_line + '\n')
+for ii in range(NumDims):
     # Line 1
-    fprintf(fid,'#s\n', line1);
+    fobj.write(line1 + '\n')
     # Line 2
-    fprintf(fid,'#s\n', dim_name{ii});
+    fobj.write(dim_name[ii] + '\n')
     # Line 3: 
-    fprintf(fid,'#d\n', dim_value(ii));
-end
+    fobj.write(str(np.squeeze(dim_value[ii])) + '\n' );
 
-par_line = '** Parameters **';
-fprintf(fid,'#s\n', par_line);
-for ii = 1: NumPars
+
+par_line = '** Parameters **'
+fobj.write(par_line + '\n')
+
+for ii in range(NumPars):
     # Line 1
-    fprintf(fid,'#s\n', line1);
+    fobj.write(line1 + '\n')
     # Line 2
-    fprintf(fid,'#s\n', par_name{ii});
+    fobj.write(par_name[ii] + '\n')
     # Line 3: 
-    fprintf(fid,'#d\n', par_num_dim(ii));
+    fobj.write(str(np.squeeze(par_num_dim[ii])) + '\n');
     # line 4 to 3+NumOfDims: Name of dimensions, 1 per line 
-    for jj = 1: par_num_dim(ii)
-        fprintf(fid,'#s\n', par_dim_name{ii}{jj});
-    end
+    if isinstance(par_dim_name[ii], list):
+        for x in par_dim_name[ii]: # loop thru list
+            fobj.write(x + '\n')
+    else: # write the single dimension
+        fobj.write(par_dim_name[ii] + '\n')
     # line 3+NumOfDims+1: Number of values 
-    fprintf(fid,'#d\n', par_num(ii));
+    fobj.write(str(np.squeeze(par_num[ii])) + '\n')
     # line 3+NumOfDims+2: data type -> 1=int, 2=single prec, 3=double prec, 4=char str
-    fprintf(fid,'#d\n', par_type(ii));
+    fobj.write(str(par_type[ii]) + '\n')
     # line 3+NumOfDims+3 to end: parameter values, 1 per line
-    switch par_type(ii)
-        case 1, fprintf(fid, '#d\n', par_value{ii});
-        case 2, fprintf(fid, '#g\n', par_value{ii});
-        case 4, 
-            for jj = 1: par_num
-                fprintf(fid, '#s\n', par_value{ii}{jj});
-            end
-    end
-    
-end
+#    if par_type[ii] == 1:
+#        fobj.write(str(np.squeeze(par_value[ii])) + '\n')
+#    elif par_type[ii] == 2:
+#        fobj.write(str(np.squeeze(par_value[ii])) + '\n');
+#    elif par_type[ii] == 4:
+#        if par_num[ii] == 1:
+#            fobj.write(str(np.squeeze(par_value[ii])) + '\n')
+#        else:
+#            for x in par_value[ii]:
+#                fobj.write(str(np.squeeze(x)) + '\n')
+#                
+#                
+    if par_num[ii] == 1:
+        fobj.write(str(np.squeeze(par_value[ii])) + '\n')
+#        print str(np.squeeze(par_value[ii])) + '\n'
+    else:
+        for x in par_value[ii]:
+            fobj.write(str(np.squeeze(x)) + '\n')
+                        
+fobj.close();
 
-
-
-fclose(fid);
-return
