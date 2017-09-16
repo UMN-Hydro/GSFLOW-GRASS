@@ -30,7 +30,7 @@
 #% keyword: geomorphology
 #%end
 #%option G_OPT_V_INPUT
-#%  key: streams
+#%  key: map
 #%  label: Vector input of stream network created by r.stream.extract
 #%  required: yes
 #%  guidependency: layer,column
@@ -66,28 +66,24 @@ def main():
     """
 
     options, flags = gscript.parser()
-    streams = options['streams']
+    streams = options['map']
 
     streamsTopo = VectorTopo(streams)
-    streamsTopo.build()
-
-    # Is this faster than v.to.db?
-    # Works more consistently, at least
-    v.to_db(map=streams, option='start', columns='x1,y1')
-    v.to_db(map=streams, option='end', columns='x2,y2')
+    #streamsTopo.build()
 
     # 1. Get vectorTopo
     streamsTopo.open(mode='rw')
+    """
     points_in_streams = []
     cat_of_line_segment = []
 
-    """
     # 2. Get coordinates
     for row in streamsTopo:
         cat_of_line_segment.append(row.cat)
         if type(row) == vector.geometry.Line:
             points_in_streams.append(row)
-
+    """
+    
     # 3. Coordinates of points: 1 = start, 2 = end
     try:
         streamsTopo.table.columns.add('x1','double precision')
@@ -109,11 +105,10 @@ def main():
         streamsTopo.table.columns.add('tostream','int')
     except:
         pass
-    #streamsTopo.table.conn.commit()
-    #streamsTopo.build()
-    #streamsTopo.close()
-    """
+    streamsTopo.table.conn.commit()
 
+    # Is this faster than v.to.db?
+    """
     cur = streamsTopo.table.conn.cursor()
     for i in range(len(points_in_streams)):
         cur.execute("update streams set x1="+str(points_in_streams[i][0].x)+" where cat="+str(cat_of_line_segment[i]))
@@ -122,15 +117,22 @@ def main():
         cur.execute("update streams set y2="+str(points_in_streams[i][-1].y)+" where cat="+str(cat_of_line_segment[i]))
     streamsTopo.table.conn.commit()
     streamsTopo.build()
+    """
+    # v.to.db Works more consistently, at least
+    streamsTopo.close()
+    v.to_db(map=streams, option='start', columns='x1,y1')
+    v.to_db(map=streams, option='end', columns='x2,y2')
 
-    colNames = np.array(vector_db_select('streams')['columns'])
-    colValues = np.array(vector_db_select('streams')['values'].values())
+    # 4. Read in the start and end coordinate points
+    colNames = np.array(vector_db_select(streams)['columns'])
+    colValues = np.array(vector_db_select(streams)['values'].values())
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze() # river number
-    print colValues
+    #if verbose:
+    #  print colValues
     xy1 = colValues[:,(colNames == 'x1') + (colNames == 'y1')].astype(float) # upstream
     xy2 = colValues[:,(colNames == 'x2') + (colNames == 'y2')].astype(float) # downstream
 
-    # Build river network
+    # 5. Build river network
     tocat = []
     for i in range(len(cats)):
         tosegment_mask = np.prod(xy1 == xy2[i], axis=1)
@@ -146,12 +148,14 @@ def main():
     streamsTopo.open('rw')
     cur = streamsTopo.table.conn.cursor()
     for i in range(len(tocat)):
-        cur.execute("update streams set tostream="+str(tocat[i])+" where cat="+str(cats[i]))
+        cur.execute("update "+streams+" set tostream="+str(tocat[i])+" where cat="+str(cats[i]))
     streamsTopo.table.conn.commit()
-    streamsTopo.build()
+    #streamsTopo.build()
+    streamsTopo.close()
 
     print ""
-    print "Done."
+    print 'Drainage topology built. Check "tostream" column for the downstream cat.'
+    print 'A cat value of 0 indicates the downstream-most segment.'
     print ""
 
 if __name__ == "__main__":
