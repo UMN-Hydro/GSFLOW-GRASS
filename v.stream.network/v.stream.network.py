@@ -22,6 +22,7 @@
  
 # More information
 # Started 14 October 2016
+
 #%module
 #% description: Build a linked stream network: each link knows its downstream link
 #% keyword: vector
@@ -29,12 +30,54 @@
 #% keyword: hydrology
 #% keyword: geomorphology
 #%end
+
 #%option G_OPT_V_INPUT
 #%  key: map
-#%  label: Vector input of stream network created by r.stream.extract
+#%  label: Vector stream network from r.stream.extract
 #%  required: yes
 #%  guidependency: layer,column
 #%end
+
+#%option
+#%  key: upstream_easting_column
+#%  type: string
+#%  description: Upstream easting (or x or lon) column name
+#%  answer: x1
+#%  required : no
+#%end
+
+#%option
+#%  key: upstream_northing_column
+#%  type: string
+#%  description: Upstream northing (or y or lat) column name
+#%  answer: y1
+#%  required : no
+#%end
+
+#%option
+#%  key: downstream_easting_column
+#%  type: string
+#%  description: Downstream easting (or x or lon) column name
+#%  answer: x2
+#%  required : no
+#%end
+
+#%option
+#%  key: downstream_northing_column
+#%  type: string
+#%  description: Downstream northing (or y or lat) column name
+#%  answer: y2
+#%  required : no
+#%end
+
+#%option
+#%  key: tostream_cat_column
+#%  type: string
+#%  description: Adjacent downstream segment cat (0 = offmap flow)
+#%  answer: tostream
+#%  required : no
+#%end
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -67,6 +110,10 @@ def main():
 
     options, flags = gscript.parser()
     streams = options['map']
+    x1 = options['upstream_easting_column']
+    y1 = options['upstream_northing_column']
+    x2 = options['downstream_easting_column']
+    y2 = options['downstream_northing_column']
 
     streamsTopo = VectorTopo(streams)
     #streamsTopo.build()
@@ -86,19 +133,19 @@ def main():
     
     # 3. Coordinates of points: 1 = start, 2 = end
     try:
-        streamsTopo.table.columns.add('x1','double precision')
+        streamsTopo.table.columns.add(x1,'double precision')
     except:
         pass
     try:
-        streamsTopo.table.columns.add('y1','double precision')
+        streamsTopo.table.columns.add(y1,'double precision')
     except:
         pass
     try:
-        streamsTopo.table.columns.add('x2','double precision')
+        streamsTopo.table.columns.add(x2,'double precision')
     except:
         pass
     try:
-        streamsTopo.table.columns.add('y2','double precision')
+        streamsTopo.table.columns.add(y2,'double precision')
     except:
         pass
     try:
@@ -120,8 +167,8 @@ def main():
     """
     # v.to.db Works more consistently, at least
     streamsTopo.close()
-    v.to_db(map=streams, option='start', columns='x1,y1')
-    v.to_db(map=streams, option='end', columns='x2,y2')
+    v.to_db(map=streams, option='start', columns=x1+','+y1)
+    v.to_db(map=streams, option='end', columns=x2+','+y2)
 
     # 4. Read in the start and end coordinate points
     colNames = np.array(vector_db_select(streams)['columns'])
