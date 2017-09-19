@@ -47,7 +47,7 @@
 
 #%option G_OPT_R_INPUT
 #%  key: elevation
-#%  label: digital elevation model to calculate slope along reaches
+#%  label: DEM for slope along reaches
 #%  required: yes
 #%  guidependency: layer,column
 #%end
@@ -74,6 +74,47 @@
 #%  answer: 1
 #%  required: no
 #%end
+
+#%option
+#%  key: upstream_easting_column_seg
+#%  type: string
+#%  description: Upstream easting (or x or lon) column name
+#%  answer: x1
+#%  required : no
+#%end
+
+#%option
+#%  key: upstream_northing_column_seg
+#%  type: string
+#%  description: Upstream northing (or y or lat) column name
+#%  answer: y1
+#%  required : no
+#%end
+
+#%option
+#%  key: downstream_easting_column_seg
+#%  type: string
+#%  description: Downstream easting (or x or lon) column name
+#%  answer: x2
+#%  required : no
+#%end
+
+#%option
+#%  key: downstream_northing_column_seg
+#%  type: string
+#%  description: Downstream northing (or y or lat) column name
+#%  answer: y2
+#%  required : no
+#%end
+
+#%option
+#%  key: tostream_cat_column_seg
+#%  type: string
+#%  description: Adjacent downstream segment cat (0 = offmap)
+#%  answer: tostream
+#%  required : no
+#%end
+
 
 ##################
 # IMPORT MODULES #
@@ -113,6 +154,11 @@ def main():
     elevation = options['elevation']
     Smin = options['s_min']
     h_stream = options['h_stream']
+    x1 = options['upstream_easting_column_seg']
+    y1 = options['upstream_northing_column_seg']
+    x2 = options['downstream_easting_column_seg']
+    y2 = options['downstream_northing_column_seg']
+    tostream = options['tostream_cat_column_seg']
 
     # Build reach maps by overlaying segments on grid
     if len(gscript.find_file(segments)['name']) > 0:
@@ -127,18 +173,16 @@ def main():
     reachesTopo.open('rw')
 
     # Rename a,b columns
-    # Bug waiting to be exposed -- x1, x2, y1, y2, tostream, must all use 
-    # defaults in v.stream.network
-    reachesTopo.table.columns.rename('a_x1', 'x1')
-    reachesTopo.table.columns.rename('a_x2', 'x2')
-    reachesTopo.table.columns.rename('a_y1', 'y1')
-    reachesTopo.table.columns.rename('a_y2', 'y2')
+    reachesTopo.table.columns.rename('a_'+x1, 'x1')
+    reachesTopo.table.columns.rename('a_'+x2, 'x2')
+    reachesTopo.table.columns.rename('a_'+y1, 'y1')
+    reachesTopo.table.columns.rename('a_'+y2, 'y2')
     reachesTopo.table.columns.rename('a_NSEG', 'NSEG')
     reachesTopo.table.columns.rename('a_ISEG', 'ISEG')
     reachesTopo.table.columns.rename('a_stream_type', 'stream_type')
     reachesTopo.table.columns.rename('a_type_code', 'type_code')
     reachesTopo.table.columns.rename('a_cat', 'rnum_cat')
-    reachesTopo.table.columns.rename('a_tostream', 'tostream')
+    reachesTopo.table.columns.rename('a_'+tostream, 'tostream')
     reachesTopo.table.columns.rename('a_id', 'segment_id')
     reachesTopo.table.columns.rename('a_OUTSEG', 'OUTSEG')
     reachesTopo.table.columns.rename('b_row', 'row')
