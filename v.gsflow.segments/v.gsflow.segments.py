@@ -9,7 +9,7 @@
 #               category value of the next downstream stream segment
 #               (0 if the stream exits the map)
 #
-# COPYRIGHT:    (c) 2016 Andrew Wickert
+# COPYRIGHT:    (c) 2016-2017 Andrew Wickert
 #
 #               This program is free software under the GNU General Public
 #               License (>=v2). Read the file COPYING that comes with GRASS
@@ -18,13 +18,13 @@
 #############################################################################
 #
 # REQUIREMENTS:
-#      -  uses inputs from r.stream.extract
+#      -  uses inputs from v.stream.network
  
 # More information
 # Started December 2016
 
 #%module
-#% description: Prepares a stream vector database for the GSFLOW model
+#% description: Prepares stream segments for PRMS and GSFLOW
 #% keyword: vector
 #% keyword: stream network
 #% keyword: hydrology
