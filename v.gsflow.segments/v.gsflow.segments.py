@@ -227,26 +227,26 @@ def main():
     # Create a map to work with
     g.copy(vector=(streams, segments), overwrite=gscript.overwrite())
     # and add its columns
-    v.db_addcolumn(map='segments', columns=segment_columns)
+    v.db_addcolumn(map=segments, columns=segment_columns)
 
     # Produce the data table entries
     ##################################
-    colNames = np.array(gscript.vector_db_select('segments', layer=1)['columns'])
-    colValues = np.array(gscript.vector_db_select('segments', layer=1)['values'].values())
+    colNames = np.array(gscript.vector_db_select(segments, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(segments, layer=1)['values'].values())
     number_of_segments = colValues.shape[0]
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
 
     nseg = np.arange(1, len(cats)+1)
     nseg_cats = []
     for i in range(len(cats)):
-      nseg_cats.append( (nseg[i], cats[i]) )
+        nseg_cats.append( (nseg[i], cats[i]) )
 
     # Default OUTSEG to 0: will stay that way if there is no valid update value
     # (works if there is a stream that goes somewhere else that is numbered but 
     # that isn't in the current basin)
-    v.db_update(map='segments', column='OUTSEG', value=0)
+    v.db_update(map=segments, column='OUTSEG', value=0)
 
-    segment = VectorTopo('segments')
+    segment = VectorTopo(segments)
     segment.open('rw')
     cur = segment.table.conn.cursor()
 
