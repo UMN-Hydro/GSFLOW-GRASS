@@ -9,7 +9,7 @@
 #               category value of the next downstream stream segment
 #               (0 if the stream exits the map)
 #
-# COPYRIGHT:    (c) 2016 Andrew Wickert
+# COPYRIGHT:    (c) 2016-2017 Andrew Wickert
 #
 #               This program is free software under the GNU General Public
 #               License (>=v2). Read the file COPYING that comes with GRASS
@@ -191,7 +191,9 @@ def main():
     # We will update the database with it.
     streamsTopo.build()
     streamsTopo.open('rw')
-    cur = streamsTopo.table.conn.cursor()
+    cur = streamsTopo.table.conn.cursor()\
+    # use "executemany" ????????????????????????????????????????????????????
+    # see v.gsflow.segments.py
     for i in range(len(tocat)):
         cur.execute("update "+streams+" set tostream="+str(tocat[i])+" where cat="+str(cats[i]))
     streamsTopo.table.conn.commit()
