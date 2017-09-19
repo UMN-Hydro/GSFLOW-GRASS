@@ -5,9 +5,7 @@
 #
 # AUTHOR(S):    Andrew Wickert
 #
-# PURPOSE:      Attach IDs of upstream and downstream nodes as well as the
-#               category value of the next downstream stream segment
-#               (0 if the stream exits the map)
+# PURPOSE:      Build stream segments for the USGS models MODFLOW or GSFLOW.
 #
 # COPYRIGHT:    (c) 2016-2017 Andrew Wickert
 #
