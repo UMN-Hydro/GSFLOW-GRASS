@@ -9,7 +9,7 @@
 #               category value of the next downstream stream segment
 #               (0 if the stream exits the map)
 #
-# COPYRIGHT:    (c) 2016 Andrew Wickert
+# COPYRIGHT:    (c) 2016-2017 Andrew Wickert
 #
 #               This program is free software under the GNU General Public
 #               License (>=v2). Read the file COPYING that comes with GRASS
@@ -21,60 +21,58 @@
 #      -  uses inputs from r.stream.extract
  
 # More information
-# Started 14 October 2016
+# Started December 2016
 
 #%module
-#% description: Prepares a stream vector database for the GSFLOW model
+#% description: Build stream "reaches" that link PRMS segments to MODFLOW cells
 #% keyword: vector
 #% keyword: stream network
 #% keyword: hydrology
+#% keyword: geomorphology
 #%end
 
 #%option G_OPT_V_INPUT
-#%  key: map
-#%  label: Vector stream network from r.stream.extract
+#%  key: segment_input
+#%  label: PRMS stream segments
+#%  required: yes
+#%  guidependency: layer,column
+#%end
+
+#%option G_OPT_V_INPUT
+#%  key: grid_input
+#%  label: MODFLOW grid
+#%  required: yes
+#%  guidependency: layer,column
+#%end
+
+#%option G_OPT_R_INPUT
+#%  key: elevation
+#%  label: digital elevation model to calculate slope along reaches
+#%  required: yes
+#%  guidependency: layer,column
+#%end
+
+#%option G_OPT_V_OUTPUT
+#%  key: output
+#%  label: Reaches for GSFLOW
 #%  required: yes
 #%  guidependency: layer,column
 #%end
 
 #%option
-#%  key: upstream_easting_column
-#%  type: string
-#%  description: Upstream easting (or x or lon) column name
-#%  answer: x1
-#%  required : no
+#%  key: Smin
+#%  type: double
+#%  description: Minimum reach slope
+#%  answer: 0.0001
+#%  required: no
 #%end
 
 #%option
-#%  key: upstream_northing_column
-#%  type: string
-#%  description: Upstream northing (or y or lat) column name
-#%  answer: y1
-#%  required : no
-#%end
-
-#%option
-#%  key: downstream_easting_column
-#%  type: string
-#%  description: Downstream easting (or x or lon) column name
-#%  answer: x2
-#%  required : no
-#%end
-
-#%option
-#%  key: downstream_northing_column
-#%  type: string
-#%  description: Downstream northing (or y or lat) column name
-#%  answer: y2
-#%  required : no
-#%end
-
-#%option
-#%  key: tostream_cat_column
-#%  type: string
-#%  description: Adjacent downstream segment cat (0 = offmap flow)
-#%  answer: tostream
-#%  required : no
+#%  key: h_stream
+#%  type: double
+#%  description: Stream channel depth (bank height) [m]
+#%  answer: 1
+#%  required: no
 #%end
 
 ##################
@@ -105,61 +103,85 @@ from grass import script as gscript
 def main():
     """
     Builds river reaches for input to the USGS hydrologic model, GSFLOW.
+    These reaches link the PRMS stream segments to the MODFLOW grid cells.
     """
 
     options, flags = gscript.parser()
-    streams = options['input']
+    segments = options['input_segments']
+    grid = options['input_grid']
     reaches = options['output']
+    elevation = options['elevation']
+    Smin = options['Smin']
+    Smin = options['h_stream']
 
-    # Segments
-    reach_columns = []
-    # Self ID
-    reach_columns.append('KRCH integer')
-    reach_columns.append('IRCH integer')
-    reach_columns.append('JRCH integer')
-    reach_columns.append('NSEG integer') # = segment_id = ISEG
-    reach_columns.append('ISEG integer') # = segment_id
-    reach_columns.append('IREACH integer')
-    reach_columns.append('RCHLEN integer')
-    reach_columns.append('STRTOP double precision')
-    reach_columns.append('SLOPE double precision')
-    reach_columns.append('STRTHICK double precision')
+    # Build reach maps by overlaying segments on grid
+    v.extract(input=segments, output='GSFLOW_TEMP__', type='line', quiet=True)
+    v.overlay(ainput='GSFLOW_TEMP__', atype='line', binput=grid, output=reaches, operator='and', overwrite=True)#gscript.overwrite(), quiet=True)
+    g.remove(type='vector', name='GSFLOW_TEMP__', quiet=True, flags='f')
 
-    reach_columns = ",".join(reach_columns)
-
-    # Create a map to work with
-    v.extract(input=streams, output='GSFLOW_TEMP__', type='line', quiet=True)
-    v.overlay(ainput='GSFLOW_TEMP__', atype='line', binput='grid', output=reaches, operator='and', overwrite=False, quiet=True)
-    grass.run_command('g.remove', type='vector', name='GSFLOW_TEMP__', quiet=True, flags='f')
-
-    v.db_addcolumn(map=reaches, columns=reach_columns)
+    # Start editing database table
+    reachesTopo = VectorTopo(reaches)
+    reachesTopo.open('rw')
 
     # Rename a,b columns
-    v.db_renamecolumn(map=reaches, column=('a_x1', 'x1'))
-    v.db_renamecolumn(map=reaches, column=('a_x2', 'x2'))
-    v.db_renamecolumn(map=reaches, column=('a_y1', 'y1'))
-    v.db_renamecolumn(map=reaches, column=('a_y2', 'y2'))
-    v.db_renamecolumn(map=reaches, column=('a_stream_type', 'stream_type'))
-    v.db_renamecolumn(map=reaches, column=('a_type_code', 'type_code'))
-    v.db_renamecolumn(map=reaches, column=('a_cat', 'rnum_cat'))
-    v.db_renamecolumn(map=reaches, column=('a_tostream', 'tostream'))
-    v.db_renamecolumn(map=reaches, column=('a_id', 'segment_id'))
-    v.db_renamecolumn(map=reaches, column=('a_OUTSEG', 'OUTSEG'))
-    v.db_renamecolumn(map=reaches, column=('b_row', 'row'))
-    v.db_renamecolumn(map=reaches, column=('b_col', 'col'))
-    v.db_renamecolumn(map=reaches, column=('b_id', 'cell_id'))
+    reachesTopo.table.columns.rename('a_x1', 'x1')
+    reachesTopo.table.columns.rename('a_x2', 'x2')
+    reachesTopo.table.columns.rename('a_y1', 'y1')
+    reachesTopo.table.columns.rename('a_y2', 'y2')
+    reachesTopo.table.columns.rename('a_NSEG', 'NSEG')
+    reachesTopo.table.columns.rename('a_ISEG', 'ISEG')
+    reachesTopo.table.columns.rename('a_stream_type', 'stream_type')
+    reachesTopo.table.columns.rename('a_type_code', 'type_code')
+    reachesTopo.table.columns.rename('a_cat', 'rnum_cat')
+    reachesTopo.table.columns.rename('a_tostream', 'tostream')
+    reachesTopo.table.columns.rename('a_id', 'segment_id')
+    reachesTopo.table.columns.rename('a_OUTSEG', 'OUTSEG')
+    reachesTopo.table.columns.rename('b_row', 'row')
+    reachesTopo.table.columns.rename('b_col', 'col')
+    reachesTopo.table.columns.rename('b_id', 'cell_id')
 
-    # Drop some unnecessary columns
-    v.db_dropcolumn(map=reaches, columns='b_area_m2')
+    # Drop unnecessary columns
+    cols = reachesTopo.table.columns.names()
+    for col in cols:
+        if (col[:2] == 'a_') or (col[:2] == 'b_'):
+            reachesTopo.table.columns.drop(col)
+
+    # Add new columns to 'reaches'
+    reachesTopo.table.columns.add('KRCH', 'integer')
+    reachesTopo.table.columns.add('IRCH', 'integer')
+    reachesTopo.table.columns.add('JRCH', 'integer')
+    reachesTopo.table.columns.add('IREACH', 'integer')
+    reachesTopo.table.columns.add('RCHLEN', 'integer')
+    reachesTopo.table.columns.add('STRTOP', 'double precision')
+    reachesTopo.table.columns.add('SLOPE', 'double precision')
+    reachesTopo.table.columns.add('STRTHICK', 'double precision')
+    reachesTopo.table.columns.add('xr1', 'double precision')
+    reachesTopo.table.columns.add('xr2', 'double precision')
+    reachesTopo.table.columns.add('yr1', 'double precision')
+    reachesTopo.table.columns.add('yr2', 'double precision')
+
+    # Commit columns before editing (necessary?)
+    reachesTopo.table.conn.commit()
+    reachesTopo.close()
 
     # Update some columns that can be done now
-    v.db_update(map=reaches, column='KRCH', value=1)
-    v.db_update(map=reaches, column='IRCH', value='row')
-    v.db_update(map=reaches, column='JRCH', value='col')
-    v.db_update(map=reaches, column='ISEG', value='segment_id')
-    v.db_update(map=reaches, column='NSEG', value='segment_id')
-    v.to_db(map=reaches, columns='RCHLEN', option='length')
-    v.db_update(map=reaches, column='STRTHICK', value=0.1) # 10 cm, prescribed
+    reachesTopo.open('rw')
+    colNames = np.array(gscript.vector_db_select(reaches, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(reaches, layer=1)['values'].values())
+    cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
+    nseg = np.arange(1, len(cats)+1)
+    nseg_cats = []
+    for i in range(len(cats)):
+        nseg_cats.append( (nseg[i], cats[i]) )
+    cur = reachesTopo.table.conn.cursor()
+    cur.execute("update "+reaches+" set KRCH=1") # MAKE A VARIABLE LATER???
+    cur.execute("update "+reaches+" set STRTHICK=0.1") # 10 cm, prescribed -- MAKE A VARIABLE LATER!!!!!
+    cur.executemany("update "+reaches+" set IRCH=? where row=?", nseg_cats)
+    cur.executemany("update "+reaches+" set JRCH=? where col=?", nseg_cats)
+    reachesTopo.table.conn.commit()
+    reachesTopo.close()
+    v.to_db(map=reaches, columns='RCHLEN', option='length', quiet=True)
+
 
     # Still to go after these:
     # STRTOP (added with slope)
@@ -167,7 +189,6 @@ def main():
     # SLOPE (need z_start and z_end)
 
     # Now, the light stuff is over: time to build the reach order
-    v.db_addcolumn(map=reaches, columns='xr1 double precision, yr1 double precision, xr2 double precision, yr2 double precision')
     v.to_db(map=reaches, option='start', columns='xr1,yr1')
     v.to_db(map=reaches, option='end', columns='xr2,yr2')
 
@@ -178,16 +199,16 @@ def main():
 
     # First, get the starting coordinates of each stream segment
     # and a set of river ID's (ordered from 1...N)
-    colNames = np.array(gscript.vector_db_select('segments', layer=1)['columns'])
-    colValues = np.array(gscript.vector_db_select('segments', layer=1)['values'].values())
+    colNames = np.array(gscript.vector_db_select(segments, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(segments, layer=1)['values'].values())
     number_of_segments = colValues.shape[0]
     segment_x1s = colValues[:,colNames == 'x1'].astype(float).squeeze()
     segment_y1s = colValues[:,colNames == 'y1'].astype(float).squeeze()
     segment_ids = colValues[:,colNames == 'id'].astype(float).squeeze()
 
     # Then move back to the reaches map to produce the ordering
-    colNames = np.array(gscript.vector_db_select('reaches', layer=1)['columns'])
-    colValues = np.array(gscript.vector_db_select('reaches', layer=1)['values'].values())
+    colNames = np.array(gscript.vector_db_select(reaches, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(reaches, layer=1)['values'].values())
     reach_cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
     reach_x1s = colValues[:,colNames == 'xr1'].astype(float).squeeze()
     reach_y1s = colValues[:,colNames == 'yr1'].astype(float).squeeze()
@@ -212,9 +233,6 @@ def main():
       # Get end of reach = start of next one
       reach_x_end = float(reach_x2s[reach_cats == _cat])
       reach_y_end = float(reach_y2s[reach_cats == _cat])
-      # Make flexible for the answer being in 1 or 2: not directional
-      # BUT IT LOOKS LIKE SEGMENTS ARE DIRECTIONAL! THIS CODE WILL STAY FLEXIBLE
-      # BUT WILL ISSUE A WARNING
       while _i_match.any():
         _x_match = reach_x1s[rsel] == reach_x_end
         _y_match = reach_y1s[rsel] == reach_y_end
@@ -223,55 +241,38 @@ def main():
           _cat = int(reach_cats[rsel][_x_match * _y_match])
           reach_x_end = float(reach_x2s[reach_cats == _cat])
           reach_y_end = float(reach_y2s[reach_cats == _cat])
-          #downstream_directed.append(1)
           reach_order_cats.append(_cat)
-        """
-        # Does not seem necessary :)
-        else:
-          _x_match = reach_x2s[rsel] == int(reach_x2s[reach_cats == _cat])
-          _y_match = reach_y2s[rsel] == int(reach_y2s[reach_cats == _cat])
-          _cat_valid = np.ones(_x_match.shape) - (reach_cats[rsel] == _cat)
-          _i_match = _x_match * _y_match * _cat_valid
-          if _i_match.any():
-            _cat = int(reach_cats[rsel][_x_match * _y_match])
-            reach_x_end = float(reach_x1s[reach_cats == _cat])
-            reach_y_end = float(reach_y1s[reach_cats == _cat])
-            downstream_directed.append(0)
-            warnings.warn('Stream reach oriented upstream!')
-        if _i_match.any():
-          reach_order_cats.append(_cat)
-        """
       print len(reach_order_cats), len(reach_cats[rsel])
         
       # Reach order to database table
       reach_number__reach_order_cats = []
       for i in range(len(reach_order_cats)):
         reach_number__reach_order_cats.append( (i+1, reach_order_cats[i]) )
-      vname = 'reaches'
-      vect = VectorTopo(vname)
-      vect.open('rw')
-      cur = vect.table.conn.cursor()
-      cur.executemany("update "+vname+" set IREACH=? where cat=?", reach_number__reach_order_cats)
-      vect.table.conn.commit()
-      vect.close()
+      reachesTopo = VectorTopo(reaches)
+      reachesTopo.open('rw')
+      cur = reachesTopo.table.conn.cursor()
+      cur.executemany("update "+reaches+" set IREACH=? where cat=?", reach_number__reach_order_cats)
+      reachesTopo.table.conn.commit()
+      reachesTopo.close()
       
 
     # TOP AND BOTTOM ARE OUT OF ORDER: SOME SEGS ARE BACKWARDS. UGH!!!!
     # NEED TO GET THEM IN ORDER TO GET THE Z VALUES AT START AND END
 
     # Compute slope and starting elevations from the elevations at the start and 
-    # end of the reaches and the length of each reach
+    # end of the reaches and the length of each reach]
+    gscript.message('Obtaining elevation values from raster: may take time.')
     v.db_addcolumn(map=reaches, columns='zr1 double precision, zr2 double precision')
     zr1 = []
     zr2 = []
     for i in range(len(reach_cats)):
       _x = reach_x1s[i]
       _y = reach_y1s[i]
-      _z = float(gscript.parse_command('r.what', map='srtm_local_filled', coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
+      _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
       zr1.append(_z)
       _x = reach_x2s[i]
       _y = reach_y2s[i]
-      _z = float(gscript.parse_command('r.what', map='srtm_local_filled', coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
+      _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
       zr2.append(_z)
 
     zr1_cats = []
@@ -280,28 +281,25 @@ def main():
       zr1_cats.append( (zr1[i], reach_cats[i]) )
       zr2_cats.append( (zr2[i], reach_cats[i]) )
 
-    # There is no reason that I have to upload both of these to the attribute 
-    # table, but why not?
-    vname = 'reaches'
-    vect = VectorTopo(vname)
-    vect.open('rw')
-    cur = vect.table.conn.cursor()
-    cur.executemany("update "+vname+" set zr1=? where cat=?", zr1_cats)
-    cur.executemany("update "+vname+" set zr2=? where cat=?", zr2_cats)
-    cur.executemany("update segments set OUTSEG=? where tostream=?", nseg_cats)
-    vect.table.conn.commit()
-    vect.close()
+    reachesTopo = VectorTopo(reaches)
+    reachesTopo.open('rw')
+    cur = reachesTopo.table.conn.cursor()
+    cur.executemany("update "+reaches+" set zr1=? where cat=?", zr1_cats)
+    cur.executemany("update "+reaches+" set zr2=? where cat=?", zr2_cats)
+    reachesTopo.table.conn.commit()
+    reachesTopo.close()
 
-    # Use these to create slope
-    Smin = '0.001' # MINIMUM SLOPE -- BACKWARDS POSSIBLE ON DEM
+    # Use these to create slope -- backwards possible on DEM!
     v.db_update(map=reaches, column='SLOPE', value='(zr1 - zr2)/RCHLEN')
-    v.db_update(map=reaches, column='SLOPE', value=Smin, where='SLOPE <= 0')
+    v.db_update(map=reaches, column='SLOPE', value=Smin, where='SLOPE <= '+str(Smin))
 
     # srtm_local_filled_grid = srtm_local_filled @ 200m (i.e. current grid)
     #  resolution
     # r.to.vect in=srtm_local_filled_grid out=srtm_local_filled_grid col=z type=area --o#
-    h_stream='1' # meter
     v.db_addcolumn(map=reaches, columns='z_topo_mean double precision')
     v.what_vect(map=reaches, query_map='srtm_local_filled_grid', column='z_topo_mean', query_column='z')
-    v.db_update(map=reaches, column='STRTOP', value='z_topo_mean -'+h_stream)
+    v.db_update(map=reaches, column='STRTOP', value='z_topo_mean -'+str(h_stream))
+
+if __name__ == "__main__":
+    main()
 
