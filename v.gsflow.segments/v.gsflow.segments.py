@@ -31,14 +31,14 @@
 #%end
 
 #%option G_OPT_V_INPUT
-#%  key: map
+#%  key: input
 #%  label: Vector stream network from r.stream.extract
 #%  required: yes
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
-#%  key: map
+#%  key: output
 #%  label: Segments: stream segments for GSFLOW / PRMS
 #%  required: yes
 #%  guidependency: layer,column
@@ -48,7 +48,8 @@
 #%  key: ICALC
 #%  type: integer
 #%  description: Stream depth option: 0-const; 1,2-Manning; 3-aQ^b
-#%  required: yes
+#%  answer: 3
+#%  required: no
 #%end
 
 #%option
@@ -218,6 +219,9 @@ def main():
     segment_columns.append('PPTSW integer')
 
     segment_columns = ",".join(segment_columns)
+
+    # CONSIDER THE EFFECT OF OVERWRITING COLUMNS -- WARN FOR THIS
+    # IF MAP EXISTS ALREADY?
 
     # Create a map to work with
     g.copy(vector=(streams, segments), overwrite=gscript.overwrite())
