@@ -112,7 +112,7 @@ def main():
     reaches = options['output']
     elevation = options['elevation']
     Smin = options['s_min']
-    Smin = options['h_stream']
+    h_stream = options['h_stream']
 
     # Build reach maps by overlaying segments on grid
     if len(gscript.find_file(segments)['name']) > 0:
