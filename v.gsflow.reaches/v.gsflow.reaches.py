@@ -127,6 +127,8 @@ def main():
     reachesTopo.open('rw')
 
     # Rename a,b columns
+    # Bug waiting to be exposed -- x1, x2, y1, y2, tostream, must all use 
+    # defaults in v.stream.network
     reachesTopo.table.columns.rename('a_x1', 'x1')
     reachesTopo.table.columns.rename('a_x2', 'x2')
     reachesTopo.table.columns.rename('a_y1', 'y1')
