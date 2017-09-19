@@ -60,7 +60,7 @@
 #%end
 
 #%option
-#%  key: Smin
+#%  key: s_min
 #%  type: double
 #%  description: Minimum reach slope
 #%  answer: 0.0001
@@ -107,17 +107,20 @@ def main():
     """
 
     options, flags = gscript.parser()
-    segments = options['input_segments']
-    grid = options['input_grid']
+    segments = options['segment_input']
+    grid = options['grid_input']
     reaches = options['output']
     elevation = options['elevation']
-    Smin = options['Smin']
+    Smin = options['s_min']
     Smin = options['h_stream']
 
     # Build reach maps by overlaying segments on grid
-    v.extract(input=segments, output='GSFLOW_TEMP__', type='line', quiet=True)
-    v.overlay(ainput='GSFLOW_TEMP__', atype='line', binput=grid, output=reaches, operator='and', overwrite=True)#gscript.overwrite(), quiet=True)
-    g.remove(type='vector', name='GSFLOW_TEMP__', quiet=True, flags='f')
+    if len(gscript.find_file(segments)['name']) > 0:
+        v.extract(input=segments, output='GSFLOW_TEMP__', type='line', quiet=True, overwrite=True)
+        v.overlay(ainput='GSFLOW_TEMP__', atype='line', binput=grid, output=reaches, operator='and', overwrite=gscript.overwrite(), quiet=True)
+        g.remove(type='vector', name='GSFLOW_TEMP__', quiet=True, flags='f')
+    else:
+        gscript.fatal('No vector file "'+segments+'" found.')
 
     # Start editing database table
     reachesTopo = VectorTopo(reaches)
