@@ -150,7 +150,8 @@ from grass import script as gscript
 
 def main():
     """
-    Builds river reaches for input to the USGS hydrologic model, GSFLOW.
+    Builds river segments for input to the USGS hydrologic models
+    PRMS and GSFLOW.
     """
 
     ##################
