@@ -170,12 +170,10 @@ def main():
     v.to_db(map=streams, option='start', columns=x1+','+y1)
     v.to_db(map=streams, option='end', columns=x2+','+y2)
 
-    # 4. Read in the start and end coordinate points
+    # 4. Read in and save the start and end coordinate points
     colNames = np.array(vector_db_select(streams)['columns'])
     colValues = np.array(vector_db_select(streams)['values'].values())
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze() # river number
-    #if verbose:
-    #  print colValues
     xy1 = colValues[:,(colNames == 'x1') + (colNames == 'y1')].astype(float) # upstream
     xy2 = colValues[:,(colNames == 'x2') + (colNames == 'y2')].astype(float) # downstream
 
@@ -200,10 +198,10 @@ def main():
     #streamsTopo.build()
     streamsTopo.close()
 
-    print ""
-    print 'Drainage topology built. Check "tostream" column for the downstream cat.'
-    print 'A cat value of 0 indicates the downstream-most segment.'
-    print ""
+    gscript.message('')
+    gscript.message('Drainage topology built. Check "tostream" column for the downstream cat.')
+    gscript.message('A cat value of 0 indicates the downstream-most segment.')
+    gscript.message('')
 
 if __name__ == "__main__":
     main()
