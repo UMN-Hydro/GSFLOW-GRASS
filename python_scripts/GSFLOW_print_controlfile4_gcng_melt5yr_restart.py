@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Created on Sun Sep 10 22:06:46 2017
 Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
@@ -61,7 +62,7 @@ in_climatedata_dir = in_data_dir + 'climate/' # specifically climate data
 
 # control file that will be written with this script
 # (will be in control_dir with model mode suffix)
-con_filname0 = 'py_ChimTest_Melt_30yr'
+con_filname0 = 'py_ChimTest_Melt_5yr_res'
 
 # command-line executable for GSFLOW (just used to print message)
 GSFLOW_exe = '/home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0_gcng/bin/gsflow'  # recompiled on Ubuntu!
@@ -89,10 +90,10 @@ outdir = PRMSoutput_dir
 # model start and end dates
 # ymdhms_v = [ 2015  6 16 0 0 0; ...
 #              2016  6 24 0 0 0];
-#ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
-#                     [ 2020,  6, 15, 0, 0, 0]])
 ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
-                     [ 2045,  6, 15, 0, 0, 0]])
+                     [ 2020,  6, 15, 0, 0, 0]])
+#ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
+#                     [ 2045,  6, 15, 0, 0, 0]])
 # ymdhms_v = [ 2015  6 16 0 0 0; ...
 #              2025  6 15 0 0 0];
 
@@ -107,10 +108,16 @@ ymdhms_m = np.array([2015, 6, 16, 0, 0, 0])
 # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
 # as example for how to stitch together many restarts using a shell script)
 if model_mode == 'GSFLOW':
-    fl_load_init = 0 # 1 to load previously saved initial conditions
+#    fl_load_init = 0 # 1 to load previously saved initial conditions
     # load initial conditions from this file
 #     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/simdir/spinup30yr_constH/outputs/PRMS/init_cond_outfile'
+#    load_init_file = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/simdir/spinup30yr_constH/outputs/PRMS/init_cond_outfile'
+    fl_load_init = 1 # 1 to load previously saved initial conditions
+#    load_init_file = PRMSoutput_dir + 'init_cond_outfile_30yr_NWT_woConstH'
+#    load_init_file = PRMSoutput_dir + 'init_cond_outfile_30yr_NWT_wConstH'
+#    load_init_file = PRMSoutput_dir + 'init_cond_outfile_30yr_wConstH'
+    load_init_file = PRMSoutput_dir + 'init_cond_outfile_30yr_woConstH'
+#    load_init_file = '/media/gcng/STORAGE3A/GSFLOW/simdir_Sept2017/res_5yr_wConstHeadMODres2woConstHead_NWT/outputs/PRMS/' + 'init_cond_outfile'
 
 fl_save_init = 1 # 1 to save outputs as initial conditions
 save_init_file = PRMSoutput_dir + 'init_cond_outfile' # save new results as initial conditions in this file
@@ -531,9 +538,6 @@ for x in con_par_values:
     ii = ii + 1
 
 
-    if os.path.isdir(outdir) == False: 
-        os.makedirs(outdir);
-
 # - Write to control file
 fobj = open(con_filname, 'w+') # w+ for write and read
 fobj.write(title_str + '\n')
@@ -561,7 +565,7 @@ fobj.close()
 if model_mode != 'MODFLOW':
 
     if os.path.isdir(outdir) == False: 
-        os.makedirs(outdir);
+        os.mkdir(outdir);
 
     print 'Make sure the below data files are ready: \n   {}\n'.format(datafil)
     print '   {}\n'.format(precip_datafil)

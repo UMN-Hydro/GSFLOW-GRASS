@@ -1,0 +1,114 @@
+readme_170924.txt
+Crystal Ng
+
+GSFLOW pre- and post-processing scripts, based on matlab scripts used for Ng et al. 2016 AGU poster for Gavilan Machay watershed on Volcan Chimborazo.  
+Most scripts have been converted to Python.
+
+Prepared for GSFLOW workshop Sept 2017
+Code available on: https://github.com/UMN-Hydro/GSFLOW_pre-processor/tree/master/python_scripts
+
+=================
+EXECUTABLE:
+=================
+For AGU2016 poster, had to use GSFLOW_1.2.0_gcng (recompiled on Linux); would not run with newer GSFLOW_1.2.1Linux executable.
+
+
+=================
+PRE-PROCESSING:
+=================
+
+GSFLOW / PRMS
+-------------
+
+CONTROL FILE:
+(in GSFLOW_pre-processing/python_scripts/)
+	- GSFLOW_print_controlfile4_gcng_melt30yr.py.m: Script for creating control file for 30-yr spinup run (with "glacier melt", i.e., artifically increased precip).  Specify model_mode = gsflow, modflow, or prms.  Also creates a shell script to easily run model at command line.
+	- GSFLOW_print_controlfile4_gcng_melt5yr_restart.py.m: Similar to above, but for "restart" run that continues after spinup.  It uses end result of spinup as initial conditions.  Sets fl_load_init={simulation dates}, fl_load_init=1, and fl_load_init={name of file set in save_init_file for above spinup run}.
+(***WARNING: CONVERGENCE DIFFICULTIES FOR RE-RUN.  SEE NOTE BELOW IN MODFLOW SECTION ABOUT THIS.)
+
+PARAMETER FILE:
+(in GSFLOW_pre-processing/python_scripts/)
+	- GSFLOW_print_PRMSparamfile4.py: generic script for creating parameter file, for model_mode=gsflow or prms. Be sure to check "CUSTOMIZE TO YOU COMPUTER!" and "CHANGE FOR SPECIFIC SITE" sections. This will guide you to set up the various scenario tests like in Ng et al. 2016's AGU poster (melt, no melt, no melt and veg shift).  
+
+CLIMATE DATA FILES:
+Note - these are currently customized to Chimborazo.  You can also check out the final data files (GSFLOW_simdir/inputs/PRMS/*.day) for data format to create your own climate data input files.
+(in GSFLOW_pre-processing/matlab_scripts/)
+	- GSFLOW_print_data_climatehru_files1.m: Script to manually apply single observed climate time series to all HRU's, sets up run to be able to use climate_hru rather than use one of PRMS' spatial interpolation schemes for climate.  Take in as input the climate data for one single climate time series (in this case: Boca Toma site).  Currently creates PRMS-specific input files (*.day) in: GSFLOW_simdir/inputs/PRMS/*.day files.  These files must be specified in the CONTROL FILE.
+	- GSFLOW_print_data_climatehru_files2.m: Similar to above script, but replicates 1-year climate times series multiple times to create a fake long time period time series.
+	- GSFLOW_print_data_climatehru_files2_melt.m: Similar to above script, but artificially inserts additional precip in highest elevation HRU, to represent glacial melt
+
+INPUT FILES USED IN GSFLOW PRE-PROCESSING (FOR CHIMBORAZO EXAMPLE)
+(note: full files are uploaded, but they may contain various unneeded files)
+	- GSFLOW/inputs/PRMS/climate/: files such as test_boca_toma_F_in.txt, which contains precip, temp data for Boca Toma weather station, in degrees F temperature and inches/day precip
+	- Data/GIS/{various files}: Files created from DEM using Andy's GRASS-GIS scripts: for domain topology for HRU's, HRU-gravity reservoir mapping, stream segments and reaches
+
+
+MODFLOW
+-------
+
+TO CREATE ALL MODFLOW INPUT FILES
+(in GSFLOW_pre-processing/python_scripts/MODFLOW_scripts/)
+	- print_MODFLOW_inputs_res_NWT.py: Creates all input files using the functions in MODFLOW_NWT_lib.py. Has option for older MODFLOW-2005 and new (numerically stabler) MODFLOW-NWT.  Sets variable 'fil_res_in' to empty string for an arbitrary initial condition head - this is for spin-up simulation. Spin-up (non-restart) runs include first a steady-state stress period and then a transient stress period.  
+	- print_MODFLOW_inputs_res_NWT_5yrRes.py: Similar to above script, but for "restart" run that continues after spin-up period.  Sets fil_res_in = {file name outputed by spin-up run} to set initial conditions.  Be sure to set other options similar to spin-up run (e.g., MODFLOW version, constant head boundary).  Note that even though 2 stress periods are specified for restart runs, the first steady-state period is ignored, and only a transient stress period is simulated.  
+	- MODFLOW_NWT_lib.py: library with functions called by print_MODFLOW_inputs_res_NWT*.py to write MODFLOW input files. Note: original matlab files included some plots to help visualize what the user is specifying.  Only one of these have been converted to Python so far; could be beneficial to convert other code blocks (commented out in Python code), or wait to visualize with GRASS-GIS. 
+	- MODFLOW_NWT_lib_1Per.py: *NOT FULLY TESTED!*  Sets up run with only 1 transient stress period.  This PROBABLY is the correct approach for restart, which does not use a first steady-state period before transient period.  However, according to manual, having 2 stress periods (using MODFLOW_NWT_lib.py) should be ok because first steady-state stress period should be ignored for restart cases. However, for wConstHead_1Per case, using 1 transient period avoided bad mass balance results in the beginning of simulation, which were in 2Per case.
+ 
+***WARNING: MODFLOW can encounter convergence problems, likely due to steep gradients.  There are 2 fixes: 
+(1) Set a constant head in grid cells along watershed boundary with high elevations (fl_BoundConstH=1).  Otherwise, one generally sets watershed boundary conditions to no-flow, assuming that the surface watner and groundwater boundaries coincide.  This was done for Ng et al. 2016 AGU poster.
+(2) Use MODFLOW-NWT with better numerical algorithm.  With the upwind algorithm, 30-yr spin-up completes without numerical problems.  HOWEVER, restart run STILL has problems, presumably because an exact bit-wise identical restart is not carried out. Future fixes could include: attempt to force a bit-wise identical restart, adjust numerical algorithm parameters in upw (upwind) input file, change MODFLOW grid cell discretization.  For now, spin-up is sufficient for our needs. 
+ 
+
+TO READ IN AND PLOT VARIABLES IN MODFLOW INPUT FILES
+(useful to visualize what is being run in model)
+(in GSFLOW_pre-processing/matlab_scripts/MODFLOW_scripts/)
+	- read_dis.m
+	- read_ba6.m
+	- read_dis.m
+	- read_lpf.m
+	- read_sfr.m
+	- plot_sfr.m
+
+INPUT FILES FOR MODFLOW PRE-PROCESSING
+	- Data/GIS/{various files}: for stream routing 
+
+
+===============
+TO RUN GSFLOW:
+===============
+- Decide model_mode = gsflow, modflow, prms, or write_climate
+  ('gsflow' is full coupled model; 'modflow' is useful for preliminary testing b/c MODFLOW will be most prone to convergence problems; 'write_climate' is useful for pre-processing climate inputs to create climate-hru files)
+- Create climate data files
+- Create GSFLOW control file (must list climate data files)
+- Create GSFLOW/PRMS parameter file
+- Create MODFLOW input files
+- To execute model: follow instructions printed by GSFLOW_print_controlfile4_gcng.m, can manually enter command or can run shell script that is created.
+
+=================
+POST-PROCESSING:
+=================
+
+GSFLOW
+------
+(in GSFLOW_pre-processing/matlab_scripts)
+	- plot_gsflow_csv.m: generalized script to plot time series results from gsflow.csv
+	- create_table_gsflowcsv.m: reference for variables in gsflow.csv
+	- read_gsflow_out.m: generalized script to plot results from gsflow.out, needed in addition to gsflow.csv for groundwater inflow and outflow
+
+PRMS
+----
+(in GSFLOW_pre-processing/matlab_scripts)
+(probably redundant to plot_gsflow.csv)
+	- plot_PRMS_timeseries.m
+
+Climate
+-------
+(in GSFLOW_pre-processing/matlab_scripts)
+	- GSFLOW_print_data_climatehru_files2.m: read in climate hru files and plot time series
+	- plot_BT_climate_data_AGU2016.m: Boca Toma climate, for AGU2016 poster
+
+MODFLOW
+-------
+(in GSFLOW_pre-processing/MODFLOW_scripts/)
+	- Plot_MODFLOW_3D_head3.m: plot head values.  Makes movie with 'pause(0.1)'; use 'pause' to control frame advancing.  Not yet set up to make 3D plots for flow (see 'return' near end of script). Ends with plots showing start and end.
+	- Plot_MODFLOW_3D_uzf.m: Generalized script to plot recharge maps.
+

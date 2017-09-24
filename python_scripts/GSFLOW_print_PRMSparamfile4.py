@@ -65,6 +65,7 @@ import pandas as pd # for data structures and reading in data from text file
 # NOTE: '/' is directory separator for Linux, '\' for Windows!!
 
 # directory for GSFLOW input and output files (include slash ('/') at end)
+# (creates directories if they don't exist)
 PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/PRMS/'
 PRMSoutput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/outputs/'
 # 
@@ -119,6 +120,7 @@ for i in range(6):
     except:
       value = float(value)
     MODdata[key] = value
+f.close()
 
 
 # 2 lines available for comments
@@ -1000,6 +1002,14 @@ for ii in range(NumPars):
     else:
         ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[ii]))
         par_num[ii] = par_num[ii] * dim_value[ind]        
+
+# create PRMS input directory if it does not exist:
+if not os.path.isdir(PRMSinput_dir):
+    os.mkdir(PRMSinput_dir)
+    
+# while we're at it, create PRMS output file if it does not exist:
+if not os.path.isdir(PRMSoutput_dir):
+    os.mkdir(PRMSoutput_dir)
 
 # - Write to Parameter file
 line1 = '####'
