@@ -32,6 +32,11 @@ mkdir -p "$control_dir" "$PRMSinput_dir" "$MODFLOWinput_dir" "$PRMSoutput_dir" "
 tar -xvzf Data_GIS.tar.gz
 mv GIS "$in_data_dir/"
 
+tar -xvzf GSFLOW_inputs_PRMS_climate.tar.gz
+mv climate "$PRMSinput_dir/"
+
+
+
 # (1)
 python2.7 python_scripts/GSFLOW_print_controlfile4_gcng_melt30yr.py
 python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
