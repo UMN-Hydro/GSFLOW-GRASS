@@ -12,6 +12,14 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 import numpy as np
 import MODFLOW_NWT_lib as mf # functions to write individual MODFLOW files
 import os  # os functions
+from ConfigParser import SafeConfigParser
+
+parser = SafeConfigParser()
+parser.read('settings.ini')
+LOCAL_DIR = parser.get('settings', 'local_dir')
+
+GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+
 
 
 # - directories
@@ -22,15 +30,15 @@ fl_BoundConstH = 0 # 1 for const head at high elev boundary, needed for numerica
 
 if sw_2005_NWT == 1:
     # MODFLOW input files
-    GSFLOW_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW_2005/'
+    GSFLOW_indir = GSFLOW_DIR + '/inputs/MODFLOW_2005/'
     # MODFLOW output files
-    GSFLOW_outdir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/outputs/MODFLOW_2005/'
+    GSFLOW_outdir = GSFLOW_DIR + '/outputs/MODFLOW_2005/'
     
 elif sw_2005_NWT == 2:
     # MODFLOW input files
-    GSFLOW_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW_NWT/'
+    GSFLOW_indir = GSFLOW_DIR + '/inputs/MODFLOW_NWT/'
     # MODFLOW output files
-    GSFLOW_outdir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/outputs/MODFLOW_NWT/'
+    GSFLOW_outdir = GSFLOW_DIR + '/outputs/MODFLOW_NWT/'
 
 infile_pre = 'test2lay_py';
 
@@ -43,7 +51,7 @@ DZ = [100, 50] # [NLAYx1] [m] ***testing
 # perlen_tr = 365*5 + ceil(365*5/4); # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 perlen_tr = 365*30 + np.ceil(365*30/4) # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 
-GIS_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/';
+GIS_indir = GSFLOW_DIR + '/DataToReadIn/GIS/';
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file

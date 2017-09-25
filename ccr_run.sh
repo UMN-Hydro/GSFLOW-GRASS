@@ -46,6 +46,6 @@ python2.7 python_scripts/GSFLOW_print_controlfile4_gcng_melt30yr.py
 # see (2)
 
 python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
-
 python2.7 python_scripts/GSFLOW_print_data_climatehru_files1.py
+python2.7 python_scripts/MODFLOW_scripts/print_MODFLOW_inputs_res_NWT.py 
 
