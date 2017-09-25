@@ -28,9 +28,13 @@ in_data_dir="$gsflow_dir/DataToReadIn/"
 
 mkdir -p "$control_dir" "$PRMSinput_dir" "$MODFLOWinput_dir" "$PRMSoutput_dir" "$in_data_dir"
 
+# (4)
+tar -xvzf Data_GIS.tar.gz
+mv GIS "$in_data_dir/"
 
 # (1)
 python2.7 python_scripts/GSFLOW_print_controlfile4_gcng_melt30yr.py
+python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
 # tried to run this, needed python-tk
 # sudo apt-get install python-tk
 # then received error

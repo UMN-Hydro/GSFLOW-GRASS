@@ -11,6 +11,13 @@ import scipy as sp # matlab toolboxes
 import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
+from ConfigParser import SafeConfigParser
+
+parser = SafeConfigParser()
+parser.read('settings.ini')
+LOCAL_DIR = parser.get('settings', 'local_dir')
+
+GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 
 # GSFLOW_print_PRMSparamfile4.m
 # 11/23/16
@@ -66,15 +73,15 @@ import pandas as pd # for data structures and reading in data from text file
 
 # directory for GSFLOW input and output files (include slash ('/') at end)
 # (creates directories if they don't exist)
-PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/PRMS/'
-PRMSoutput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/outputs/'
+PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
+PRMSoutput_dir = GSFLOW_DIR + '/outputs/'
 # 
 # PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/ChimTest/')
 # PRMSoutput_dir = '')
 
 
 # directory with files to be read in to generate PRMS input files (include slash ('/') at end)
-in_data_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/'
+in_data_dir = GSFLOW_DIR + '/DataToReadIn/'
 in_GISdata_dir = in_data_dir + 'GIS/' # specifically GIS data
 
 # parameter file that will be written (name must match that in Control file!)
