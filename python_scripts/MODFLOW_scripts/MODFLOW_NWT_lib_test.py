@@ -87,7 +87,7 @@ def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_outdir, infile_pre, fil_res_in, sw
 # v1 - 11/30/16 start to include GIS data for Chimborazo's Gavilan Machay
 #      watershed; topo.asc for surface elevation (fill in bottom elevation
 #      based on uniform thickness of single aquifer)
-def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
+def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr, sw_spinup_restart):
 
 # # ==== TO RUN AS SCRIPT ===================================================
 #     # - directories
@@ -114,6 +114,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 #     
 #     # for various files: ba6, uzf
 #    mask_fil = GIS_indir + 'basinmask_dischargept.asc'
+#    sw_spinup_restart = 1 # 1: spinup (2 periods: steady-state and transient), 2: restart (1 period: transient)
 ##  =========================================================================
 
 
@@ -146,7 +147,10 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
     # DZ = [5; 5]; # [NLAYx1] ***temporary: constant 10m thick single aquifer (consider 2-layer?)
     
     # - time discretization
-    PERLEN = [1, perlen_tr];  # 2 periods: 1-day steady-state and multi-day transient
+    if sw_spinup_restart == 1:
+        PERLEN = [1, perlen_tr];  # 2 periods: 1-day steady-state and multi-day transient
+    elif sw_spinup_restart == 2:
+        PERLEN = [perlen_tr];  # 1 period: multi-day transient
     
     comment1 = '# test file for Gavilan Machay'
     comment2 = '# test file'
@@ -155,10 +159,14 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
     LAYCBD = np.zeros((1,NLAY), int); # no confining layer below layer
     ITMUNI = 4; # [d]
     LENUNI = 2; # [m]
-    NPER = 1; # 1 SS then 1 transient
+    if sw_spinup_restart == 1:
+        NPER = 2; # 1 SS then 1 transient
+        SsTr_flag = ['ss', 'tr']
+    else:
+        NPER = 1 # 1 transient        
+        SsTr_flag = ['tr']
     NSTP = PERLEN 
     TSMULT = 1  # must have daily time step to correspond with PRMS
-    SsTr_flag = ['tr']
     
     ## ------------------------------------------------------------------------
     # -- Read in data from files
@@ -869,7 +877,7 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 #%%
 
 # based on write_OC_PCG_MOD_f.m
-def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr):
+def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr, sw_spinup_restart):
 
 #    # =========== TO RUN AS SCRIPT ===========================================
 #    # - directories
@@ -886,9 +894,12 @@ def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr):
     fil_oc = infile_pre + '.oc'
     
     # -- shoud match .dis
-    NPER = 1 # 1 SS then 1 transient
-#    PERLEN = [1, int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
-    PERLEN = [int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
+    if sw_spinup_restart == 1:
+        NPER = 2 # 1 SS then 1 transient
+        PERLEN = [1, int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
+    elif sw_spinup_restart == 2:
+        NPER = 1 # 1 SS then 1 transient
+        PERLEN = [int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
     NSTP = PERLEN
     
     # -- pcg and oc files are not changed with this script
@@ -938,7 +949,7 @@ def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr):
 
 # based on make_sfr2_f_Mannings
 #
-def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
+def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all, sw_spinup_restart):
 
 # Note: assume .dis file already created!! (reads in TOP for setting STRTOP)
 
@@ -987,7 +998,10 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
     # items 
     reach_data_all = pd.read_csv(reach_fil)       # used to write item 2: assumes 
     
-    NPER = 1       # used for item 3
+    if sw_spinup_restart == 1:
+        NPER = 2       # used for item 3
+    elif sw_spinup_restart == 2:
+        NPER = 1       # used for item 3                        
     
     # items 4a: # NSEG ICALC  OUTSEG  IUPSEG  IPRIOR  NSTRPTS  FLOW  RUNOFF  ETSW  PPTSW  ROUGHCH  ROUGHBK  CDPTH  FDPTH  AWDTH  BWDTH
     segment_data_4A = pd.read_csv(segment_fil_all[0]);   # used to write items 4a
@@ -1337,7 +1351,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
                     if fl_no_4bc == 0:
                         fobj.write('\n')
    
-    fobj.close() # end make_sfr2_f_Mannings
+    fobj.close()
     
 #%%
 
@@ -1355,7 +1369,7 @@ def MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment):
         fobj.write('INTERNAL  %10s%20s%10s %s \n' % (CNSTNT0, '(FREE)', '-1', comment))
         np.savetxt(fobj, data, delimiter=' ', fmt=fmt0)
 
-def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
+def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, sw_spinup_restart):
 
     print 'UZF: Had to play around alot with finf (infiltration) to get convergence!!'
 
@@ -1416,8 +1430,12 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     # - set TOP to surface elevation [m]
     TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
     
-    NPER = 1
-    # **** ASSUMES PER 1 IS TR ****
+    if sw_spinup_restart == 1:    
+        NPER = 2
+        # **** ASSUMES PER 1 IS SS, PER 2 IS TR ****
+    elif sw_spinup_restart == 2: 
+        NPER = 1
+        # **** ASSUMES PER 1 IS TR ****        
     
     #Item 1:
     #NUZTOP: Which cell (layer) has recharge&discharge simulated in it; 
@@ -1447,15 +1465,17 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     # Ok to have following parameters as SCALAR (constant for all gridcells) or as ARRAY (NROWxNCOL)
     eps = 3.5  #Brooks-Corey epsilon of the unsaturated zone.
     thts = 0.35    #Saturated water content of the unsaturated zone
-    thti = 0.2     #initial water content for each vertical column of cells-not specified for steady-state simulations
+    thti = 0.0     #initial water content for each vertical column of cells-not specified for steady-state simulations
     if NUZGAG > 0:
         print 'Error!  Input scripts only set up for UZGAG = 0!'
         quit()        
 #        uzgag = importdata('./data/uzgag.dat'); # only for NUZGAG>0; row, col, file unit for output, IUZOPT (flag for what data to output)    
     # - infiltration (in general, not needed  bc provided by PRMS, but option to apply for initial SS period for MODFLOW)
-#    NUZF1 = np.array([[1], 
-#             -1*np.ones((NPER-1,1))]) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
-    NUZF1 = -1*np.ones((NPER,1)) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
+    if sw_spinup_restart == 1:
+        NUZF1 = np.array([[1], 
+             -1*np.ones((NPER-1,1))]) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
+    elif sw_spinup_restart == 2:
+        NUZF1 = -1*np.ones((NPER,1)) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)        
     # A = importdata('./data/finf.dat'); # infiltration rate [NROW,NCOL,1], **max ONLY for 1 stress period: first SS stress period! [m/d]
     # finf = A';
     # B = reshape(A', NCOL, NROW, NPER);
@@ -1541,11 +1561,13 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     #   assume same for all stress periods
     if IETFLG>0:
         NUZF2 = -1*ones((NPER,1)) # use ET from below soil-zone
-#        NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
-        NUZF3 = -1*np.ones((NPER-1,1)) # only specify extdp for first stress periods
+        if sw_spinup_restart == 1:
+            NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
+            NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
+        elif sw_spinup_restart == 2:
+            NUZF3 = -1*np.ones((NPER,1)) # only specify extdp for first stress periods
+            NUZF4 = -1*np.ones((NPER,1)) # only specify extdp for first stress periods
         extdp = 15.0*np.ones((NROW,NCOL))   #array of ET extiction zone~altitude of the soil-zone base;specified at least for 1st stress period; only for IETFLG>0
-#        NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
-        NUZF4 = -1*np.ones((NPER-1,1)) # only specify extwc for first stress periods
         extwc = thts*0.9*np.ones((NROW,NCOL)) #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
     # -------------------------------------------------------------------------
     
@@ -1608,8 +1630,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     data_type = 'REAL'
     MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment)
     
-    # Only if starts with transient stress period
-    if NPER == 1:
+    if sw_spinup_restart == 2:
+        # only if starts with transient period
         comment = '#THTI--INITIAL WATER CONTENT'
         data = thti
         data_type = 'REAL'
@@ -1622,7 +1644,7 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
             dummyrow = uzgag[i, :]
             fobj.write('  %6d  %6d  %6d  %6d      %s\n' % (dummyrow, comment))
     
-    # write items 9-16   
+    # write items 9-16
     for iper in range(NPER):
         
         # write item 9
