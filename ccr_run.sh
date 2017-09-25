@@ -39,9 +39,13 @@ mv climate "$PRMSinput_dir/"
 
 # (1)
 python2.7 python_scripts/GSFLOW_print_controlfile4_gcng_melt30yr.py
-python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
 # tried to run this, needed python-tk
 # sudo apt-get install python-tk
 # then received error
 # "Permission denied: '/home/gcng'"
 # see (2)
+
+python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
+
+python2.7 python_scripts/GSFLOW_print_data_climatehru_files1.py
+
