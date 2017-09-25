@@ -45,18 +45,25 @@ import numpy as np # matlab core
 import scipy as sp # matlab toolboxes
 import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
+from ConfigParser import SafeConfigParser
+
+parser = SafeConfigParser()
+parser.read('settings.ini')
+LOCAL_DIR = parser.get('settings', 'local_dir')
+
+GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 
 # directory for GSFLOW input and output files (include slash ('/') at end)
 # NOTE: Assumes these directories already exist
-control_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/control/'
-PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/PRMS/'
-MODFLOWinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW_NWT/'
-#MODFLOWinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW_2005/'
-PRMSoutput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/outputs/PRMS/'
+control_dir = GSFLOW_DIR + '/control/'
+PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
+MODFLOWinput_dir = GSFLOW_DIR + '/inputs/MODFLOW_NWT/'
+#MODFLOWinput_dir = GSFLOW_DIR + '/inputs/MODFLOW_2005/'
+PRMSoutput_dir = GSFLOW_DIR + '/outputs/PRMS/'
 
 # directory with files to be read in to generate PRMS input files (to get
 # start/end dates)
-in_data_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW2/DataToReadIn/'
+in_data_dir = GSFLOW_DIR + '/DataToReadIn/'
 in_climatedata_dir = in_data_dir + 'climate/' # specifically climate data
 
 # control file that will be written with this script
@@ -64,8 +71,8 @@ in_climatedata_dir = in_data_dir + 'climate/' # specifically climate data
 con_filname0 = 'py_ChimTest_Melt_30yr'
 
 # command-line executable for GSFLOW (just used to print message)
-GSFLOW_exe = '/home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0_gcng/bin/gsflow'  # recompiled on Ubuntu!
-GSFLOW_exe_cmt = '/home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.1Linux/bin/gsflow' # comment out
+GSFLOW_exe = parser.get('settings', 'gsflow_exe') + '/gsflow'  # recompiled on Ubuntu!
+#GSFLOW_exe_cmt = '/home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.1Linux/bin/gsflow' # comment out
 
 
 # - choose one:
@@ -110,7 +117,7 @@ if model_mode == 'GSFLOW':
     fl_load_init = 0 # 1 to load previously saved initial conditions
     # load initial conditions from this file
 #     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/simdir/spinup30yr_constH/outputs/PRMS/init_cond_outfile'
+    load_init_file = LOCAL_DIR + '/simdir/spinup30yr_constH/outputs/PRMS/init_cond_outfile'
 
 fl_save_init = 1 # 1 to save outputs as initial conditions
 save_init_file = PRMSoutput_dir + 'init_cond_outfile' # save new results as initial conditions in this file
@@ -572,13 +579,13 @@ if model_mode != 'MODFLOW':
     print 'Make sure the below parameter file is ready: \n   {}\n'.format(parfil)
 
 
-cmd_str_cmt = '#' + GSFLOW_exe_cmt + ' ' + con_filname + ' &> out.txt'
+#cmd_str_cmt = '#' + GSFLOW_exe_cmt + ' ' + con_filname + ' &> out.txt'
 cmd_str = GSFLOW_exe + ' ' + con_filname + ' &> out.txt'
 print 'To run command-line execution, enter at prompt: \n  {}\n'.format(cmd_str)
 
 runscriptfil = control_dir + con_filname0 + '_' + model_mode + '.sh'
 fobj = open(runscriptfil, 'w+') 
-fobj.write(cmd_str_cmt);
+#fobj.write(cmd_str_cmt);
 fobj.write('\n\n');
 fobj.write(cmd_str);
 fobj.close()
