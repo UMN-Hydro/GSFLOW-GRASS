@@ -32,56 +32,56 @@
 #%option G_OPT_V_INPUT
 #%  key: hru_input
 #%  label: Sub-basin hydrologic response units
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_INPUT
 #%  key: grid_input
 #%  label: MODFLOW grid
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_INPUT
 #%  key: gravres_input
 #%  label: Union of MODFLOW grid and HRUs
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_INPUT
 #%  key: pour_point_input
 #%  label: Pour point at the outlet of the basin
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
 #%  key: hru_output
 #%  label: PRMS-style HRU output table for GSFLOW input, no file ext
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
 #%  key: grid_output
 #%  label: MODFLOW output table for GSFLOW input, no file ext
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
 #%  key: gravres_output
 #%  label: Gravity Reservoir output table for GSFLOW input, no file ext
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
 #%  key: pour_point_output
 #%  label: Pour point coordinates for GSFLOW input, no file ext
-#%  required: yes
+#%  required: no
 #%  guidependency: layer,column
 #%end
 
@@ -154,47 +154,59 @@ def main():
 
     # Reaches
     ##########
-    columns_in_order = ['KRCH', 'IRCH', 'JRCH', 'ISEG', 'IREACH', 'RCHLEN', 'STRTOP', 'SLOPE', 'STRTHICK', 'STRHC1', 'THTS', 'THTI', 'EPS', 'UHC']
-    outcols = get_columns_in_order(reaches, columns_in_order)
-    outarray = np.array(outcols).transpose()
-    outtable = np.vstack((columns_in_order, outarray))
-    np.savetxt(out_reaches+'.txt', outtable, fmt='%s', delimiter=',')
+    if (len(reaches) > 0) and (len(out_reaches) > 0):
+        columns_in_order = ['KRCH', 'IRCH', 'JRCH', 'ISEG', 'IREACH', 'RCHLEN', 'STRTOP', 'SLOPE', 'STRTHICK', 'STRHC1', 'THTS', 'THTI', 'EPS', 'UHC']
+        outcols = get_columns_in_order(reaches, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(out_reaches+'.txt', outtable, fmt='%s', delimiter=',')
+    elif (len(reaches) > 0) or (len(out_reaches) > 0):
+        grass.fatal(_("You must inlcude both input and output reaches"))
 
     # Segments
     ###########
-    columns_in_order = ['NSEG', 'ICALC', 'OUTSEG', 'IUPSEG', 'IPRIOR', 'NSTRPTS', 'FLOW', 'RUNOFF', 'ETSW', 'PPTSW', 'ROUGHCH', 'ROUGHBK', 'CDPTH', 'FDPTH', 'AWDTH', 'BWDTH']
-    outcols = get_columns_in_order(segments, columns_in_order)
-    outarray = np.array(outcols).transpose()
-    outtable = np.vstack((columns_in_order, outarray))
-    np.savetxt(out_segments+'_A_INFORMATION.txt', outtable, fmt='%s', delimiter=',')
+    if (len(segments) > 0) and (len(out_segments) > 0):
+        columns_in_order = ['NSEG', 'ICALC', 'OUTSEG', 'IUPSEG', 'IPRIOR', 'NSTRPTS', 'FLOW', 'RUNOFF', 'ETSW', 'PPTSW', 'ROUGHCH', 'ROUGHBK', 'CDPTH', 'FDPTH', 'AWDTH', 'BWDTH']
+        outcols = get_columns_in_order(segments, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(out_segments+'_A_INFORMATION.txt', outtable, fmt='%s', delimiter=',')
 
-    columns_in_order = ['HCOND1', 'THICKM1', 'ELEVUP', 'WIDTH1', 'DEPTH1', 'THTS1', 'THTI1', 'EPS1', 'UHC1']
-    outcols = get_columns_in_order(segments, columns_in_order)
-    outarray = np.array(outcols).transpose()
-    outtable = np.vstack((columns_in_order, outarray))
-    np.savetxt(out_segments+'_segment_data_4B_UPSTREAM.txt', outtable, fmt='%s', delimiter=',')
+        columns_in_order = ['HCOND1', 'THICKM1', 'ELEVUP', 'WIDTH1', 'DEPTH1', 'THTS1', 'THTI1', 'EPS1', 'UHC1']
+        outcols = get_columns_in_order(segments, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(out_segments+'_segment_data_4B_UPSTREAM.txt', outtable, fmt='%s', delimiter=',')
 
-    columns_in_order = ['HCOND2', 'THICKM2', 'ELEVDN', 'WIDTH2', 'DEPTH2', 'THTS2', 'THTI2', 'EPS2', 'UHC2']
-    outcols = get_columns_in_order(segments, columns_in_order)
-    outarray = np.array(outcols).transpose()
-    outtable = np.vstack((columns_in_order, outarray))
-    np.savetxt(out_segments+'_4C_DOWNSTREAM.txt', outtable, fmt='%s', delimiter=',')
+        columns_in_order = ['HCOND2', 'THICKM2', 'ELEVDN', 'WIDTH2', 'DEPTH2', 'THTS2', 'THTI2', 'EPS2', 'UHC2']
+        outcols = get_columns_in_order(segments, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(out_segments+'_4C_DOWNSTREAM.txt', outtable, fmt='%s', delimiter=',')
+    elif (len(segments) > 0) or (len(out_segments) > 0):
+        grass.fatal(_("You must inlcude both input and output segments"))
 
     # Gravity reservoirs
     #####################
-    columns_in_order = ['gvr_hru_id', 'gvr_hru_pct', 'gvr_cell_id', 'gvr_cell_pct']
-    outcols = get_columns_in_order(gravity_reservoirs, columns_in_order)
-    outarray = np.array(outcols).transpose()
-    outtable = np.vstack((columns_in_order, outarray))
-    np.savetxt(out_gravity_reservoirs+'.txt', outtable, fmt='%s', delimiter=',')
+    if (len(gravity_reservoirs) > 0) and (len(out_gravity_reservoirs) > 0):
+        columns_in_order = ['gvr_hru_id', 'gvr_hru_pct', 'gvr_cell_id', 'gvr_cell_pct']
+        outcols = get_columns_in_order(gravity_reservoirs, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(out_gravity_reservoirs+'.txt', outtable, fmt='%s', delimiter=',')
+    elif (len(gravity_reservoirs) > 0) or (len(out_gravity_reservoirs) > 0):
+        grass.fatal(_("You must inlcude both input and output gravity reservoirs"))
 
     # Pour Point
     #####################
-    _y, _x = np.squeeze(gscript.db_select(sql='SELECT row,col FROM '+pour_point))
-    outstr = 'discharge_pt: row_i '+_y+' col_i '+_x
-    outfile = file(out_pour_point+'.txt', 'w')
-    outfile.write(outstr)
-    outfile.close()
+    if (len(pour_point) > 0) and (len(out_pour_point) > 0):
+        _y, _x = np.squeeze(gscript.db_select(sql='SELECT row,col FROM '+pour_point))
+        outstr = 'discharge_pt: row_i '+_y+' col_i '+_x
+        outfile = file(out_pour_point+'.txt', 'w')
+        outfile.write(outstr)
+        outfile.close()
+    elif (len(pour_point) > 0) or (len(out_pour_point) > 0):
+        grass.fatal(_("You must inlcude both input and output pour points"))
     
 if __name__ == "__main__":
     main()
