@@ -35,6 +35,12 @@
 #%  required: yes
 #%end
 
+#%option G_OPT_V_INPUT
+#%  key: pour_point
+#%  label: Pour point, to which row and col (MODFLOW) will be added
+#%  required: yes
+#%end
+
 #%option
 #%  key: dx
 #%  label: Cell size (x / E / zonal), in map units
@@ -51,6 +57,12 @@
 #%  key: output
 #%  label: MODFLOW grid
 #%  required: yes
+#%end
+
+#%option G_OPT_R_OUTPUT
+#%  key: mask_output
+#%  label: Basin mask: inside (1) or outside (0) the watershed?
+#%  required: no
 #%end
 
 ##################
@@ -89,7 +101,9 @@ def main():
     dx = options['dx']
     dy = options['dy']
     grid = options['output']
-    
+    mask = options['mask_output']
+    pp = options['pour_point']
+        
     # Create grid
     gscript.use_temp_region()
     g.region(vector=basin, ewres=dx, nsres=dy)
@@ -118,6 +132,17 @@ def main():
     # Cell area
     v.db_addcolumn(map=grid, columns='area_m2', quiet=True)
     v.to_db(map=grid, option='area', units='meters', columns='area_m2', quiet=True)
+
+    # Basin mask
+    if len(mask) > 0:
+        v.to_rast(input=basin, output=mask, use='val', value=1, quiet=True)
+
+    # Pour point
+    if len(pp) > 0:
+        v.db_addcolumn(map=pp, columns=('row integer','col integer'), quiet=True)
+        v.build(map=pp, quiet=True)
+        v.what_vect(map=pp, query_map=grid, column='row', query_column='row', quiet=True)
+        v.what_vect(map=pp, query_map=grid, column='col', query_column='col', quiet=True)
 
 if __name__ == "__main__":
     main()
