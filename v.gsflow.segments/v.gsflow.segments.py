@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ############################################################################
 #
-# MODULE:       v.stream.network
+# MODULE:       v.gsflow.segments
 #
 # AUTHOR(S):    Andrew Wickert
 #
