@@ -158,9 +158,9 @@ def main():
     x2 = options['downstream_easting_column_seg']
     y2 = options['downstream_northing_column_seg']
     tostream = options['tostream_cat_column_seg']
-
+    
     # Build reach maps by overlaying segments on grid
-    if len(gscript.find_file(segments)['name']) > 0:
+    if len(gscript.find_file(segments, element='vector')['name']) > 0:
         v.extract(input=segments, output='GSFLOW_TEMP__', type='line', quiet=True, overwrite=True)
         v.overlay(ainput='GSFLOW_TEMP__', atype='line', binput=grid, output=reaches, operator='and', overwrite=gscript.overwrite(), quiet=True)
         g.remove(type='vector', name='GSFLOW_TEMP__', quiet=True, flags='f')
