@@ -21,6 +21,7 @@
  
 # More information
 # Started 14 October 2016
+
 #%module
 #% description: Subset a stream network into just one of its basins
 #% keyword: vector
@@ -29,27 +30,32 @@
 #% keyword: hydrology
 #% keyword: geomorphology
 #%end
+
 #%option G_OPT_V_INPUT
 #%  key: input_streams
 #%  label: Stream network
 #%  required: yes
 #%end
+
 #%option G_OPT_V_INPUT
 #%  key: input_basins
 #%  label: Subbasins built alongside stream network
 #%  required: no
 #%end
+
 #%option
 #%  key: cat
 #%  label: Farthest downstream segment category
 #%  required: yes
 #%  guidependency: layer,column
 #%end
+
 #%option G_OPT_V_OUTPUT
 #%  key: output_basin
 #%  label: Vector output drainage basin
 #%  required: no
 #%end
+
 #%option G_OPT_V_OUTPUT
 #%  key: output_streams
 #%  label: Streams within vector output drainage basin
