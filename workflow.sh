@@ -9,6 +9,10 @@ reaches=reaches_tmp
 threshold=100000 #m2
 grid_res=150 #m2
 grid=grid_tmp
+slope=slope_tmp
+aspect=aspect_tmp
+HRUs=HRUs_tmp
+gravity_reservoirs=gravity_reservoirs_tmp
 
 # Set region
 g.region -p rast=$DEM
@@ -42,7 +46,10 @@ v.gsflow.grid basin=$basins_onebasin dx=150 dy=150 output=$grid --o
 # GSFLOW reaches: intersection of segments and grid
 v.gsflow.reaches segment_input=$segments grid_input=$grid elevation=$DEM output=$reaches --o
 
-# GSFLOW gravity reservoirs
-
 # GSFLOW HRU parameters
+r.slope.aspect elevation=$DEM slope=$slope aspect=$aspect format=percent zscale=0.01 --o
+v.gsflow.hruparams input=$basins_onebasin output=$HRUs slope=$slope aspect=$aspect --o
+
+# GSFLOW gravity reservoirs
+v.gsflow.gravres hru_input=$HRUs grid_input=$grid output=$gravity_reservoirs --o
 
