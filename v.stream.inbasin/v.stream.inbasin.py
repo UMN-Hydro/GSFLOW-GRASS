@@ -59,7 +59,13 @@
 #%option G_OPT_V_OUTPUT
 #%  key: output_streams
 #%  label: Streams within vector output drainage basin
-#%  required: yes
+#%  required: no
+#%end
+
+#%option G_OPT_V_OUTPUT
+#%  key: output_pour_point
+#%  label: Basin outlet
+#%  required: no
 #%end
 
 ##################
@@ -80,6 +86,7 @@ from grass.pygrass.vector import Vector, VectorTopo
 from grass.pygrass.raster import RasterRow
 from grass.pygrass import utils
 from grass import script as gscript
+from grass.pygrass.vector.geometry import Point
 
 ###############
 # MAIN MODULE #
@@ -106,6 +113,7 @@ def main():
     cat = options['cat']
     output_basins = options['output_basin']
     output_streams = options['output_streams']
+    output_pour_point = options['output_pour_point']
     
     #print options
     #print flags
@@ -139,6 +147,26 @@ def main():
         v.extract(input=basins, output=output_basins, where=SQL_OR, overwrite=gscript.overwrite(), quiet=True)
     if len(streams) > 0:
         v.extract(input=streams, output=output_streams, cats=basincats_str, overwrite=gscript.overwrite(), quiet=True)
+    if len(output_pour_point) > 0:
+        _pp = gscript.vector_db_select(map=streams, columns='x2,y2', where='cat='+str(cat))
+        _xy = np.squeeze(_pp['values'].values())
+        _x = float(_xy[0])
+        _y = float(_xy[1])
+        # NEED TO ADD IF-STATEMENT HERE TO AVOID AUTOMATIC OVERWRITING!!!!!!!!!!!
+        try:
+            v.db_droptable(table=output_pour_point, flags='f')
+        except:
+            pass
+        pptmp = vector.Vector(output_pour_point)
+        _cols = [(u'cat',       'INTEGER PRIMARY KEY'),
+                 (u'x',         'DOUBLE PRECISION'),
+                 (u'y',         'DOUBLE PRECISION')]
+        pptmp.open('w', tab_name=output_pour_point, tab_cols=_cols)
+        point0 = Point(_x,_y)
+        pptmp.write(point0, cat=1, attrs=(str(_x), str(_y)), )
+        pptmp.table.conn.commit()
+        pptmp.build()
+        pptmp.close()
 
 if __name__ == "__main__":
     main()
