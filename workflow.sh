@@ -59,6 +59,12 @@ v.gsflow.gravres hru_input=$HRUs grid_input=$grid output=$gravity_reservoirs --o
 # Export basin mask -- 1s where basin exists and 0 where it doesn't
 r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
 
+# Export DEM with MODFLOW resolution
+g.region rast=$basin_mask
+r.out.ascii input=$DEM output=$DEM.asc --o
+g.region rast=$DEM
+g.region vect=$basins_onebasin
+
 # Export tables and discharge point
-v.gsflow.export reaches_input=$reaches segments_input=$segments gravres_input=$gravity_reservoirs pour_point_input=$pour_point reaches_output=$reaches segments_output=$segments gravres_output=$gravity_reservoirs pour_point_output=$pour_point --o
+v.gsflow.export reaches_input=$reaches segments_input=$segments gravres_input=$gravity_reservoirs hru_input=$HRUs pour_point_input=$pour_point reaches_output=$reaches segments_output=$segments gravres_output=$gravity_reservoirs hru_output=$HRUs pour_point_output=$pour_point --o
 

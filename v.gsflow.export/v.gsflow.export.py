@@ -51,6 +51,13 @@
 #%end
 
 #%option G_OPT_V_INPUT
+#%  key: hru_input
+#%  label: PRMS-style hydrologic response units
+#%  required: no
+#%  guidependency: layer,column
+#%end
+
+#%option G_OPT_V_INPUT
 #%  key: pour_point_input
 #%  label: Pour point at the outlet of the basin
 #%  required: no
@@ -74,6 +81,13 @@
 #%option G_OPT_V_OUTPUT
 #%  key: gravres_output
 #%  label: Gravity Reservoir output table for GSFLOW input, no file ext
+#%  required: no
+#%  guidependency: layer,column
+#%end
+
+#%option G_OPT_V_OUTPUT
+#%  key: hru_output
+#%  label: HRU table, no file ext
 #%  required: no
 #%  guidependency: layer,column
 #%end
@@ -140,12 +154,14 @@ def main():
     reaches = options['reaches_input']
     segments = options['segments_input']
     gravity_reservoirs = options['gravres_input']
+    HRUs = options['hru_input']
     pour_point = options['pour_point_input']
     
     # Output
     out_reaches = options['reaches_output']
     out_segments = options['segments_output']
     out_gravity_reservoirs = options['gravres_output']
+    out_HRUs = options['hru_output']
     out_pour_point = options['pour_point_output']
     
     ##############
@@ -197,8 +213,19 @@ def main():
     elif (len(gravity_reservoirs) > 0) or (len(out_gravity_reservoirs) > 0):
         grass.fatal(_("You must inlcude both input and output gravity reservoirs"))
 
+    # HRUs 
+    #######
+    if (len(HRUs) > 0) and (len(out_HRUs) > 0):
+        columns_in_order = ['hru_area', 'hru_aspect', 'hru_elev', 'hru_lat', 'hru_slope', 'hru_segment', 'hru_strmseg_down_id']
+        outcols = get_columns_in_order(HRUs, columns_in_order)
+        outarray = np.array(outcols).transpose()
+        outtable = np.vstack((columns_in_order, outarray))
+        np.savetxt(HRUs+'.txt', outtable, fmt='%s', delimiter=',')
+    elif (len(HRUs) > 0) or (len(out_HRUs) > 0):
+        grass.fatal(_("You must inlcude both input and output HRUs"))
+
     # Pour Point
-    #####################
+    #############
     if (len(pour_point) > 0) and (len(out_pour_point) > 0):
         _y, _x = np.squeeze(gscript.db_select(sql='SELECT row,col FROM '+pour_point))
         outstr = 'discharge_pt: row_i '+_y+' col_i '+_x
