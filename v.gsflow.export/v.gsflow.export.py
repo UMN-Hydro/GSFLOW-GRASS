@@ -30,15 +30,15 @@
 #%end
 
 #%option G_OPT_V_INPUT
-#%  key: hru_input
-#%  label: Sub-basin hydrologic response units
+#%  key: reaches_input
+#%  label: Reaches where stream segments overlap MODFLOW grid cells
 #%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_INPUT
-#%  key: grid_input
-#%  label: MODFLOW grid
+#%  key: segments_input
+#%  label: Stream segments, coincident with HRUs
 #%  required: no
 #%  guidependency: layer,column
 #%end
@@ -58,15 +58,15 @@
 #%end
 
 #%option G_OPT_V_OUTPUT
-#%  key: hru_output
-#%  label: PRMS-style HRU output table for GSFLOW input, no file ext
+#%  key: reaches_output
+#%  label: Reaches table, no file ext
 #%  required: no
 #%  guidependency: layer,column
 #%end
 
 #%option G_OPT_V_OUTPUT
-#%  key: grid_output
-#%  label: MODFLOW output table for GSFLOW input, no file ext
+#%  key: segments_output
+#%  label: Segments table, no file ext
 #%  required: no
 #%  guidependency: layer,column
 #%end
