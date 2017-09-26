@@ -32,7 +32,7 @@
 #%end
 
 #%option G_OPT_V_INPUT
-#%  key: basins_input
+#%  key: hru_input
 #%  label: Sub-basins
 #%  required: yes
 #%  guidependency: layer,column
@@ -47,19 +47,10 @@
 
 #%option G_OPT_V_OUTPUT
 #%  key: output
-#%  label: Gravity reservoirs: union (AND-style) of sub-basins and MODFLOW grid
+#%  label: Gravity reservoirs: union (AND) of sub-basins and MODFLOW grid
 #%  required: yes
 #%  guidependency: layer,column
 #%end
-
-#%option
-#%  key: col
-#%  type: str
-#%  description: New (or existing) column name for basin area (m2)
-#%  answer: area_m2
-#%  required: no
-#%end
-
 
 ##################
 # IMPORT MODULES #
@@ -99,33 +90,36 @@ def main():
     options, flags = gscript.parser()
     
     # I/O
-    basins = options['basins_input']
+    HRUs = options['hru_input']
     grid = options['grid_input']
     segments = options['output']
-    col = options['col']
+    #col = options['col']
+    gravity_reservoirs = options['output']
 
     ############
     # ANALYSIS #
     ############
 
+    """
     # Basin areas
     v.db_addcolumn(map=basins, columns=col)
     v.to_db(map=basins, option='area', units='meters', columns=col)
+    """
 
     # Create gravity reservoirs -- overlay cells=grid and HRUs
-    v.overlay(ainput=basins, binput=grid, operator='and', output=gravity_reservoirs, overwrite=gscript.overwrite())
-    v.db_dropcolumn(map=gravity_reservoirs, columns='a_cat,a_rnum,a_label,b_cat', quiet=True)
+    v.overlay(ainput=HRUs, binput=grid, operator='and', output=gravity_reservoirs, overwrite=gscript.overwrite())
+    v.db_dropcolumn(map=gravity_reservoirs, columns='a_cat,a_label,b_cat', quiet=True)
     # Cell and HRU ID's
     v.db_renamecolumn(map=gravity_reservoirs, column=('a_id', 'gvr_hru_id'), quiet=True)
     v.db_renamecolumn(map=gravity_reservoirs, column=('b_id', 'gvr_cell_id'), quiet=True)
     # Percent areas
-    v.db_renamecolumn(map=gravity_reservoirs, column=('a_'+col, 'hru_area_m2'), quiet=True)
+    v.db_renamecolumn(map=gravity_reservoirs, column=('a_hru_area_m2', 'hru_area_m2'), quiet=True)
     v.db_renamecolumn(map=gravity_reservoirs, column=('b_area_m2', 'cell_area_m2'), quiet=True)
     v.db_addcolumn(map=gravity_reservoirs, columns='area_m2', quiet=True)
     v.to_db(map=gravity_reservoirs, option='area', units='meters', columns='area_m2', quiet=True)
     v.db_addcolumn(map=gravity_reservoirs, columns='gvr_cell_pct double precision, gvr_hru_pct double precision', quiet=True)
-    v.db_update(map=gravity_reservoirs, column='gvr_cell_pct', query_column='100*area_m2/cell_area_m2')
-    v.db_update(map=gravity_reservoirs, column='gvr_hru_pct', query_column='100*area_m2/hru_area_m2')
+    v.db_update(map=gravity_reservoirs, column='gvr_cell_pct', query_column='100*area_m2/cell_area_m2', quiet=True)
+    v.db_update(map=gravity_reservoirs, column='gvr_hru_pct', query_column='100*area_m2/hru_area_m2', quiet=True)
 
 
 if __name__ == "__main__":
