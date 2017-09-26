@@ -102,4 +102,4 @@ ENV/
 
 
 # LINUX
-.swp
+*.swp
