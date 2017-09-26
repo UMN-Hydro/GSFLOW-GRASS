@@ -96,9 +96,9 @@ def main():
     v.mkgrid(map=grid, overwrite=gscript.overwrite())
 
     # Cell numbers (row, column, continuous ID)
-    v.db_addcolumn(map='grid', columns='id int', quiet=True)
-    colNames = np.array(gscript.vector_db_select('grid', layer=1)['columns'])
-    colValues = np.array(gscript.vector_db_select('grid', layer=1)['values'].values())
+    v.db_addcolumn(map=grid, columns='id int', quiet=True)
+    colNames = np.array(gscript.vector_db_select(grid, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(grid, layer=1)['values'].values())
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
     rows = colValues[:,colNames == 'row'].astype(int).squeeze()
     cols = colValues[:,colNames == 'col'].astype(int).squeeze()
@@ -108,12 +108,12 @@ def main():
     _id_cat = []
     for i in range(len(_id)):
       _id_cat.append( (_id[i], cats[i]) )
-    grid = VectorTopo('grid')
-    grid.open('rw')
-    cur = grid.table.conn.cursor()
-    cur.executemany("update grid set id=? where cat=?", _id_cat)
-    grid.table.conn.commit()
-    grid.close()
+    gridTopo = VectorTopo(grid)
+    gridTopo.open('rw')
+    cur = gridTopo.table.conn.cursor()
+    cur.executemany("update "+grid+" set id=? where cat=?", _id_cat)
+    gridTopo.table.conn.commit()
+    gridTopo.close()
 
 if __name__ == "__main__":
     main()
