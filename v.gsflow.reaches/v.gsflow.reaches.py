@@ -27,7 +27,7 @@
 #% keyword: vector
 #% keyword: stream network
 #% keyword: hydrology
-#% keyword: geomorphology
+#% keyword: GSFLOW
 #%end
 
 #%option G_OPT_V_INPUT
