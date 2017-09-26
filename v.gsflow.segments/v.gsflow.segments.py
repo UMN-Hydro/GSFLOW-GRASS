@@ -168,9 +168,9 @@ def main():
     
     # ICALC=0: Constant depth - NOT IMPLEMENTED
     
-    # ICALC=0: Manning - NOT IMPLEMENTED
+    # ICALC=1: Manning - NOT IMPLEMENTED
 
-    # ICALC=0: Manning - NOT IMPLEMENTED
+    # ICALC=2: Manning - NOT IMPLEMENTED
 
     # ICALC=3: Power-law relationships (following Leopold and others)
     CDPTH = options['CDPTH']
