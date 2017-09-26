@@ -239,14 +239,9 @@ def main():
     for i in range(len(cats)):
         nseg_cats.append( (nseg[i], cats[i]) )
 
-    # Default OUTSEG to 0: will stay that way if there is no valid update value
-    # (works if there is a stream that goes somewhere else that is numbered but 
-    # that isn't in the current basin)
-    v.db_update(map=segments, column='OUTSEG', value=0)
-
-    segment = VectorTopo(segments)
-    segment.open('rw')
-    cur = segment.table.conn.cursor()
+    segmentsTopo = VectorTopo(segments)
+    segmentsTopo.open('rw')
+    cur = segmentsTopo.table.conn.cursor()
 
     # id = cat (as does ISEG and NSEG)
     cur.executemany("update segments set id=? where cat=?", nseg_cats)
@@ -276,8 +271,8 @@ def main():
     cur.execute("update segments set ETSW="+str(0))
     cur.execute("update segments set PPTSW="+str(0))
 
-    segment.table.conn.commit()
-    segment.close()
+    segmentsTopo.table.conn.commit()
+    segmentsTopo.close()
 
 if __name__ == "__main__":
     main()
