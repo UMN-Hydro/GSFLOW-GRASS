@@ -244,19 +244,19 @@ def main():
     cur = segmentsTopo.table.conn.cursor()
 
     # id = cat (as does ISEG and NSEG)
-    cur.executemany("update segments set id=? where cat=?", nseg_cats)
-    cur.executemany("update segments set ISEG=? where cat=?", nseg_cats)
-    cur.executemany("update segments set NSEG=? where cat=?", nseg_cats)
+    cur.executemany("update "+segments+" set id=? where cat=?", nseg_cats)
+    cur.executemany("update "+segments+" set ISEG=? where cat=?", nseg_cats)
+    cur.executemany("update "+segments+" set NSEG=? where cat=?", nseg_cats)
 
     # outseg = tostream
-    cur.executemany("update segments set OUTSEG=? where tostream=?", nseg_cats)
+    cur.executemany("update "+segments+" set OUTSEG=? where tostream=?", nseg_cats)
 
     # Discharge and hydraulic geometry
-    cur.execute("update segments set ICALC="+str(ICALC))
-    cur.execute("update segments set CDPTH="+str(CDPTH))
-    cur.execute("update segments set FDPTH="+str(FDPTH))
-    cur.execute("update segments set AWDTH="+str(AWDTH))
-    cur.execute("update segments set BWDTH="+str(BWDTH))
+    cur.execute("update "+segments+" set ICALC="+str(ICALC))
+    cur.execute("update "+segments+" set CDPTH="+str(CDPTH))
+    cur.execute("update "+segments+" set FDPTH="+str(FDPTH))
+    cur.execute("update "+segments+" set AWDTH="+str(AWDTH))
+    cur.execute("update "+segments+" set BWDTH="+str(BWDTH))
 
     gscript.message('')
     gscript.message('NOTICE: not currently used:')
@@ -265,11 +265,11 @@ def main():
     gscript.message('')
 
     # values that are 0
-    cur.execute("update segments set IUPSEG="+str(0))
-    cur.execute("update segments set FLOW="+str(0))
-    cur.execute("update segments set RUNOFF="+str(0))
-    cur.execute("update segments set ETSW="+str(0))
-    cur.execute("update segments set PPTSW="+str(0))
+    cur.execute("update "+segments+" set IUPSEG="+str(0))
+    cur.execute("update "+segments+" set FLOW="+str(0))
+    cur.execute("update "+segments+" set RUNOFF="+str(0))
+    cur.execute("update "+segments+" set ETSW="+str(0))
+    cur.execute("update "+segments+" set PPTSW="+str(0))
 
     segmentsTopo.table.conn.commit()
     segmentsTopo.close()
