@@ -176,7 +176,7 @@ def main():
         outcols = get_columns_in_order(segments, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_segments+'_segment_data_4B_UPSTREAM.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_segments+'_4B_UPSTREAM.txt', outtable, fmt='%s', delimiter=',')
 
         columns_in_order = ['HCOND2', 'THICKM2', 'ELEVDN', 'WIDTH2', 'DEPTH2', 'THTS2', 'THTI2', 'EPS2', 'UHC2']
         outcols = get_columns_in_order(segments, columns_in_order)
