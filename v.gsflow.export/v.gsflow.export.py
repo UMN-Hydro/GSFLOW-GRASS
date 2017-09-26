@@ -170,7 +170,7 @@ def main():
         outcols = get_columns_in_order(segments, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_segments+'_A_INFORMATION.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_segments+'_4A_INFORMATION.txt', outtable, fmt='%s', delimiter=',')
 
         columns_in_order = ['HCOND1', 'THICKM1', 'ELEVUP', 'WIDTH1', 'DEPTH1', 'THTS1', 'THTI1', 'EPS1', 'UHC1']
         outcols = get_columns_in_order(segments, columns_in_order)
