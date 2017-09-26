@@ -17,7 +17,7 @@
 #############################################################################
 #
 # REQUIREMENTS:
-#      -  uses inputs from r.stream.extract
+#      -  uses inputs from v.stream.network
  
 # More information
 # Started 14 October 2016
@@ -83,6 +83,7 @@ def find_upstream_segments(cats, tostream, cat):
     """
     Find segments immediately upstream of the given one
     """
+    pass
     
 
 def main():
@@ -128,8 +129,8 @@ def main():
     # Many basins out -- need to use overwrite flag in future!
     SQL_OR = 'rnum = ' + ' OR rnum = '.join(map(str, basincats))
     SQL_OR = 'cat = ' + ' OR cat = '.join(map(str, basincats))
-    v.extract(input=basins, output=output_basins, where=SQL_OR, overwrite=True)
-    v.extract(input=streams, output=output_streams, cats=basincats_str, overwrite=True)
+    v.extract(input=basins, output=output_basins, where=SQL_OR, overwrite=gscript.overwrite())
+    v.extract(input=streams, output=output_streams, cats=basincats_str, overwrite=gscript.overwrite())
 
     # We can loop over this list to get the shape of the full river network.
     selected_cats = []
@@ -139,7 +140,7 @@ def main():
     selected_cats_str = list(np.array(selected_cats).astype(str))
     selected_cats_csv = ','.join(selected_cats_str)
 
-    v.extract(input=options['streams'], output=options['outstream'], cats=selected_cats_csv, overwrite=True)
+    v.extract(input=options['streams'], output=options['outstream'], cats=selected_cats_csv, overwrite=gscript.overwrite())
 
 if __name__ == "__main__":
     main()
