@@ -176,7 +176,7 @@ def main():
     # Create a cursor
     cur = hru.table.conn.cursor()
     # Use it to loop across the table
-    cur.executemany("update HRU set id=? where cat=?", nhrut)
+    cur.executemany("update "+HRU+" set id=? where cat=?", nhrut)
     # Commit changes to the table
     hru.table.conn.commit()
     # Close the table
@@ -231,7 +231,7 @@ def main():
     aspect_angle = np.arctan2(_aspect_y_sum, _aspect_x_sum) * 180./np.pi
     aspect_angle[aspect_angle < 0] += 360 # all positive
     aspect_angle_cat = np.vstack((aspect_angle, _cat)).transpose()
-    cur.executemany("update HRU set hru_aspect=? where cat=?", aspect_angle_cat)
+    cur.executemany("update "+ HRU +" set hru_aspect=? where cat=?", aspect_angle_cat)
     hru.table.conn.commit()
     hru.close()
 
@@ -270,7 +270,7 @@ def main():
     hru = VectorTopo(HRU)
     hru.open('rw')
     cur = hru.table.conn.cursor()
-    cur.executemany("update HRU set hru_lon=?, hru_lat=? where cat=?", lonlat_cat)
+    cur.executemany("update "+ HRU +" set hru_lon=?, hru_lat=? where cat=?", lonlat_cat)
     hru.table.conn.commit()
     hru.close()
 
@@ -293,7 +293,7 @@ def main():
     hru = VectorTopo(HRU)
     hru.open('rw')
     cur = hru.table.conn.cursor()
-    cur.executemany("update HRU set hru_segment=? where id=?", hru_segmentt)
+    cur.executemany("update "+HRU+" set hru_segment=? where id=?", hru_segmentt)
     hru.table.conn.commit()
     hru.close()
     """
