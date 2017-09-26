@@ -4,7 +4,8 @@
 
 # (3)
 # this needs to be set by the user
-gsflow_exe=$HOME"/opt/GSFLOW_1.2.1\ Linux/bin"
+gsflow_exe=$HOME"/opt/GSFLOW_1.2.1 Linux/bin"
+spin_up="30yr"
 
 # (2)
 # in order to fix Permission denied problems after (1)
@@ -13,6 +14,7 @@ local_dir=${PWD}
 echo "[settings]" > settings.ini
 echo "local_dir=$local_dir" >> settings.ini
 echo "gsflow_exe=$gsflow_exe" >> settings.ini
+echo "spin_up=$spin_up" >> settings.ini
 
 gsflow_dir="$local_dir/GSFLOW"
 
@@ -38,7 +40,7 @@ mv climate "$PRMSinput_dir/"
 
 
 # (1)
-python2.7 python_scripts/GSFLOW_print_controlfile4_gcng_melt30yr.py
+python2.7 "python_scripts/GSFLOW_print_controlfile4_gcng_melt$spin_up.py"
 # tried to run this, needed python-tk
 # sudo apt-get install python-tk
 # then received error
@@ -49,3 +51,4 @@ python2.7 python_scripts/GSFLOW_print_PRMSparamfile4.py
 python2.7 python_scripts/GSFLOW_print_data_climatehru_files1.py
 python2.7 python_scripts/MODFLOW_scripts/print_MODFLOW_inputs_res_NWT.py 
 
+"${gsflow_exe}/gsflow" "$gsflow_dir/control/py_ChimTest_Melt_rep${spin_up}_GSFLOW.control" &> out.txt

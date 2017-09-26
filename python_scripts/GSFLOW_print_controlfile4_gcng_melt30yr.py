@@ -50,8 +50,11 @@ from ConfigParser import SafeConfigParser
 parser = SafeConfigParser()
 parser.read('settings.ini')
 LOCAL_DIR = parser.get('settings', 'local_dir')
+SPIN_UP = parser.get('settings', 'spin_up')
 
 GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+
+insert = "rep" + SPIN_UP
 
 # directory for GSFLOW input and output files (include slash ('/') at end)
 # NOTE: Assumes these directories already exist
@@ -68,7 +71,9 @@ in_climatedata_dir = in_data_dir + 'climate/' # specifically climate data
 
 # control file that will be written with this script
 # (will be in control_dir with model mode suffix)
-con_filname0 = 'py_ChimTest_Melt_30yr'
+con_filname0 = 'py_ChimTest_Melt'
+if SPIN_UP:
+    con_filname0 += ("_" + format(insert))
 
 # command-line executable for GSFLOW (just used to print message)
 GSFLOW_exe = parser.get('settings', 'gsflow_exe') + '/gsflow'  # recompiled on Ubuntu!
@@ -82,10 +87,10 @@ GSFLOW_exe = parser.get('settings', 'gsflow_exe') + '/gsflow'  # recompiled on U
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
 # data file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
-datafil = PRMSinput_dir + 'empty_rep30yr.day'
+datafil = PRMSinput_dir + 'empty.day'
 
 # parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
-parfil_pre = 'ChimTest' # will have '_', model_mode following
+parfil_pre = 'py_ChimTest' # will have '_', model_mode following
 
 # MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
 namfil = MODFLOWinput_dir + 'test2lay_py.nam'
@@ -117,7 +122,7 @@ if model_mode == 'GSFLOW':
     fl_load_init = 0 # 1 to load previously saved initial conditions
     # load initial conditions from this file
 #     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = LOCAL_DIR + '/simdir/spinup30yr_constH/outputs/PRMS/init_cond_outfile'
+    load_init_file = LOCAL_DIR + '/simdir/spinup{}_constH'.format(SPIN_UP) + '/outputs/PRMS/init_cond_outfile'
 
 fl_save_init = 1 # 1 to save outputs as initial conditions
 save_init_file = PRMSoutput_dir + 'init_cond_outfile' # save new results as initial conditions in this file
@@ -143,15 +148,15 @@ if fl_all_climate_hru == 0:
 # If climate_hru, use the following file names (else ignored)
 # (note that WRITE_CLIMATE will produce files with the below names)
 # precip_datafil = strcat(PRMSinput_dir, 'precip_rep30yr.day'); # w/o meltwater
-precip_datafil = PRMSinput_dir + 'precip_rep30yr_melt.day'
+precip_datafil = PRMSinput_dir + 'precip.day'
 # tmax_datafil = strcat(PRMSinput_dir, 'tmax_rep30yr_tadj_plus1C.day'); # to be safe: set as F
 # tmin_datafil = strcat(PRMSinput_dir, 'tmin_rep30yr_tadj_plus1C.day'); # to be safe: set as F
-tmax_datafil = PRMSinput_dir +'tmax_rep30yr_tadj.day' # to be safe: set as F
-tmin_datafil = PRMSinput_dir + 'tmin_rep30yr_tadj.day' # to be safe: set as F
-solrad_datafil = PRMSinput_dir + 'swrad_rep30yr.day'
-pet_datafil = PRMSinput_dir + 'potet_rep30yr.day'
-# humidity_datafil = strcat(PRMSinput_dir, 'humidity.day'); # for potet_pm
-transp_datafil = PRMSinput_dir + 'transp_rep30yr.day' # may not be needed in GSFLOW? Is needed!
+tmax_datafil = PRMSinput_dir +'tmax.day' # to be safe: set as F
+tmin_datafil = PRMSinput_dir + 'tmin.day' # to be safe: set as F
+solrad_datafil = PRMSinput_dir + 'swrad.day'
+pet_datafil = PRMSinput_dir + 'potet.day'
+humidity_datafil = PRMSinput_dir + 'humidity.day' # for potet_pm
+transp_datafil = PRMSinput_dir + 'transp.day' # may not be needed in GSFLOW? Is needed!
 
 
 
@@ -259,13 +264,11 @@ if model_mode != 'MODFLOW':
         con_par_values.append(precip_datafil) # file name
     
 
-# Below: harmless mistake in original matlab version
-#    if strcmp(con_par_values{ii}, 'climate_hru')
-#        ii = ii+1;
-#        con_par_name{ii} = 'humidity_day'; # file with precip data for each HRU
-#        con_par_type(ii) = 4; 
-#        con_par_values{ii} = {humidity_datafil) # file name
-#    end
+        # Below: harmless mistake in original matlab version
+
+    con_par_name.append('humidity_day')
+    con_par_type.append(4)
+    con_par_values.append(humidity_datafil) # file name
 
     con_par_name.append('temp_module') # temperature distribution method (should match precip)
     con_par_type.append(4) 
