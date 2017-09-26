@@ -113,6 +113,7 @@ def main():
     hru_columns.append('id integer') # nhru
     # Basic Physical Attributes (Geometry)
     hru_columns.append('hru_area double precision') # acres (!!!!)
+    hru_columns.append('hru_area_m2 double precision') # [not for GSFLOW: for me!]
     hru_columns.append('hru_aspect double precision') # Mean aspect [degrees]
     hru_columns.append('hru_elev double precision') # Mean elevation
     hru_columns.append('hru_lat double precision') # Latitude of centroid
@@ -198,7 +199,7 @@ def main():
     #hru_columns.append('hru_area double precision')
     # Acres b/c USGS
     v.to_db(map=HRU, option='area', columns='hru_area', units='acres', quiet=True)
-
+    v.to_db(map=HRU, option='area', columns='hru_area_m2', units='meters', quiet=True)
 
     # GET MEAN VALUES FOR THESE NEXT ONES, ACROSS THE BASIN
 
