@@ -115,6 +115,10 @@ def main():
     gridTopo.table.conn.commit()
     gridTopo.close()
 
+    # Cell area
+    v.db_addcolumn(map=grid, columns='area_m2', quiet=True)
+    v.to_db(map=grid, option='area', units='meters', columns='area_m2', quiet=True)
+
 if __name__ == "__main__":
     main()
 
