@@ -30,6 +30,13 @@
 #%  keyword: GSFLOW
 #%end
 
+#%option G_OPT_R_INPUT
+#%  key: elevation
+#%  label: Elevation raster
+#%  required: yes
+#%  guidependency: layer,column
+#%end
+
 #%option G_OPT_V_INPUT
 #%  key: input
 #%  label: Sub-basins to become HRUs
@@ -96,6 +103,7 @@ def main():
     HRU = options['output']
     slope = options['slope']
     aspect = options['aspect']
+    elevation = options['elevation']
 
     ################################
     # CREATE HRUs FROM SUB-BASINS  #
@@ -205,7 +213,7 @@ def main():
 
     # SLOPE (and aspect) 
     #####################
-    v.rast_stats(map=HRU, raster='slope', method='average', column_prefix='tmp', flags='c', quiet=True)
+    v.rast_stats(map=HRU, raster=slope, method='average', column_prefix='tmp', flags='c', quiet=True)
     v.db_update(map=HRU, column='hru_slope', query_column='tmp_average', quiet=True)
 
     # ASPECT
@@ -215,8 +223,8 @@ def main():
     # average -- x- and y-vectors
     # Geographic coordinates, so sin=x, cos=y.... not that it matters so long 
     # as I am consistent in how I return to degrees
-    r.mapcalc('aspect_x = sin(aspect)', overwrite=True, quiet=True)
-    r.mapcalc('aspect_y = cos(aspect)', overwrite=True, quiet=True)
+    r.mapcalc('aspect_x = sin(' + aspect + ')', overwrite=gscript.overwrite(), quiet=True)
+    r.mapcalc('aspect_y = cos(' + aspect + ')', overwrite=gscript.overwrite(), quiet=True)
     #grass.run_command('v.db.addcolumn', map=HRU, columns='aspect_x_sum double precision, aspect_y_sum double precision, ncells_in_hru integer')
     v.rast_stats(map=HRU, raster='aspect_x', method='sum', column_prefix='aspect_x', flags='c', quiet=True)
     v.rast_stats(map=HRU, raster='aspect_y', method='sum', column_prefix='aspect_y', flags='c', quiet=True)
@@ -237,7 +245,7 @@ def main():
 
     # ELEVATION
     ############
-    v.rast_stats(map=HRU, raster='srtm', method='average', column_prefix='tmp', flags='c', quiet=True)
+    v.rast_stats(map=HRU, raster=elevation, method='average', column_prefix='tmp', flags='c', quiet=True)
     v.db_update(map=HRU, column='hru_elev', query_column='tmp_average', quiet=True)
     v.db_dropcolumn(map=HRU, columns='tmp_average', quiet=True)
 

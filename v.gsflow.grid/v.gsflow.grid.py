@@ -118,7 +118,8 @@ def main():
     cols = colValues[:,colNames == 'col'].astype(int).squeeze()
     nrows = np.max(rows)
     ncols = np.max(cols)
-    _id = ncols*(rows-1) + cols
+    cats = np.ravel([cats])
+    _id = np.ravel([ncols*(rows-1) + cols])
     _id_cat = []
     for i in range(len(_id)):
       _id_cat.append( (_id[i], cats[i]) )
