@@ -6,8 +6,8 @@ basins=basins_tmp
 basins_onebasin=${basins}_onebasin
 segments=segments_tmp
 reaches=reaches_tmp
-threshold=100000 #m2
-grid_res=150 #m2
+threshold=100000 #m2 - drainage area
+grid_res=150 #m2 - for MODFLOW
 grid=grid_tmp
 slope=slope_tmp
 aspect=aspect_tmp
@@ -29,7 +29,7 @@ r.mapcalc "${DEM}_pos_accum = $DEM * ($accumulation > 0)"
 r.null map=${DEM}_pos_accum setnull=0
 
 # Build streams and sub-basins
-r.stream.extract elevation=${DEM}_pos_accum accumulation=${accumulation}_pos stream_raster=$streams stream_vector=$streams threshold=$thresh direction=draindir_tmp d8cut=0 --o
+r.stream.extract elevation=${DEM}_pos_accum accumulation=${accumulation}_pos stream_raster=$streams stream_vector=$streams threshold=$threshold direction=draindir_tmp d8cut=0 --o
 r.stream.basins direction=draindir_tmp stream_rast=$streams basins=$basins --o
 r.to.vect input=$basins output=$basins type=area -v --o
 
