@@ -123,6 +123,46 @@
 #%  required: no
 #%end
 
+#%option
+#%  key: PPTSW
+#%  type: string
+#%  description: Direct precipitation on the stream
+#%  answer: 0,0
+#%  required: no
+#%end
+
+#%option
+#%  key: ROUGHCH
+#%  type: double
+#%  description: In-channel Manning's n for ICALC=1,2
+#%  answer: 0.035
+#%  required: no
+#%end
+
+#%option
+#%  key: ROUGHBK
+#%  type: double
+#%  description: Overbank Manning's n for ICALC=2
+#%  answer: 0.06
+#%  required: no
+#%end
+
+#%option
+#%  key: WIDTH1
+#%  type: double
+#%  description: Upstream width in segment, assumed constant through watershed
+#%  answer: 5
+#%  required: no
+#%end
+
+#%option
+#%  key: WIDTH2
+#%  type: double
+#%  description: Downstream width in segment, assumed constant through watershed
+#%  answer: 5
+#%  required: no
+#%end
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -166,11 +206,15 @@ def main():
     # Hydraulic geometry
     ICALC = options['ICALC']
     
-    # ICALC=0: Constant depth - NOT IMPLEMENTED
+    # ICALC=0: Constant depth
+    WIDTH1 = options['WIDTH1']
+    WIDTH2 = options['WIDTH2']
     
-    # ICALC=1: Manning - NOT IMPLEMENTED
-
-    # ICALC=2: Manning - NOT IMPLEMENTED
+    # ICALC=1: Manning
+    ROUGHCH = options['ROUGHCH']
+    
+    # ICALC=2: Manning
+    ROUGHBK = options['ROUGHBK']
 
     # ICALC=3: Power-law relationships (following Leopold and others)
     CDPTH = options['CDPTH']
@@ -207,6 +251,10 @@ def main():
     # for GSFLOW
     segment_columns.append('ICALC integer') # 3 for power function
     segment_columns.append('OUTSEG integer') # downstream segment -- tostream, renumbered
+    segment_columns.append('ROUGHCH double precision') # overbank roughness
+    segment_columns.append('ROUGHBK double precision') # in-channel roughness
+    segment_columns.append('WIDTH1 double precision') # overbank roughness
+    segment_columns.append('WIDTH2 double precision') # in-channel roughness
     segment_columns.append('CDPTH double precision') # depth coeff
     segment_columns.append('FDPTH double precision') # depth exp
     segment_columns.append('AWDTH double precision') # width coeff
@@ -253,6 +301,10 @@ def main():
     cur.executemany("update "+segments+" set OUTSEG=? where tostream=?", nseg_cats)
 
     # Discharge and hydraulic geometry
+    cur.execute("update "+segments+" set WIDTH1="+str(WIDTH1))
+    cur.execute("update "+segments+" set WIDTH2="+str(WIDTH2))
+    cur.execute("update "+segments+" set ROUGHCH="+str(ROUGHCH))
+    cur.execute("update "+segments+" set ROUGHBK="+str(ROUGHBK))
     cur.execute("update "+segments+" set ICALC="+str(ICALC))
     cur.execute("update "+segments+" set CDPTH="+str(CDPTH))
     cur.execute("update "+segments+" set FDPTH="+str(FDPTH))
