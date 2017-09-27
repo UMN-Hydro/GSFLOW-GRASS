@@ -1,4 +1,6 @@
-DEM=srtm_local_filled
+#DEM=srtm_local_filled
+#DEM=ASTGTM2_S12W075_dem
+DEM=DEM
 accumulation=accumulation_tmp
 streams=streams_tmp
 streams_onebasin=${streams}_onebasin
@@ -6,7 +8,8 @@ basins=basins_tmp
 basins_onebasin=${basins}_onebasin
 segments=segments_tmp
 reaches=reaches_tmp
-threshold=100000 #m2 - drainage area
+threshold=1000000 #m2 - drainage area
+#grid_res=150 #m2 - for MODFLOW
 grid_res=150 #m2 - for MODFLOW
 grid=grid_tmp
 slope=slope_tmp
@@ -22,11 +25,18 @@ g.region -p rast=$DEM
 
 # Build flow accumulation with only fully on-map flow
 r.cell.area output=cellArea_meters2 units=m2 --o
-r.watershed elevation=$DEM flow=cellArea_meters2 accumulation=$accumulation --o
-r.mapcalc "${accumulation}_pos = $accumulation * ($accumulation > 0)"
+r.watershed elevation=$DEM flow=cellArea_meters2 accumulation=$accumulation -s --o
+r.mapcalc "${accumulation}_pos = $accumulation * ($accumulation > 0)" --o
 r.null map=${accumulation}_pos setnull=0
-r.mapcalc "${DEM}_pos_accum = $DEM * ($accumulation > 0)"
+r.mapcalc "${DEM}_pos_accum = $DEM * (isnull(${accumulation}_pos) == 0)" --o
 r.null map=${DEM}_pos_accum setnull=0
+r.mapcalc "${accumulation}_pos = ${accumulation}_pos * ($DEM > 0)" --o
+r.null map=${accumulation}_pos setnull=0
+# Repeat is sometimes needed
+r.mapcalc "${DEM}_pos_accum = $DEM * (isnull(${accumulation}_pos) == 0)" --o
+r.null map=${DEM}_pos_accum setnull=0
+r.mapcalc "${accumulation}_pos = ${accumulation}_pos * ($DEM > 0)" --o
+r.null map=${accumulation}_pos setnull=0
 
 # Build streams and sub-basins
 r.stream.extract elevation=${DEM}_pos_accum accumulation=${accumulation}_pos stream_raster=$streams stream_vector=$streams threshold=$threshold direction=draindir_tmp d8cut=0 --o
@@ -37,14 +47,14 @@ r.to.vect input=$basins output=$basins type=area -v --o
 v.stream.network map=$streams
 
 # Restrict to a single basin
-basin_outlet_cat=144 # You must find and define this after building the stream network
+basin_outlet_cat=2485 #2762 #144 # You must find and define this after building the stream network
 v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$streams_onebasin output_basin=$basins_onebasin cat=$basin_outlet_cat output_pour_point=$pour_point --o
 
 # GSFLOW segments: sections of stream that define subbasins
 v.gsflow.segments input=$streams_onebasin output=$segments --o
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
-v.gsflow.grid basin=$basins_onebasin dx=150 dy=150 output=$grid mask_output=$basin_mask pour_point=$pour_point --o
+v.gsflow.grid basin=$basins_onebasin dx=$grid_res dy=$grid_res output=$grid mask_output=$basin_mask pour_point=$pour_point --o
 
 # GSFLOW reaches: intersection of segments and grid
 v.gsflow.reaches segment_input=$segments grid_input=$grid elevation=$DEM output=$reaches --o
