@@ -243,11 +243,6 @@ def main():
     segment_columns.append('id integer') # segment number
     segment_columns.append('ISEG integer') # segment number
     segment_columns.append('NSEG integer') # segment number
-    # Streamflow and lake routing
-    #segment_columns.append('tosegment integer') # Index of downstream segment to which a segment
-                                                #   flows (thus differentiating it from hru_segment,
-                                                #   which is for HRU's, though segment and HRU ID's
-                                                #   are the same when HRU's are sub-basins
     # for GSFLOW
     segment_columns.append('ICALC integer') # 3 for power function
     segment_columns.append('OUTSEG integer') # downstream segment -- tostream, renumbered
@@ -327,6 +322,6 @@ def main():
     segmentsTopo.table.conn.commit()
     segmentsTopo.close()
 
+
 if __name__ == "__main__":
     main()
-

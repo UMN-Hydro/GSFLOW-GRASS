@@ -119,10 +119,10 @@ def main():
     nrows = np.max(rows)
     ncols = np.max(cols)
     cats = np.ravel([cats])
-    _id = np.ravel([ncols*(rows-1) + cols])
+    _id = np.ravel([ncols * (rows - 1) + cols])
     _id_cat = []
     for i in range(len(_id)):
-      _id_cat.append( (_id[i], cats[i]) )
+        _id_cat.append( (_id[i], cats[i]) )
     gridTopo = VectorTopo(grid)
     gridTopo.open('rw')
     cur = gridTopo.table.conn.cursor()
@@ -145,6 +145,6 @@ def main():
         v.what_vect(map=pp, query_map=grid, column='row', query_column='row', quiet=True)
         v.what_vect(map=pp, query_map=grid, column='col', query_column='col', quiet=True)
 
+
 if __name__ == "__main__":
     main()
-

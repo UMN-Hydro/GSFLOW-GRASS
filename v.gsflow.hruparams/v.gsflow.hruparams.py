@@ -131,30 +131,30 @@ def main():
     #hru_columns.append('elev_units integer') # 0=feet; 1=meters. 0=default. I think I will set this to 1 by default.
     # Measured input
     hru_columns.append('outlet_sta integer') # Index of streamflow station at basin outlet:
-                                         #   station number if it has one, 0 if not
-    #    Note that the below specify projections and note lat/lon; they really seem
-    #    to work for any projected coordinates, with _x, _y, in meters, and _xlong, 
-    #    _ylat, in feet (i.e. they are just northing and easting). The meters and feet
-    #    are not just simple conversions, but actually are required for different
-    #    modules in the code, and are hence redundant but intentional.
+                                             # station number if it has one, 0 if not
+    # Note that the below specify projections and note lat/lon; they really seem
+    # to work for any projected coordinates, with _x, _y, in meters, and _xlong, 
+    # _ylat, in feet (i.e. they are just northing and easting). The meters and feet
+    # are not just simple conversions, but actually are required for different
+    # modules in the code, and are hence redundant but intentional.
     hru_columns.append('hru_x double precision') # Easting [m]
     hru_columns.append('hru_xlong double precision') # Easting [feet]
     hru_columns.append('hru_y double precision') # Northing [m]
     hru_columns.append('hru_ylat double precision') # Northing [feet]
     # Streamflow and lake routing
     hru_columns.append('K_coef double precision') # Travel time of flood wave to next downstream segment;
-                                                  #   this is the Muskingum storage coefficient
-                                                  #   1.0 for reservoirs, diversions, and segments flowing
-                                                  #   out of the basin
+                                                  # this is the Muskingum storage coefficient
+                                                  # 1.0 for reservoirs, diversions, and segments flowing
+                                                  # out of the basin
     hru_columns.append('x_coef double precision') # Amount of attenuation of flow wave;
-                                                  #   this is the Muskingum routing weighting factor
-                                                  #   range: 0.0--0.5; default 0.2
-                                                  #   0 for all segments flowing out of the basin
+                                                  # this is the Muskingum routing weighting factor
+                                                  # range: 0.0--0.5; default 0.2
+                                                  # 0 for all segments flowing out of the basin
     hru_columns.append('hru_segment integer') # ID of stream segment to which flow will be routed
-                                              #   this is for non-cascade routing (flow goes directly
-                                              #   from HRU to stream segment)
+                                              # this is for non-cascade routing (flow goes directly
+                                              # from HRU to stream segment)
     hru_columns.append('obsin_segment integer') # Index of measured streamflow station that replaces
-                                                #   inflow to a segment
+                                                # inflow to a segment
 
     # Create strings
     hru_columns = ",".join(hru_columns)
@@ -173,7 +173,7 @@ def main():
     cats = colValues[:,colNames == 'cat'].astype(int).squeeze()
     rnums = colValues[:,colNames == 'rnum'].astype(int).squeeze()
 
-    nhru = np.arange(1, number_of_hrus+1)
+    nhru = np.arange(1, number_of_hrus + 1)
     nhrut = []
     for i in range(len(nhru)):
       nhrut.append( (nhru[i], cats[i]) )
@@ -236,7 +236,7 @@ def main():
     _cat = _arr[:,0]
     _aspect_x_sum = _arr[:,1]
     _aspect_y_sum = _arr[:,2]
-    aspect_angle = np.arctan2(_aspect_y_sum, _aspect_x_sum) * 180./np.pi
+    aspect_angle = np.arctan2(_aspect_y_sum, _aspect_x_sum) * 180. / np.pi
     aspect_angle[aspect_angle < 0] += 360 # all positive
     aspect_angle_cat = np.vstack((aspect_angle, _cat)).transpose()
     cur.executemany("update "+ HRU +" set hru_aspect=? where cat=?", aspect_angle_cat)
@@ -308,6 +308,6 @@ def main():
     # Segment number = HRU ID number
     v.db_update(map=HRU, column='hru_segment', query_column='id', quiet=True)
 
+
 if __name__ == "__main__":
     main()
-

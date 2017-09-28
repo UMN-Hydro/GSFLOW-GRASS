@@ -205,6 +205,6 @@ def main():
     gscript.message('A cat value of 0 indicates the downstream-most segment.')
     gscript.message('')
 
+
 if __name__ == "__main__":
     main()
-

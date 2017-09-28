@@ -125,17 +125,18 @@ from grass import script as gscript
 ###############
 
 def get_columns_in_order(vect, cols, nodata_value=-999):
-  colNames = np.array(gscript.vector_db_select(vect, layer=1)['columns'])
-  colValues = np.array(gscript.vector_db_select(vect, layer=1)['values'].values())
-  outlist = []
-  for col in cols:
-      newcol = colValues[:,colNames == col].squeeze()
-      # If column does not exist, populate with nodata value
-      # Strangely, has shape (nrows, 0)
-      if np.prod(newcol.shape) == 0:
-          newcol = (-999*np.ones(colValues.shape[0])).astype(int).astype(str)
-      outlist.append(newcol)
-  return outlist
+    colNames = np.array(gscript.vector_db_select(vect, layer=1)['columns'])
+    colValues = np.array(gscript.vector_db_select(vect, layer=1)\
+                ['values'].values())
+    outlist = []
+    for col in cols:
+        newcol = colValues[:,colNames == col].squeeze()
+        # If column does not exist, populate with nodata value
+        # Strangely, has shape (nrows, 0)
+        if np.prod(newcol.shape) == 0:
+            newcol = (-999*np.ones(colValues.shape[0])).astype(int).astype(str)
+        outlist.append(newcol)
+    return outlist
 
 def main():
     """
@@ -171,7 +172,9 @@ def main():
     # Reaches
     ##########
     if (len(reaches) > 0) and (len(out_reaches) > 0):
-        columns_in_order = ['KRCH', 'IRCH', 'JRCH', 'ISEG', 'IREACH', 'RCHLEN', 'STRTOP', 'SLOPE', 'STRTHICK', 'STRHC1', 'THTS', 'THTI', 'EPS', 'UHC']
+        columns_in_order = ['KRCH', 'IRCH', 'JRCH', 'ISEG', 'IREACH', 'RCHLEN',
+                            'STRTOP', 'SLOPE', 'STRTHICK', 'STRHC1', 'THTS', 
+                            'THTI', 'EPS', 'UHC']
         outcols = get_columns_in_order(reaches, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
@@ -182,41 +185,53 @@ def main():
     # Segments
     ###########
     if (len(segments) > 0) and (len(out_segments) > 0):
-        columns_in_order = ['NSEG', 'ICALC', 'OUTSEG', 'IUPSEG', 'IPRIOR', 'NSTRPTS', 'FLOW', 'RUNOFF', 'ETSW', 'PPTSW', 'ROUGHCH', 'ROUGHBK', 'CDPTH', 'FDPTH', 'AWDTH', 'BWDTH']
+        columns_in_order = ['NSEG', 'ICALC', 'OUTSEG', 'IUPSEG', 'IPRIOR', 
+                            'NSTRPTS', 'FLOW', 'RUNOFF', 'ETSW', 'PPTSW', 
+                            'ROUGHCH', 'ROUGHBK', 'CDPTH', 'FDPTH', 'AWDTH', 
+                            'BWDTH']
         outcols = get_columns_in_order(segments, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_segments+'_4A_INFORMATION.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_segments+'_4A_INFORMATION.txt', outtable, fmt='%s', 
+                   delimiter=',')
 
-        columns_in_order = ['HCOND1', 'THICKM1', 'ELEVUP', 'WIDTH1', 'DEPTH1', 'THTS1', 'THTI1', 'EPS1', 'UHC1']
+        columns_in_order = ['HCOND1', 'THICKM1', 'ELEVUP', 'WIDTH1', 'DEPTH1', 
+                            'THTS1', 'THTI1', 'EPS1', 'UHC1']
         outcols = get_columns_in_order(segments, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_segments+'_4B_UPSTREAM.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_segments+'_4B_UPSTREAM.txt', outtable, fmt='%s', 
+                   delimiter=',')
 
-        columns_in_order = ['HCOND2', 'THICKM2', 'ELEVDN', 'WIDTH2', 'DEPTH2', 'THTS2', 'THTI2', 'EPS2', 'UHC2']
+        columns_in_order = ['HCOND2', 'THICKM2', 'ELEVDN', 'WIDTH2', 'DEPTH2', 
+                            'THTS2', 'THTI2', 'EPS2', 'UHC2']
         outcols = get_columns_in_order(segments, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_segments+'_4C_DOWNSTREAM.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_segments+'_4C_DOWNSTREAM.txt', outtable, fmt='%s', 
+                   delimiter=',')
     elif (len(segments) > 0) or (len(out_segments) > 0):
         grass.fatal(_("You must inlcude both input and output segments"))
 
     # Gravity reservoirs
     #####################
     if (len(gravity_reservoirs) > 0) and (len(out_gravity_reservoirs) > 0):
-        columns_in_order = ['gvr_hru_id', 'gvr_hru_pct', 'gvr_cell_id', 'gvr_cell_pct']
+        columns_in_order = ['gvr_hru_id', 'gvr_hru_pct', 'gvr_cell_id', 
+                            'gvr_cell_pct']
         outcols = get_columns_in_order(gravity_reservoirs, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
-        np.savetxt(out_gravity_reservoirs+'.txt', outtable, fmt='%s', delimiter=',')
+        np.savetxt(out_gravity_reservoirs+'.txt', outtable, fmt='%s', 
+                   delimiter=',')
     elif (len(gravity_reservoirs) > 0) or (len(out_gravity_reservoirs) > 0):
-        grass.fatal(_("You must inlcude both input and output gravity reservoirs"))
+        grass.fatal(_("You must inlcude both input and output \
+                      gravity reservoirs"))
 
     # HRUs 
     #######
     if (len(HRUs) > 0) and (len(out_HRUs) > 0):
-        columns_in_order = ['hru_area', 'hru_aspect', 'hru_elev', 'hru_lat', 'hru_slope', 'hru_segment', 'hru_strmseg_down_id']
+        columns_in_order = ['hru_area', 'hru_aspect', 'hru_elev', 'hru_lat', 
+                            'hru_slope', 'hru_segment', 'hru_strmseg_down_id']
         outcols = get_columns_in_order(HRUs, columns_in_order)
         outarray = np.array(outcols).transpose()
         outtable = np.vstack((columns_in_order, outarray))
@@ -227,7 +242,8 @@ def main():
     # Pour Point
     #############
     if (len(pour_point) > 0) and (len(out_pour_point) > 0):
-        _y, _x = np.squeeze(gscript.db_select(sql='SELECT row,col FROM '+pour_point))
+        _y, _x = np.squeeze(gscript.db_select(sql='SELECT row,col FROM '+
+                            pour_point))
         outstr = 'discharge_pt: row_i '+_y+' col_i '+_x
         outfile = file(out_pour_point+'.txt', 'w')
         outfile.write(outstr)
@@ -235,6 +251,6 @@ def main():
     elif (len(pour_point) > 0) or (len(out_pour_point) > 0):
         grass.fatal(_("You must inlcude both input and output pour points"))
     
+
 if __name__ == "__main__":
     main()
-

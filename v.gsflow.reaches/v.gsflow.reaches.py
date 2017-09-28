@@ -265,43 +265,44 @@ def main():
     segment_ids__reach = colValues[:,colNames == 'segment_id'].astype(float).squeeze()
 
     for segment_id in segment_ids:
-      reach_order_cats = []
-      downstream_directed = []
-      ssel = segment_ids == segment_id
-      rsel = segment_ids__reach == segment_id # selector
-      # Find first segment: x1y1 first here, but not necessarily later
-      downstream_directed.append(1)
-      _x_match = reach_x1s[rsel] == segment_x1s[ssel]
-      _y_match = reach_y1s[rsel] == segment_y1s[ssel]
-      _i_match = _x_match * _y_match
-      x1y1 = True # false if x2y2
-      # Find cat
-      _cat = int(reach_cats[rsel][_x_match * _y_match])
-      reach_order_cats.append(_cat)
-      # Get end of reach = start of next one
-      reach_x_end = float(reach_x2s[reach_cats == _cat])
-      reach_y_end = float(reach_y2s[reach_cats == _cat])
-      while _i_match.any():
-        _x_match = reach_x1s[rsel] == reach_x_end
-        _y_match = reach_y1s[rsel] == reach_y_end
+        reach_order_cats = []
+        downstream_directed = []
+        ssel = segment_ids == segment_id
+        rsel = segment_ids__reach == segment_id # selector
+        # Find first segment: x1y1 first here, but not necessarily later
+        downstream_directed.append(1)
+        _x_match = reach_x1s[rsel] == segment_x1s[ssel]
+        _y_match = reach_y1s[rsel] == segment_y1s[ssel]
         _i_match = _x_match * _y_match
-        if _i_match.any():
-          _cat = int(reach_cats[rsel][_x_match * _y_match])
-          reach_x_end = float(reach_x2s[reach_cats == _cat])
-          reach_y_end = float(reach_y2s[reach_cats == _cat])
-          reach_order_cats.append(_cat)
-      print len(reach_order_cats), len(reach_cats[rsel])
-        
-      # Reach order to database table
-      reach_number__reach_order_cats = []
-      for i in range(len(reach_order_cats)):
-        reach_number__reach_order_cats.append( (i+1, reach_order_cats[i]) )
-      reachesTopo = VectorTopo(reaches)
-      reachesTopo.open('rw')
-      cur = reachesTopo.table.conn.cursor()
-      cur.executemany("update "+reaches+" set IREACH=? where cat=?", reach_number__reach_order_cats)
-      reachesTopo.table.conn.commit()
-      reachesTopo.close()
+        x1y1 = True # false if x2y2
+        # Find cat
+        _cat = int(reach_cats[rsel][_x_match * _y_match])
+        reach_order_cats.append(_cat)
+        # Get end of reach = start of next one
+        reach_x_end = float(reach_x2s[reach_cats == _cat])
+        reach_y_end = float(reach_y2s[reach_cats == _cat])
+        while _i_match.any():
+            _x_match = reach_x1s[rsel] == reach_x_end
+            _y_match = reach_y1s[rsel] == reach_y_end
+            _i_match = _x_match * _y_match
+            if _i_match.any():
+                _cat = int(reach_cats[rsel][_x_match * _y_match])
+                reach_x_end = float(reach_x2s[reach_cats == _cat])
+                reach_y_end = float(reach_y2s[reach_cats == _cat])
+                reach_order_cats.append(_cat)
+        print len(reach_order_cats), len(reach_cats[rsel])
+          
+        # Reach order to database table
+        reach_number__reach_order_cats = []
+        for i in range(len(reach_order_cats)):
+            reach_number__reach_order_cats.append( (i+1, reach_order_cats[i]) )
+        reachesTopo = VectorTopo(reaches)
+        reachesTopo.open('rw')
+        cur = reachesTopo.table.conn.cursor()
+        cur.executemany("update "+reaches+" set IREACH=? where cat=?", 
+                        reach_number__reach_order_cats)
+        reachesTopo.table.conn.commit()
+        reachesTopo.close()
       
 
     # TOP AND BOTTOM ARE OUT OF ORDER: SOME SEGS ARE BACKWARDS. UGH!!!!
@@ -314,20 +315,20 @@ def main():
     zr1 = []
     zr2 = []
     for i in range(len(reach_cats)):
-      _x = reach_x1s[i]
-      _y = reach_y1s[i]
-      _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
-      zr1.append(_z)
-      _x = reach_x2s[i]
-      _y = reach_y2s[i]
-      _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
-      zr2.append(_z)
+        _x = reach_x1s[i]
+        _y = reach_y1s[i]
+        _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
+        zr1.append(_z)
+        _x = reach_x2s[i]
+        _y = reach_y2s[i]
+        _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
+        zr2.append(_z)
 
     zr1_cats = []
     zr2_cats = []
     for i in range(len(reach_cats)):
-      zr1_cats.append( (zr1[i], reach_cats[i]) )
-      zr2_cats.append( (zr2[i], reach_cats[i]) )
+        zr1_cats.append( (zr1[i], reach_cats[i]) )
+        zr2_cats.append( (zr2[i], reach_cats[i]) )
 
     reachesTopo = VectorTopo(reaches)
     reachesTopo.open('rw')
@@ -348,6 +349,6 @@ def main():
     #v.what_vect(map=reaches, query_map='srtm_local_filled_grid', column='z_topo_mean', query_column='z')
     #v.db_update(map=reaches, column='STRTOP', value='z_topo_mean -'+str(h_stream))
 
+
 if __name__ == "__main__":
     main()
-
