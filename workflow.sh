@@ -61,15 +61,13 @@ v.gsflow.reaches segment_input=$segments grid_input=$grid elevation=$DEM output=
 
 # GSFLOW HRU parameters
 r.slope.aspect elevation=$DEM slope=$slope aspect=$aspect format=percent zscale=0.01 --o
-v.gsflow.hruparams input=$basins_onebasin output=$HRUs slope=$slope aspect=$aspect --o
+v.gsflow.hruparams input=$basins_onebasin elevation=$DEM output=$HRUs slope=$slope aspect=$aspect --o
 
 # GSFLOW gravity reservoirs
 v.gsflow.gravres hru_input=$HRUs grid_input=$grid output=$gravity_reservoirs --o
 
-# Export basin mask -- 1s where basin exists and 0 where it doesn't
-r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
-
 # Export DEM with MODFLOW resolution
+# Also export basin mask -- 1s where basin exists and 0 where it doesn't
 g.region rast=$basin_mask res=$grid_res
 r.out.ascii input=$DEM output=$DEM.asc null_value=0 --o
 r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
