@@ -70,8 +70,9 @@ v.gsflow.gravres hru_input=$HRUs grid_input=$grid output=$gravity_reservoirs --o
 r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
 
 # Export DEM with MODFLOW resolution
-g.region rast=$basin_mask
-r.out.ascii input=$DEM output=$DEM.asc --o
+g.region rast=$basin_mask res=$grid_res
+r.out.ascii input=$DEM output=$DEM.asc null_value=0 --o
+r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
 g.region rast=$DEM
 g.region vect=$basins_onebasin
 
