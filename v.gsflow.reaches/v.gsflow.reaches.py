@@ -342,12 +342,13 @@ def main():
     v.db_update(map=reaches, column='SLOPE', value='(zr1 - zr2)/RCHLEN')
     v.db_update(map=reaches, column='SLOPE', value=Smin, where='SLOPE <= '+str(Smin))
 
-    ## srtm_local_filled_grid = srtm_local_filled @ 200m (i.e. current grid)
-    ##  resolution
-    ## r.to.vect in=srtm_local_filled_grid out=srtm_local_filled_grid col=z type=area --o#
-    #v.db_addcolumn(map=reaches, columns='z_topo_mean double precision')
-    #v.what_vect(map=reaches, query_map='srtm_local_filled_grid', column='z_topo_mean', query_column='z')
-    #v.db_update(map=reaches, column='STRTOP', value='z_topo_mean -'+str(h_stream))
+    # srtm_local_filled_grid = srtm_local_filled @ 200m (i.e. current grid)
+    #  resolution
+    # r.to.vect in=srtm_local_filled_grid out=srtm_local_filled_grid col=z type=area --o#
+    # NOT SURE IF IT IS BEST TO USE MEAN ELEVATION OR TOP ELEVATION!!!!!!!!!!!!!!!!!!!!!!!
+    v.db_addcolumn(map=reaches, columns='z_topo_mean double precision')
+    v.what_vect(map=reaches, query_map=elevation, column='z_topo_mean', query_column='z')
+    v.db_update(map=reaches, column='STRTOP', value='z_topo_mean -'+str(h_stream), quiet=True)
 
 
 if __name__ == "__main__":
