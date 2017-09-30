@@ -68,7 +68,7 @@
 #%end
 
 #%option
-#%  key: AWDTH
+#%  key: awdth
 #%  type: double
 #%  description: Flow width coefficient; used if ICALC=3
 #%  answer: 8
