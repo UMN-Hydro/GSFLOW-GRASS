@@ -128,7 +128,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 
     # - write to this file
     # GSFLOW_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW/';
-    dis_file = infile_pre + '.dis'
+    dis_fil = infile_pre + '.dis'
     
     # - read in this file for surface elevation (for TOP(NROW,NCOL))
     # surfz_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/topo.asc';
@@ -200,7 +200,8 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
         BOTM[:,:,ilay] = BOTM[:,:,ilay-1]-DZ[ilay]
 
     # -- Discretization file:
-    fobj = open(GSFLOW_indir + slashstr + dis_file, 'w+')
+    dis_fil_0 = GSFLOW_indir + slashstr + dis_fil
+    fobj = open(dis_fil_0, 'w+')
 #    fobj = open('/home/gcng/test.txt', 'w')
     fobj.write(comment1 + '\n');
     fobj.write(comment2 + '\n');    
@@ -246,6 +247,8 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
         im.set_clim(3800, 6200)
         fig.colorbar(im, orientation='horizontal')
         plt.title('BOTM lay' + str(ilay+1));
+        
+    return dis_fil_0
 
 #    
 #    figure
@@ -273,7 +276,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 # (had to be careful of numerical convergence problems; set constant head for 
 # outer boundary to avoid these.  Later resolved with NWT by Leila)
 
-def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_BoundConstH):
+def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH):
 
 #    # ==== TO RUN AS SCRIPT ===================================================
 #    # - directories
@@ -363,9 +366,9 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_Bou
     
     
     # -- init head: base on TOP and BOTM
-    dis_file = GSFLOW_indir + slashstr + infile_pre + '.dis'
+#    dis_file = GSFLOW_indir + slashstr + infile_pre + '.dis'
     # dis_file = '/home/gcng/Shortcuts/AndesWaterResources/GSFLOW/inputs/MODFLOW/test2lay.dis'
-    f = open(dis_file, 'r')
+    f = open(dis_fil, 'r')
     for i in range(3): # first 2 lines are comments
         line = f.readline().rstrip()
     line = line.split()
@@ -389,10 +392,10 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_Bou
     DELC = float(line[1])
     f.close()    
     
-    TOP = np.genfromtxt(dis_file, skip_header=7, max_rows=NROW, dtype=float)
+    TOP = np.genfromtxt(dis_fil, skip_header=7, max_rows=NROW, dtype=float)
     BOTM = np.zeros((NROW, NCOL, NLAY),float);
     for ii in range(NLAY):
-        BOTM[:,:,ii] = np.genfromtxt(dis_file, skip_header=7+(ii+1)*(NROW+1), \
+        BOTM[:,:,ii] = np.genfromtxt(dis_fil, skip_header=7+(ii+1)*(NROW+1), \
         max_rows=NROW, dtype=float)
 
     
@@ -402,18 +405,18 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_Bou
         IBOUNDin[ind_bound & (TOP[1:-1-1+1,1:-1-1+1] > 3500)] = -1 # ***this used for AGU2016 to have convergence
         IBOUND[1:-1-1+1,1:-1-1+1] = IBOUNDin
 
-    # - make discharge point and neighboring cells constant head
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
-    # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    if (dischargePt_coli < NCOL):
-        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
-        if (dischargePt_rowi > 1):
-            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
-        if (dischargePt_rowi < NROW):
-            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # downgrad of discharge pt
+#    # - make discharge point and neighboring cells constant head
+#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
+#    # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
+#    if (dischargePt_rowi < NROW):
+#        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
+#    if (dischargePt_coli < NCOL):
+#        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
+#        if (dischargePt_rowi > 1):
+#            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+#        if (dischargePt_rowi < NROW):
+#            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
+#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # downgrad of discharge pt
     
     M = np.ones((NROW,NCOL,NLAY),float)
     M[:,:,0] = IBOUND
@@ -453,6 +456,8 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_Bou
         np.savetxt(fobj, initHead[:,:,ii], delimiter=' ', fmt='%7g')      
 
     fobj.close()
+    
+    return fil_ba6_0
     
 #    # -- Plot basics
 #    for ii = 1:2
@@ -590,6 +595,10 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     #K[strm_buffer==5] = 0.08 # farthest from stream and high
     hydcond[:,:,0] = 0.01#K;
     hydcond[:,:,1] = 0.01
+
+    hydcond[:,:,0] = 0.1#K;
+    hydcond[:,:,1] = 0.1
+
     
     # -- assumed input values
     flow_filunit = 34 # make sure this matches namefile!!
@@ -659,6 +668,8 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     fobj.write('\n')
     fobj.close()
     
+    return fil_lpf_0
+    
 #    figure
 #    for ilay = 1:NLAY
 #        subplot(2,2,double(ilay))
@@ -720,8 +731,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 
     # - write to this file
     # GSFLOW_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW/';
-    # lpf_file = 'test.lpf';
-    lpf_file = infile_pre + '.upw'
+    # upw_file = 'test.upw';
+    upw_fil = infile_pre + '.upw'
     
     # - domain dimensions, maybe already in surfz_fil and botm_fil{}?
     # NLAY = 2;
@@ -820,8 +831,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     for ii in range(NLAY):
         fmt1 = fmt1 + '%2d '
     
-    fil_lpf_0 = GSFLOW_indir + slashstr + lpf_file
-    fobj = open(fil_lpf_0, 'w+')
+    upw_fil_0 = GSFLOW_indir + slashstr + upw_fil
+    fobj = open(upw_fil_0, 'w+')
     fobj.write('# UPW package inputs\n');
     # Edited Leila's file, which omitted IPHDRY
     fobj.write('%d %g %d %d    ILPFCB,HDRY,NPLPF,IPHDRY\n' % (flow_filunit, hdry, nplpf, iphdry))
@@ -867,6 +878,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     
     fobj.write('\n')
     fobj.close()
+    
+    return upw_fil_0
     
 #    figure
 #    for ilay = 1:NLAY
@@ -953,7 +966,7 @@ def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr):
 
 # based on make_sfr2_f_Mannings
 #
-def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
+def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all):
 
 # Note: assume .dis file already created!! (reads in TOP for setting STRTOP)
 
@@ -1044,9 +1057,9 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
             
     # -- make sure STRTOP is within 1st layer 
     # - read in TOP and BOTM from .dis file
-    dis_file = GSFLOW_indir + slashstr + infile_pre + '.dis'
+#    dis_file = GSFLOW_indir + slashstr + infile_pre + '.dis'
 #    dis_file = '/home/gcng/Shortcuts/AndesWaterResources/GSFLOW/inputs/MODFLOW/test2lay.dis'
-    f = open(dis_file, 'r')
+    f = open(dis_fil, 'r')
     for i in range(3): # first 2 lines are comments
         line = f.readline().rstrip()
     line = line.split()
@@ -1068,10 +1081,10 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
     DELC = float(line[1])
     f.close()    
     
-    TOP = np.genfromtxt(dis_file, skip_header=7, max_rows=NROW, dtype=float)
+    TOP = np.genfromtxt(dis_fil, skip_header=7, max_rows=NROW, dtype=float)
     BOTM = np.zeros((NROW, NCOL, NLAY),float);
     for ii in range(NLAY):
-        BOTM[:,:,ii] = np.genfromtxt(dis_file, skip_header=7+(ii+1)*(NROW+1), \
+        BOTM[:,:,ii] = np.genfromtxt(dis_fil, skip_header=7+(ii+1)*(NROW+1), \
         max_rows=NROW, dtype=float)
 
 
@@ -1213,7 +1226,8 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
     # -------------------------------------------------------------------------
     
     # Ouput file
-    fobj = open(GSFLOW_indir + slashstr + sfr_file, 'w+')    
+    sfr_file_0 = GSFLOW_indir + slashstr + sfr_file
+    fobj = open(sfr_file_0, 'w+')    
     
     # Write header lines (item 0)
     heading = '# Streamflow-Routing (SFR7) input file.\n'
@@ -1357,6 +1371,8 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
    
     fobj.close()
     
+    return sfr_file_0
+    
 #%%
 
 def MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment):
@@ -1373,7 +1389,7 @@ def MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment):
         fobj.write('INTERNAL  %10s%20s%10s %s \n' % (CNSTNT0, '(FREE)', '-1', comment))
         np.savetxt(fobj, data, delimiter=' ', fmt=fmt0)
 
-def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil):
+def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil):
 
     print 'UZF: Had to play around alot with finf (infiltration) to get convergence!!'
 
@@ -1434,6 +1450,9 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     # - set TOP to surface elevation [m]
     TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
     
+    IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
+
+    
     NPER = 2
     # **** ASSUMES PER 1 IS SS, PER 2 IS TR ****
     
@@ -1455,7 +1474,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     
     #Item 2-7:
     project_name = 'TestProject'   # used to name the output file (.uzf)
-    iuzfbnd = np.ones((NROW,NCOL),int) # [NROW,NCOL] layer w/ top as land-surface and/or w/ discharge/recharge (see NUZTOP), default: mask with 1's
+    iuzfbnd = np.copy(IBOUND) # [NROW,NCOL] layer w/ top as land-surface and/or w/ discharge/recharge (see NUZTOP), default: mask with 1's
+    iuzfbnd[iuzfbnd<0] = 1
     if IRUNFLG > 0:
         print 'Error!  Input scripts only set up for IRUNFLG = 0!'
         quit()        
@@ -1483,18 +1503,6 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     # finf(:,:,1) = ones(NROW,NCOL)*8.8e-5; # m/d (8.8e-4 m/d typical in Sagehen)
     
     # - set infiltration: FINF (for S.S. initialization) according to TOP (high elev only)
-    f = open(mask_fil, 'r')
-    sdata = {}
-    for i in range(6):
-        line = f.readline()
-    f.close()
-    IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=0, delimiter=' ', dtype=float)
-
-    f = open(mask_fil, 'r')
-    last_line = f.readlines()
-    last_line = last_line[-1].rstrip()
-    f.close()    
-
     f = open(dischargept_fil, 'r')
     last_line = f.readlines()
     last_line = last_line[-1].rstrip()
@@ -1508,11 +1516,6 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     #value2 = value2.split(' ')
     #dischargePt_rowi = int(value2[1])
     #dischargePt_coli = int(value2[3])
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
-    if (dischargePt_rowi > 1):
-        IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi+1-1,dischargePt_coli-1] = -1
     TOP_mask = TOP 
     TOP_mask[IBOUND==0] = 0
     a = np.where(TOP_mask.flatten()>0)
@@ -1541,6 +1544,9 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     finf = m*(TOP_mask-np.min(TOP_mask[TOP_mask>0])) + minFINF
     finf[TOP_mask<=midZ] = 4e-4
     finf[IBOUND==0] = 0
+
+    finf[:] = 8.8e-6    
+    finf[:] = 8.8e-7    
     
     # # testing: 
     # finf = np.zeros((NROW,NCOL))
@@ -1577,8 +1583,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     # -------------------------------------------------------------------------
     
     # Ouput file
-    fname = GSFLOW_indir + slashstr + uz_file
-    fobj = open(fname, 'w+')  
+    uz_file_0 = GSFLOW_indir + slashstr + uz_file
+    fobj = open(uz_file_0, 'w+')  
     
     # Write header lines (item 0)
     heading = '# Unsaturated-Zone Flow (UZF) input file.\n';
@@ -1704,6 +1710,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil
     
     fobj.close()
     
+    return uz_file_0
+    
 #%%
 # Based on Leila's script NWT_write.m
 # Adapted into function
@@ -1770,13 +1778,13 @@ def NWT_write_file(GSFLOW_indir, infile_pre):
     hclosexmd = 1e-4;
     mxiterxmd = 50;
     
-    filename = GSFLOW_indir + slashstr + infile_pre + '.nwt'
+    nwt_file_0 = GSFLOW_indir + slashstr + infile_pre + '.nwt'
     
     headings = ['NWT Input File', 'Test Problem 3 for MODFLOW-NWT']
     
     # -------------------------------------------------------------------------
     
-    fobj = open(filename, 'w+');
+    fobj = open(nwt_file_0, 'w+');
     
     # item 0 -------
     for head0 in headings:
@@ -1810,5 +1818,7 @@ def NWT_write_file(GSFLOW_indir, infile_pre):
     fobj.write('\n')
     
     fobj.close()
+    
+    return nwt_file_0
     # -------------------------------------------------------------------------
     # End of the script

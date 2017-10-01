@@ -10,12 +10,17 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 # print_MODFLOW_inputs
 
 import numpy as np
-from MODFLOW_scripts import MODFLOW_NWT_lib as mf # functions to write individual MODFLOW files
+import MODFLOW_NWT_lib as mf # functions to write individual MODFLOW files
 import os  # os functions
 from ConfigParser import SafeConfigParser
-import settings
 
-GSFLOW_DIR = settings.LOCAL_DIR + "/GSFLOW/"
+parser = SafeConfigParser()
+parser.read('settings.ini')
+LOCAL_DIR = parser.get('settings', 'local_dir')
+
+GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+
+
 
 # - directories
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 
@@ -46,19 +51,18 @@ DZ = [100, 50] # [NLAYx1] [m] ***testing
 # perlen_tr = 365*5 + ceil(365*5/4); # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 perlen_tr = 365*30 + np.ceil(365*30/4) # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 
-GIS_indir = settings.LOCAL_DIR + "/data/GIS/"
+GIS_indir = GSFLOW_DIR + '/DataToReadIn/GIS/';
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file
 #fil_res_in = '/home/gcng/workspace/Pfil_res_inrojectFiles/AndesWaterResources/GSFLOW/outputs/MODFLOW/test2lay_melt_30yr.out' % empty string to not use restart file
 
 # for various files: ba6, dis, uzf, lpf
-surfz_fil = GIS_indir + settings.DEM + '.asc'
+surfz_fil = GIS_indir + 'srtm_local_filled.asc'
 # surfz_fil = GIS_indir + 'SRTM_new_20161208.asc'
 # for various files: ba6, uzf
 mask_fil = GIS_indir + 'basin_mask.asc'
-# for ba6
-dischargept_fil = GIS_indir + 'pp_tmp.txt'
+
 
 # for sfr
 reach_fil = GIS_indir + 'reaches_tmp.txt'
@@ -76,24 +80,23 @@ if not os.path.isdir(GSFLOW_outdir):
     os.makedirs(GSFLOW_outdir)
 
 ## 
-dis_fil = mf.write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr);
-ba6_fil = mf.write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
+mf.write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr);
+mf.write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
 
 # flow algorithm
 if sw_2005_NWT == 1:
-    lpf_fil = mf.write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY);
+    mf.write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY);
 elif sw_2005_NWT == 2:
     # MODFLOW-NWT files
-    upw_fil = mf.write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY);
-    nwt_fil = mf.NWT_write_file(GSFLOW_indir, infile_pre);
+    mf.write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY);
+    mf.NWT_write_file(GSFLOW_indir, infile_pre);
 
 # unsat zone and streamflow input files
-uzf_fil = mf.make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil); # list this below write_ba6_MOD3_2
-sfr_fil = mf.make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all); # list this below write_dis_MOD2_f
+mf.make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil);
+mf.make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all); # list this below write_dis_MOD2_f
 
 # Write PCG file (only used for MODFLOW-2005, but this function also creates OC file)
 mf.write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr);
 
 # Write namefile
-nam_fil = mf.write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_outdir, infile_pre, fil_res_in, sw_2005_NWT);
-
+mf.write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_outdir, infile_pre, fil_res_in, sw_2005_NWT);

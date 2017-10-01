@@ -80,7 +80,8 @@ ymdhms_v = np.array([[ 1990,  4, 23, 0, 0, 0],
                      [ 2017,  9, 27, 0, 0, 0]])
 # ymdhms_v = [ 2015  6 16 0 0 0; ...
 #              2025  6 15 0 0 0];
-
+#ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
+#                     [ 2025,  6, 15, 0, 0, 0]])
 ####
 
 #First MODFLOW initial stress period (can be earlier than model start date;
