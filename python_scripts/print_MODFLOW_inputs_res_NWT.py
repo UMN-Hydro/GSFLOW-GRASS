@@ -10,17 +10,12 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 # print_MODFLOW_inputs
 
 import numpy as np
-import MODFLOW_NWT_lib as mf # functions to write individual MODFLOW files
+from MODFLOW_scripts import MODFLOW_NWT_lib as mf # functions to write individual MODFLOW files
 import os  # os functions
 from ConfigParser import SafeConfigParser
+import settings
 
-parser = SafeConfigParser()
-parser.read('settings.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
-
-GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
-
-
+GSFLOW_DIR = settings.LOCAL_DIR + "/GSFLOW/"
 
 # - directories
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 
@@ -51,23 +46,25 @@ DZ = [100, 50] # [NLAYx1] [m] ***testing
 # perlen_tr = 365*5 + ceil(365*5/4); # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 perlen_tr = 365*30 + np.ceil(365*30/4) # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
 
-GIS_indir = GSFLOW_DIR + '/DataToReadIn/GIS/';
+GIS_indir = settings.LOCAL_DIR + "/data/GIS/"
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file
 #fil_res_in = '/home/gcng/workspace/Pfil_res_inrojectFiles/AndesWaterResources/GSFLOW/outputs/MODFLOW/test2lay_melt_30yr.out' % empty string to not use restart file
 
 # for various files: ba6, dis, uzf, lpf
-surfz_fil = GIS_indir + 'topo.asc'
+surfz_fil = GIS_indir + settings.DEM + '.asc'
 # surfz_fil = GIS_indir + 'SRTM_new_20161208.asc'
 # for various files: ba6, uzf
-mask_fil = GIS_indir + 'basinmask_dischargept.asc'
+mask_fil = GIS_indir + 'basin_mask.asc'
+# for ba6
+dischargept_fil = GIS_indir + 'pp_tmp.txt'
 
 # for sfr
-reach_fil = GIS_indir + 'reach_data.txt'
-segment_fil_all = [GIS_indir + 'segment_data_4A_INFORMATION_Man.csv', 
-                   GIS_indir + 'segment_data_4B_UPSTREAM_Man.csv', 
-                   GIS_indir + 'segment_data_4C_DOWNSTREAM_Man.csv']
+reach_fil = GIS_indir + 'reaches_tmp.txt'
+segment_fil_all = [GIS_indir + 'segments_tmp_4A_INFORMATION.txt', 
+                   GIS_indir + 'segments_tmp_4B_UPSTREAM.txt', 
+                   GIS_indir + 'segments_tmp_4C_DOWNSTREAM.txt']
 
 
 # create MODFLOW input directory if it does not exist:
@@ -80,7 +77,7 @@ if not os.path.isdir(GSFLOW_outdir):
 
 ## 
 mf.write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr);
-mf.write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
+mf.write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
 
 # flow algorithm
 if sw_2005_NWT == 1:
@@ -91,7 +88,7 @@ elif sw_2005_NWT == 2:
     mf.NWT_write_file(GSFLOW_indir, infile_pre);
 
 # unsat zone and streamflow input files
-mf.make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil);
+mf.make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil);
 mf.make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all); # list this below write_dis_MOD2_f
 
 # Write PCG file (only used for MODFLOW-2005, but this function also creates OC file)

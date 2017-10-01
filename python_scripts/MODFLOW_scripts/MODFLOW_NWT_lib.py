@@ -12,6 +12,15 @@ This library includes all the separate matlab functions for writing the differen
 import numpy as np
 import pandas as pd # for data structures and reading in data from text file
 import matplotlib.pyplot as plt # matlab-like plots
+from ConfigParser import SafeConfigParser
+
+parser = SafeConfigParser()
+parser.read('settings.ini')
+LOCAL_DIR = parser.get('settings', 'local_dir')
+
+GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+
+GIS_indir = GSFLOW_DIR + "/DataToReadIn/GIS/"
 
 slashstr = '/'
 
@@ -264,7 +273,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 # (had to be careful of numerical convergence problems; set constant head for 
 # outer boundary to avoid these.  Later resolved with NWT by Leila)
 
-def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH):
+def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, fl_BoundConstH):
 
 #    # ==== TO RUN AS SCRIPT ===================================================
 #    # - directories
@@ -320,9 +329,9 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH):
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
     NCOL = sdata['cols']
-    IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=1, delimiter=' ', dtype=float)
+    IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=0, delimiter=' ', dtype=float)
 
-    f = open(mask_fil, 'r')
+    f = open(dischargept_fil, 'r')
     last_line = f.readlines()
     last_line = last_line[-1].rstrip()
     f.close()    
@@ -333,10 +342,10 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH):
       
     # - force some cells to be active to correspond to stream reaches
     print "Warning!!  Hard-coded to set some IBOUND values to be active!! Check Andy's GIS algorithm..."
-    IBOUND[14-1,33-1] = 1
-    IBOUND[11-1,35-1] = 1
-    IBOUND[12-1,34-1] = 1
-    IBOUND[7-1,43-1] = 1
+    #IBOUND[14-1,33-1] = 1
+    #IBOUND[11-1,35-1] = 1
+    #IBOUND[12-1,34-1] = 1
+    #IBOUND[7-1,43-1] = 1
     
     # find boundary cells
     IBOUNDin = IBOUND[1:-1-1+1,1:-1-1+1]
@@ -367,6 +376,8 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH):
     ITMUNI = int(line[4]) 
     LENUNI = int(line[5])    
 
+    print(NROW, NCOL)
+
     line = f.readline().rstrip()
     LAYCBD = np.array(line.split(), float)
     
@@ -394,10 +405,14 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, fl_BoundConstH):
     # - make discharge point and neighboring cells constant head
     IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
     # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
-    IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
-    IBOUND[dischargePt_rowi,dischargePt_coli] = -1
+    if (dischargePt_rowi < NROW):
+        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
+    if (dischargePt_coli < NCOL):
+        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
+        if (dischargePt_rowi > 1):
+            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+        if (dischargePt_rowi < NROW):
+            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
     IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # downgrad of discharge pt
     
     M = np.ones((NROW,NCOL,NLAY),float)
@@ -497,9 +512,9 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 #
 #    # ====================================================================
 
-    # codes pixels by distance from streams, for specifying hyd cond
-    strm_buffer_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/segments_buffer2.asc'
-    print 'specifying hyd cond based on distance from stream!'
+    ## codes pixels by distance from streams, for specifying hyd cond
+    #strm_buffer_fil = GIS_indir + 'segments_buffer2.asc'
+    #print 'specifying hyd cond based on distance from stream!'
 
     # - write to this file
     # GSFLOW_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW/';
@@ -525,6 +540,7 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
     NCOL = sdata['cols']
+    print((NROW, NCOL))
 
     # - space discretization
     DELR = (NSEW[2]-NSEW[3])/NCOL # width of column [m]
@@ -534,8 +550,8 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
         
     
-    # get strm_buffer info (pixels around streams, for hyd cond)
-    strm_buffer = np.genfromtxt(strm_buffer_fil, skip_header=6, delimiter=' ', dtype=float)
+    ## get strm_buffer info (pixels around streams, for hyd cond)
+    #strm_buffer = np.genfromtxt(strm_buffer_fil, skip_header=6, delimiter=' ', dtype=float)
 
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
@@ -562,17 +578,17 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # hydcond(:,:,1) = K;
     # hydcond(:,:,2) = 0.01;
     
-    # use strm_buffer (and elev?)
-    K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    K[strm_buffer==0] = 0.04 # very far from streams
-    K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
-    # K(strm_buffer>=1) = 0.5; # close to streams
-    K[strm_buffer>=1] = 0.25 # close to streams
-    K[strm_buffer>=2] = 0.15
-    K[strm_buffer>=3] = 0.08
-    K[strm_buffer>=4] = 0.08
-    K[strm_buffer==5] = 0.08 # farthest from stream and high
-    hydcond[:,:,0] = K;
+    ## use strm_buffer (and elev?)
+    #K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
+    #K[strm_buffer==0] = 0.04 # very far from streams
+    #K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
+    ## K(strm_buffer>=1) = 0.5; # close to streams
+    #K[strm_buffer>=1] = 0.25 # close to streams
+    #K[strm_buffer>=2] = 0.15
+    #K[strm_buffer>=3] = 0.08
+    #K[strm_buffer>=4] = 0.08
+    #K[strm_buffer==5] = 0.08 # farthest from stream and high
+    hydcond[:,:,0] = 0.01#K;
     hydcond[:,:,1] = 0.01
     
     # -- assumed input values
@@ -698,9 +714,9 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 #
 #    # ====================================================================
 
-    # codes pixels by distance from streams, for specifying hyd cond
-    strm_buffer_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/segments_buffer2.asc'
-    print 'specifying hyd cond based on distance from stream!'
+    ## codes pixels by distance from streams, for specifying hyd cond
+    #strm_buffer_fil = GIS_indir + '/segments_buffer2.asc'
+    #print 'specifying hyd cond based on distance from stream!'
 
     # - write to this file
     # GSFLOW_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/inputs/MODFLOW/';
@@ -735,8 +751,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
         
     
-    # get strm_buffer info (pixels around streams, for hyd cond)
-    strm_buffer = np.genfromtxt(strm_buffer_fil, skip_header=6, delimiter=' ', dtype=float)
+    ## get strm_buffer info (pixels around streams, for hyd cond)
+    #strm_buffer = np.genfromtxt(strm_buffer_fil, skip_header=6, delimiter=' ', dtype=float)
 
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
@@ -763,17 +779,17 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # hydcond(:,:,1) = K;
     # hydcond(:,:,2) = 0.01;
     
-    # use strm_buffer (and elev?)
-    K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    K[strm_buffer==0] = 0.04 # very far from streams
-    K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
-    # K(strm_buffer>=1) = 0.5; # close to streams
-    K[strm_buffer>=1] = 0.25 # close to streams
-    K[strm_buffer>=2] = 0.15
-    K[strm_buffer>=3] = 0.08
-    K[strm_buffer>=4] = 0.08
-    K[strm_buffer==5] = 0.08 # farthest from stream and high
-    hydcond[:,:,0] = K;
+    ## use strm_buffer (and elev?)
+    #K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
+    #K[strm_buffer==0] = 0.04 # very far from streams
+    #K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
+    ## K(strm_buffer>=1) = 0.5; # close to streams
+    #K[strm_buffer>=1] = 0.25 # close to streams
+    #K[strm_buffer>=2] = 0.15
+    #K[strm_buffer>=3] = 0.08
+    #K[strm_buffer>=4] = 0.08
+    #K[strm_buffer==5] = 0.08 # farthest from stream and high
+    hydcond[:,:,0] = 0.01#K;
     hydcond[:,:,1] = 0.01
     
     # -- assumed input values
@@ -1004,7 +1020,9 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
 
     # sort rows according to increasing segment numbers
     reach_data_all = reach_data_all.sort_values(by='ISEG', ascending=1)
-    nss = max(reach_data_all['ISEG'])
+    #nss = max(reach_data_all['ISEG'])
+    nss = segment_data_4A.shape[0]
+
 
     # sort rows according to increasing reach numbers
     colhead = reach_data_all.columns.get_values()
@@ -1248,6 +1266,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, segment_fil_all):
             for iitmp in range(int(itmp)):   # start loop over itmp (num_segments)
                 dummy4a = segment_data_4A.iloc[iitmp,:]
                 # write item 4a to the file
+
                 fobj.write('    %5d  %5d  %5d  %5d' % (dummy4a['NSEG'], dummy4a['ICALC'], dummy4a['OUTSEG'], dummy4a['IUPSEG']))
                 
                 if dummy4a['IUPSEG'] > 0:
@@ -1354,7 +1373,7 @@ def MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment):
         fobj.write('INTERNAL  %10s%20s%10s %s \n' % (CNSTNT0, '(FREE)', '-1', comment))
         np.savetxt(fobj, data, delimiter=' ', fmt=fmt0)
 
-def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
+def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil, dischargept_fil):
 
     print 'UZF: Had to play around alot with finf (infiltration) to get convergence!!'
 
@@ -1469,9 +1488,14 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     for i in range(6):
         line = f.readline()
     f.close()
-    IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=1, delimiter=' ', dtype=float)
+    IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=0, delimiter=' ', dtype=float)
 
     f = open(mask_fil, 'r')
+    last_line = f.readlines()
+    last_line = last_line[-1].rstrip()
+    f.close()    
+
+    f = open(dischargept_fil, 'r')
     last_line = f.readlines()
     last_line = last_line[-1].rstrip()
     f.close()    
@@ -1479,9 +1503,16 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, mask_fil):
     value2 = value2.split(' ')
     dischargePt_rowi = int(value2[1])
     dischargePt_coli = int(value2[3])
+ 
+    #value1, value2 = last_line.split(': ')
+    #value2 = value2.split(' ')
+    #dischargePt_rowi = int(value2[1])
+    #dischargePt_coli = int(value2[3])
     IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
-    IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    IBOUND[dischargePt_rowi+1-1,dischargePt_coli-1] = -1
+    if (dischargePt_rowi > 1):
+        IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
+    if (dischargePt_rowi < NROW):
+        IBOUND[dischargePt_rowi+1-1,dischargePt_coli-1] = -1
     TOP_mask = TOP 
     TOP_mask[IBOUND==0] = 0
     a = np.where(TOP_mask.flatten()>0)

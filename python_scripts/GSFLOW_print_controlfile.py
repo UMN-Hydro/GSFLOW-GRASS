@@ -45,39 +45,12 @@ import numpy as np # matlab core
 import scipy as sp # matlab toolboxes
 import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
-from ConfigParser import SafeConfigParser
-
-parser = SafeConfigParser()
-parser.read('settings.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
-SPIN_UP = parser.get('settings', 'spin_up')
-
-GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
-
-insert = "rep" + SPIN_UP
-
-# directory for GSFLOW input and output files (include slash ('/') at end)
-# NOTE: Assumes these directories already exist
-control_dir = GSFLOW_DIR + '/control/'
-PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
-MODFLOWinput_dir = GSFLOW_DIR + '/inputs/MODFLOW_NWT/'
-#MODFLOWinput_dir = GSFLOW_DIR + '/inputs/MODFLOW_2005/'
-PRMSoutput_dir = GSFLOW_DIR + '/outputs/PRMS/'
-
-# directory with files to be read in to generate PRMS input files (to get
-# start/end dates)
-in_data_dir = GSFLOW_DIR + '/DataToReadIn/'
-in_climatedata_dir = in_data_dir + 'climate/' # specifically climate data
+import settings
 
 # control file that will be written with this script
 # (will be in control_dir with model mode suffix)
-con_filname0 = 'py_ChimTest_Melt'
-if SPIN_UP:
-    con_filname0 += ("_" + format(insert))
 
-# command-line executable for GSFLOW (just used to print message)
-GSFLOW_exe = parser.get('settings', 'gsflow_exe') + '/gsflow'  # recompiled on Ubuntu!
-#GSFLOW_exe_cmt = '/home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.1Linux/bin/gsflow' # comment out
+con_filname0 = settings.PROJ_CODE
 
 
 # - choose one:
@@ -87,24 +60,24 @@ GSFLOW_exe = parser.get('settings', 'gsflow_exe') + '/gsflow'  # recompiled on U
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
 # data file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
-datafil = PRMSinput_dir + 'empty.day'
+datafil = settings.PRMSinput_dir + 'empty.day'
 
 # parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
-parfil_pre = 'py_ChimTest' # will have '_', model_mode following
+parfil_pre = settings.PROJ_CODE # will have '_', model_mode following
 
 # MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
-namfil = MODFLOWinput_dir + 'test2lay_py.nam'
+namfil = settings.MODFLOWinput_dir + 'test2lay_py.nam'
 
 # output directory that the control file will point to for creating output files (include slash at end!)
-outdir = PRMSoutput_dir
+outdir = settings.PRMSoutput_dir
 
 # model start and end dates
 # ymdhms_v = [ 2015  6 16 0 0 0; ...
 #              2016  6 24 0 0 0];
 #ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
 #                     [ 2020,  6, 15, 0, 0, 0]])
-ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
-                     [ 2045,  6, 15, 0, 0, 0]])
+ymdhms_v = np.array([[ 1990,  4, 23, 0, 0, 0],
+                     [ 2017,  9, 27, 0, 0, 0]])
 # ymdhms_v = [ 2015  6 16 0 0 0; ...
 #              2025  6 15 0 0 0];
 
@@ -113,7 +86,7 @@ ymdhms_v = np.array([[ 2015,  6, 16, 0, 0, 0],
 #First MODFLOW initial stress period (can be earlier than model start date;
 # useful when using load_init_file and modflow period represents longer 
 # period that started earlier).  
-ymdhms_m = np.array([2015, 6, 16, 0, 0, 0])
+ymdhms_m = ymdhms_v[0]
 
 # initial condition files 
 # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
@@ -122,13 +95,10 @@ if model_mode == 'GSFLOW':
     fl_load_init = 0 # 1 to load previously saved initial conditions
     # load initial conditions from this file
 #     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = LOCAL_DIR + '/simdir/spinup{}_constH'.format(SPIN_UP) + '/outputs/PRMS/init_cond_outfile'
+    load_init_file = settings.PRMSoutput_dir + 'init_cond_outfile'
 
 fl_save_init = 1 # 1 to save outputs as initial conditions
-save_init_file = PRMSoutput_dir + 'init_cond_outfile' # save new results as initial conditions in this file
-
-# Met (temp+precip) data files (ignored if fl_climate_hru = 1)
-TempPrecip_datafil = PRMSinput_dir + 'test_boca_toma_F_in.txt'
+save_init_file = settings.PRMSoutput_dir + 'init_cond_outfile' # save new results as initial conditions in this file
 
 # 1: use all pre-processed met data
 fl_all_climate_hru = 0 # (could set to = False)
@@ -148,15 +118,15 @@ if fl_all_climate_hru == 0:
 # If climate_hru, use the following file names (else ignored)
 # (note that WRITE_CLIMATE will produce files with the below names)
 # precip_datafil = strcat(PRMSinput_dir, 'precip_rep30yr.day'); # w/o meltwater
-precip_datafil = PRMSinput_dir + 'precip.day'
+precip_datafil = settings.PRMSinput_dir + 'precip.day'
 # tmax_datafil = strcat(PRMSinput_dir, 'tmax_rep30yr_tadj_plus1C.day'); # to be safe: set as F
 # tmin_datafil = strcat(PRMSinput_dir, 'tmin_rep30yr_tadj_plus1C.day'); # to be safe: set as F
-tmax_datafil = PRMSinput_dir +'tmax.day' # to be safe: set as F
-tmin_datafil = PRMSinput_dir + 'tmin.day' # to be safe: set as F
-solrad_datafil = PRMSinput_dir + 'swrad.day'
-pet_datafil = PRMSinput_dir + 'potet.day'
-humidity_datafil = PRMSinput_dir + 'humidity.day' # for potet_pm
-transp_datafil = PRMSinput_dir + 'transp.day' # may not be needed in GSFLOW? Is needed!
+tmax_datafil = settings.PRMSinput_dir +'tmax.day' # to be safe: set as F
+tmin_datafil = settings.PRMSinput_dir + 'tmin.day' # to be safe: set as F
+solrad_datafil = settings.PRMSinput_dir + 'swrad.day'
+pet_datafil = settings.PRMSinput_dir + 'potet.day'
+humidity_datafil = settings.PRMSinput_dir + 'humidity.day' # for potet_pm
+transp_datafil = settings.PRMSinput_dir + 'transp.day' # may not be needed in GSFLOW? Is needed!
 
 
 
@@ -164,7 +134,7 @@ transp_datafil = PRMSinput_dir + 'transp.day' # may not be needed in GSFLOW? Is 
 
 # Project-specific entries ->
 
-title_str = 'Chimborazo, AGU2016 poster'
+title_str = settings.PROJ_NAME
 
 # n_par_max should be dynamically generated
 con_par_name = []  # name of control file parameter
@@ -226,7 +196,7 @@ if model_mode != 'MODFLOW':
     con_par_type.append(4)
     con_par_values.append(datafil)
 
-    parfil = PRMSinput_dir + parfil_pre + '_' + model_mode + '.param'
+    parfil = settings.PRMSinput_dir + parfil_pre + '_' + model_mode + '.param'
     con_par_name.append('param_file')
     con_par_type.append(4)
     con_par_values.append(parfil)
@@ -373,7 +343,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('stat_var_file') # output Statistics file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir + 'ChimOut.statvar')
+    con_par_values.append(outdir + '{}.statvar'.format(settings.PROJ_CODE))
 
     con_par_name.append('statVar_names')
     con_par_type.append(4)
@@ -429,7 +399,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('ani_output_file') # output Statistics file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir + 'ChimOut.ani')    
+    con_par_values.append(outdir + '{}.ani'.format(settings.PROJ_CODE))    
     
     con_par_name.append('aniOutVar_names')
     con_par_type.append(4) 
@@ -511,7 +481,7 @@ if model_mode != 'MODFLOW':
 # % % -----------------------------------------------------------------------
 # Generally, do not change below here
 
-con_filname = control_dir + con_filname0 + '_' + model_mode + '.control'
+con_filname = settings.control_dir + con_filname0 + '_' + model_mode + '.control'
 
 # - Write to control file
 
@@ -583,19 +553,15 @@ if model_mode != 'MODFLOW':
 
 
 #cmd_str_cmt = '#' + GSFLOW_exe_cmt + ' ' + con_filname + ' &> out.txt'
-cmd_str = GSFLOW_exe + ' ' + con_filname + ' &> out.txt'
+cmd_str = settings.GSFLOW_exe + ' ' + con_filname + ' &> out.txt'
 print 'To run command-line execution, enter at prompt: \n  {}\n'.format(cmd_str)
 
-runscriptfil = control_dir + con_filname0 + '_' + model_mode + '.sh'
+runscriptfil = settings.control_dir + con_filname0 + '_' + model_mode + '.sh'
 fobj = open(runscriptfil, 'w+') 
 #fobj.write(cmd_str_cmt);
 fobj.write('\n\n');
 fobj.write(cmd_str);
 fobj.close()
 os.chmod(runscriptfil, 0777)
-
- #     gui_str1 = cmd_str + ' -print'
- #     gui_str2 = 'java -cp ' + PRMS_java_GUI + ' oui.mms.gui.Mms ' + con_filname
- #     print 'To launch GUI, enter the following 2 lines (one at a time) at prompt: \n  {}\n  {}\n'.format(gui_str1, gui_str2);
 
 

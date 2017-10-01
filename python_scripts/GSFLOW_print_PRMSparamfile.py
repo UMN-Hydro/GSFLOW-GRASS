@@ -12,12 +12,8 @@ import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 from ConfigParser import SafeConfigParser
+import settings
 
-parser = SafeConfigParser()
-parser.read('settings.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
-
-GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 
 # GSFLOW_print_PRMSparamfile4.m
 # 11/23/16
@@ -71,31 +67,22 @@ GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 # *** CUSTOMIZE TO YOUR COMPUTER! *****************************************
 # NOTE: '/' is directory separator for Linux, '\' for Windows!!
 
-# directory for GSFLOW input and output files (include slash ('/') at end)
-# (creates directories if they don't exist)
-PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
-PRMSoutput_dir = GSFLOW_DIR + '/outputs/'
-# 
-# PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/ChimTest/')
-# PRMSoutput_dir = '')
-
-
 # directory with files to be read in to generate PRMS input files (include slash ('/') at end)
-in_data_dir = GSFLOW_DIR + '/DataToReadIn/'
-in_GISdata_dir = in_data_dir + 'GIS/' # specifically GIS data
+in_GISdata_dir = 'data/GIS/' # specifically GIS data
 
 # parameter file that will be written (name must match that in Control file!)
-parfil_pre = 'ChimTest'
+parfil_pre = settings.PROJ_CODE
+
 fl_veg_shift = 0 # shift veg upslope (for pt_alpha)
 if fl_veg_shift == 1:
     parfil_pre = parfil_pre + 'VegShift'
 
 # GIS-generated files read in to provide values to PRMS input file
-HRUfil = in_GISdata_dir  + 'HRU.csv'
-segmentfil = in_GISdata_dir  + 'segment_data_4A_INFORMATION.txt'
-reachfil = in_GISdata_dir  + 'reach_data.txt' # *** NEW FOR GSFLOW, only required here for NREACH, other info is for SFR file
-gvrfil = in_GISdata_dir  + 'GRAVITY_RESERVOIRS.csv' # *** NEW FOR GSFLOW
-MODfil = in_GISdata_dir  + 'basinmask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
+HRUfil = in_GISdata_dir  + 'HRUs_tmp.txt'
+segmentfil = in_GISdata_dir  + 'segments_tmp_4A_INFORMATION.txt'
+reachfil = in_GISdata_dir  + 'reaches_tmp.txt' # *** NEW FOR GSFLOW, only required here for NREACH, other info is for SFR file
+gvrfil = in_GISdata_dir  + 'gravity_reservoirs_tmp.txt' # *** NEW FOR GSFLOW
+MODfil = in_GISdata_dir  + 'basin_mask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
 # *************************************************************************
 
 #%%
@@ -107,7 +94,7 @@ MODfil = in_GISdata_dir  + 'basinmask.asc' # *** NEW FOR GSFLOW, only required h
 # model_mode = 'MODFLOW' # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-parfil = PRMSinput_dir + 'py_' + parfil_pre + '_' + model_mode + '.param'
+parfil = settings.PRMSinput_dir + parfil_pre + '_' + model_mode + '.param'
 
 # Load GIS-generated files with HRU, segment etc information
 # (pandas work like structures in matlab?)
@@ -122,11 +109,12 @@ for i in range(6):
     line = f.readline()
     line = line.rstrip() # remove newline characters
     key, value = line.split(': ')
-    try:
-      value = int(value)
-    except:
-      value = float(value)
-    MODdata[key] = value
+    if key in ["rows", "cols"]:
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        MODdata[key] = value
 f.close()
 
 
@@ -165,7 +153,7 @@ dim_value.append(1)
 # -- Spatial dimensions --
 # ****to be read in from GIS info****
 dim_name.append('nhru')  
-dim_value.append(max(HRUdata.id))
+dim_value.append(HRUdata.shape[0])
 
 # ****to be read in from GIS info****
 dim_name.append('nsegment')  # num stream channel segments
@@ -194,7 +182,7 @@ dim_value.append(MODdata['rows'] * MODdata['cols'])
 # new for GSFLOW:
 # ****to be read in from GIS info****
 dim_name.append('nhrucell')  # total num gravity reservoirs (intersections of hru and grid cells)
-dim_value.append(max(gvrdata.cat))
+dim_value.append(max(gvrdata.gvr_hru_id))
 
 # -- Time-series input data dimensions --
 # (some of these data are not needed but are handy to output for calibration)
@@ -1011,12 +999,12 @@ for ii in range(NumPars):
         par_num[ii] = par_num[ii] * dim_value[ind]        
 
 # create PRMS input directory if it does not exist:
-if not os.path.isdir(PRMSinput_dir):
-    os.mkdir(PRMSinput_dir)
+if not os.path.isdir(settings.PRMSinput_dir):
+    os.mkdir(settings.PRMSinput_dir)
     
 # while we're at it, create PRMS output file if it does not exist:
-if not os.path.isdir(PRMSoutput_dir):
-    os.mkdir(PRMSoutput_dir)
+if not os.path.isdir(settings.PRMSoutput_dir):
+    os.mkdir(settings.PRMSoutput_dir)
 
 # - Write to Parameter file
 line1 = '####'
