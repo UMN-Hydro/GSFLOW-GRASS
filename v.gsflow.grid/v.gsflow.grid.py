@@ -107,8 +107,8 @@ def main():
     # Create grid -- overlaps DEM, one cell of padding
     gscript.use_temp_region()
     reg = gscript.region()
-    reg_grid_edges_sn = np.linspace(reg['s'], reg['n'], reg['nsres'])
-    reg_grid_edges_we = np.linspace(reg['w'], reg['e'], reg['ewres'])
+    reg_grid_edges_sn = np.linspace(reg['s'], reg['n'], reg['rows'])
+    reg_grid_edges_we = np.linspace(reg['w'], reg['e'], reg['cols'])
     g.region(vector=basin, ewres=dx, nsres=dy)
     regnew = gscript.region()
     # Use a grid ratio -- don't match exactly the desired MODFLOW resolution
@@ -116,18 +116,18 @@ def main():
     grid_ratio_ew = np.round(regnew['ewres']/reg['ewres'])
     # Get S, W, and then move the unit number of grid cells over to get N and E
     # and include 1 (new) cell of padding around the whole watershed
-    _s_dist = np.abs(reg_grid_edges_sn - regnew['s'] + 2.*regnew['nsres'])
+    _s_dist = np.abs(reg_grid_edges_sn - (regnew['s'] - 2.*regnew['nsres']) )
     _s_idx = np.where(_s_dist == np.min(_s_dist))[0][0]
     _s = float(reg_grid_edges_sn[_s_idx])
-    _n_grid = np.arange(_s, reg['n'] + 3*grid_ratio_ns*reg['nsres'], grid_ratio_ns*reg['nsres'])
-    _n_dist = np.abs(_n_grid - regnew['n'] - 2.*regnew['nsres'])
+    _n_grid = np.arange(_s, reg['n'] + 2*grid_ratio_ns*reg['nsres'], grid_ratio_ns*reg['nsres'])
+    _n_dist = np.abs(_n_grid - (regnew['n'] + 2.*regnew['nsres']))
     _n_idx = np.where(_n_dist == np.min(_n_dist))[0][0]
     _n = float(_n_grid[_n_idx])
-    _w_dist = np.abs(reg_grid_edges_we - regnew['w'] + 2.5*regnew['ewres'])
+    _w_dist = np.abs(reg_grid_edges_we - (regnew['w'] - 2.*regnew['ewres']))
     _w_idx = np.where(_w_dist == np.min(_w_dist))[0][0]
     _w = float(reg_grid_edges_we[_w_idx])
-    _e_grid = np.arange(_w, reg['e'] + 3*grid_ratio_ew*reg['ewres'], grid_ratio_ew*reg['ewres'])
-    _e_dist = np.abs(_e_grid - regnew['e'] - 2.*regnew['ewres'])
+    _e_grid = np.arange(_w, reg['e'] + 2*grid_ratio_ew*reg['ewres'], grid_ratio_ew*reg['ewres'])
+    _e_dist = np.abs(_e_grid - (regnew['e'] + 2.*regnew['ewres']))
     _e_idx = np.where(_e_dist == np.min(_e_dist))[0][0]
     _e = float(_e_grid[_e_idx])
     # Finally make the region
