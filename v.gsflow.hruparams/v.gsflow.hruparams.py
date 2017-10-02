@@ -274,8 +274,6 @@ def main():
     # From looking at map, lots of extra centroids on area boundaries, and removing
     # small areas (though threshold hard to guess) gets rid of these
 
-    v.db_addcolumn(map=HRU, columns='centroid_x double precision, centroid_y double precision,', quiet=True)
-
     hru = VectorTopo(HRU)
     hru.open('rw')
     hru_cats = []
@@ -311,17 +309,17 @@ def main():
             hru_centroid_locations.append((hru_coords[hru_cats == cat]).squeeze())
         else:
             _centroids = hru_coords[hru_cats == cat]
-            print _centroids
+            #print _centroids
             _areas = hru_areas[hru_cats == cat]
-            print _areas
+            #print _areas
             _x = np.average(_centroids[:,0], weights=_areas)
             _y = np.average(_centroids[:,1], weights=_areas)
-            print _x, _y
+            #print _x, _y
             hru_centroid_locations.append(np.array([_x, _y]))
           
     # Now upload weighted mean to database table
     # allcats and hru_centroid_locations are co-indexed
-    #index__cats = create_iterator(HRU) # No longer needed
+    index__cats = create_iterator(HRU)
     cur = hru.table.conn.cursor()
     for i in range(len(allcats)):
         # meters
@@ -359,30 +357,15 @@ def main():
                     index__cats)
     """                    
 
+    # ID NUMBER
+    ############
+    cur.executemany("update "+HRU+" set hru_segment=? where id=?", 
+                    index__cats)
+
+
     cur.close()
     hru.table.conn.commit()
     hru.close()
-
-    # Easting and Northing for other columns
-    v.db_update(map=HRU, column='hru_x', query_column='centroid_x', quiet=True)
-    v.db_update(map=HRU, column='hru_xlong', query_column='centroid_x*3.28084', quiet=True) # feet
-    v.db_update(map=HRU, column='hru_y', query_column='centroid_y', quiet=True)
-    v.db_update(map=HRU, column='hru_ylat', query_column='centroid_y*3.28084', quiet=True) # feet
-
-    # ID NUMBER
-    ############
-
-    """
-    hru = VectorTopo(HRU)
-    hru.open('rw')
-    cur = hru.table.conn.cursor()
-    cur.executemany("update "+HRU+" set hru_segment=? where id=?", hru_segmentt)
-    hru.table.conn.commit()
-    hru.close()
-    """
-    # Segment number = HRU ID number
-    v.db_update(map=HRU, column='hru_segment', query_column='id', quiet=True)
-
 
 if __name__ == "__main__":
     main()
