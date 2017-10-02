@@ -350,6 +350,8 @@ def main():
                     +' where cat='+str(allcats[i]))
 
     # feet -- not working.
+    # Probably an issue with index__cats -- maybe fix later, if needed
+    # But currently not a major speed issue
     """
     cur.executemany("update "+HRU+" set hru_xlong=?*3.28084 where hru_x=?", 
                     index__cats)
@@ -357,15 +359,17 @@ def main():
                     index__cats)
     """                    
 
-    # ID NUMBER
-    ############
-    cur.executemany("update "+HRU+" set hru_segment=? where id=?", 
-                    index__cats)
-
-
     cur.close()
     hru.table.conn.commit()
     hru.close()
+
+    # ID NUMBER
+    ############
+    #cur.executemany("update "+HRU+" set hru_segment=? where id=?", 
+    #                index__cats)
+    # Segment number = HRU ID number
+    v.db_update(map=HRU, column='hru_segment', query_column='id', quiet=True)
+
 
 if __name__ == "__main__":
     main()
