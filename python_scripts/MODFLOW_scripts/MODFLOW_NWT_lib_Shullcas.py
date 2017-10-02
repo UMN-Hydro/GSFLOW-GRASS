@@ -13,16 +13,22 @@ import numpy as np
 import pandas as pd # for data structures and reading in data from text file
 import matplotlib.pyplot as plt # matlab-like plots
 from ConfigParser import SafeConfigParser
+import platform
 
-parser = SafeConfigParser()
-parser.read('settings.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+#    
+#parser = SafeConfigParser()
+#parser.read('settings.ini')
+#LOCAL_DIR = parser.get('settings', 'local_dir')
+#
+#GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+#
+#GIS_indir = GSFLOW_DIR + "/DataToReadIn/GIS/"
 
-GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 
-GIS_indir = GSFLOW_DIR + "/DataToReadIn/GIS/"
-
-slashstr = '/'
 
 
 #%%
@@ -405,8 +411,8 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
         IBOUNDin[ind_bound & (TOP[1:-1-1+1,1:-1-1+1] > 3500)] = -1 # ***this used for AGU2016 to have convergence
         IBOUND[1:-1-1+1,1:-1-1+1] = IBOUNDin
 
-    # - make discharge point and neighboring cells constant head
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
+#    # - make discharge point and neighboring cells constant head (similar to Sagehen example)
+#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
     # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
     if (dischargePt_rowi < NROW):
         IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
@@ -416,30 +422,14 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
             IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
         if (dischargePt_rowi < NROW):
             IBOUND[dischargePt_rowi,dischargePt_coli] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # downgrad of discharge pt
-
-    # - make discharge point active cell and neighboring non-stream cells constant head
-    # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    if (dischargePt_coli < NCOL):
-        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -1 # downgrad of discharge pt
-        if (dischargePt_rowi > 1):
-            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
-        if (dischargePt_rowi < NROW):
-            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
-    # hard-code to have active cells below streams 10/2/17 (Santa Rosa)
-    IBOUND[11-1,51-1] = 1
+    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
+    # active cells below stream reaches!
     print "To do for IBOUND: check if neighboring cells to discharge point are stream cells"
-
-
     
     M = np.ones((NROW,NCOL,NLAY),float)
-    M[:,:,0] = IBOUND
-    M[:,:,1] = IBOUND
+    for ii in range(NLAY):
+        M[:,:,ii] = IBOUND
     IBOUND = M
-    
     
     # - initHead(NROW,NCOL,NLAY) 
     initHead = BOTM[:,:,0] + (TOP-BOTM[:,:,0])*0.9; # within top layer
@@ -447,8 +437,8 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
     # Y = nan(NROW,NCOL,2); Y(:,:,1) = initHead; Y(:,:,2) = TOP-10; 
     # initHead = max(Y,[],3);
     M = np.ones((NROW,NCOL,NLAY),float)
-    M[:,:,0] = initHead
-    M[:,:,1] = initHead
+    for ii in range(NLAY):
+        M[:,:,ii] = initHead
     initHead = M
     
     # - assumed values
@@ -790,7 +780,7 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # hydcond[:,:,1] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
     hydcond[:,:,0] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
     # hydcond[:,:,0] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    hydcond[:,:,1] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
+#    hydcond[:,:,1] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
     Sy = 0.15*np.ones((NROW,NCOL,NLAY),float) # 0.08-0.15 in Sagehen (lower Sy under ridges for volcanic rocks)
     WETDRY = Sy # = Sy in Sagehen (lower Sy under ridges for volcanic rocks)
@@ -817,8 +807,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     #K[strm_buffer>=3] = 0.08
     #K[strm_buffer>=4] = 0.08
     #K[strm_buffer==5] = 0.08 # farthest from stream and high
-    hydcond[:,:,0] = 0.01#K;
-    hydcond[:,:,1] = 0.01
+#    hydcond[:,:,0] = 0.01#K;
+#    hydcond[:,:,1] = 0.01
     
     # -- assumed input values
     flow_filunit = 34 # make sure this matches namefile!!
@@ -1541,29 +1531,30 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     
     # this works: (for no sfr: converges, but mostly all dry)
     ind = TOP_mask > z_sort[int(round(NZ/10))]
-    finf = np.zeros((NROW,NCOL))
-    finf[ind] = 4e-4; # m/d (8.8e-4 m/d typical in Sagehen)
+#    finf = np.zeros((NROW,NCOL))
+#    finf[ind] = 4e-4; # m/d (8.8e-4 m/d typical in Sagehen)
+#    
+#    # testing: (for no sfr: kind of works, S.S. does not converge but transient mostly
+#    # does, starts wet then dries out)
+#    finf = np.zeros((NROW,NCOL))
+#    ind = TOP_mask > z_sort[int(round(0.25*NZ))]
+#    finf[IBOUND!=0] = 4e-4 / 10 # m/d (8.8e-4 m/d typical in Sagehen)
+#    finf[ind] = 4e-4; # m/d (8.8e-4 m/d typical in Sagehen)
+    finf = np.zeros((NROW,NCOL)) + 0.001 # from Lauren's test 10/1/17
     
-    # testing: (for no sfr: kind of works, S.S. does not converge but transient mostly
-    # does, starts wet then dries out)
-    finf = np.zeros((NROW,NCOL))
-    ind = TOP_mask > z_sort[int(round(0.25*NZ))]
-    finf[IBOUND!=0] = 4e-4 / 10 # m/d (8.8e-4 m/d typical in Sagehen)
-    finf[ind] = 4e-4; # m/d (8.8e-4 m/d typical in Sagehen)
-    
-    # scale FINF by elev
-    # (# Sagehen max 3*8.e-4, min 8.e-4
-    maxFINF = 3* 8.e-4 
-    minFINF = 8e-4
-    midZ_factor = (2150-1928)/(2649-1928) # based on Sagehen, where FINF levels off; sagehen: 0.31
-    midZ = midZ_factor * (np.max(TOP_mask.flatten())-np.min(TOP_mask[TOP_mask>0])) + np.min(TOP_mask[TOP_mask>0])
-    m = (maxFINF-minFINF)/(np.max(TOP_mask.flatten())-np.min(TOP_mask[TOP_mask>0]))
-    finf = m*(TOP_mask-np.min(TOP_mask[TOP_mask>0])) + minFINF
-    finf[TOP_mask<=midZ] = 4e-4
-    finf[IBOUND==0] = 0
-
-    finf[:] = 8.8e-6    
-    finf[:] = 8.8e-4    
+#    # scale FINF by elev
+#    # (# Sagehen max 3*8.e-4, min 8.e-4
+#    maxFINF = 3* 8.e-4 
+#    minFINF = 8e-4
+#    midZ_factor = (2150-1928)/(2649-1928) # based on Sagehen, where FINF levels off; sagehen: 0.31
+#    midZ = midZ_factor * (np.max(TOP_mask.flatten())-np.min(TOP_mask[TOP_mask>0])) + np.min(TOP_mask[TOP_mask>0])
+#    m = (maxFINF-minFINF)/(np.max(TOP_mask.flatten())-np.min(TOP_mask[TOP_mask>0]))
+#    finf = m*(TOP_mask-np.min(TOP_mask[TOP_mask>0])) + minFINF
+#    finf[TOP_mask<=midZ] = 4e-4
+#    finf[IBOUND==0] = 0
+#
+#    finf[:] = 8.8e-6    
+#    finf[:] = 8.8e-4    
     
     # # testing: 
     # finf = np.zeros((NROW,NCOL))
