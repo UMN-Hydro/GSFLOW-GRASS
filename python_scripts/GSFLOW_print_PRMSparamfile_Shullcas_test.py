@@ -13,7 +13,12 @@ import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 from ConfigParser import SafeConfigParser
 import settings
+import platform
 
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
 
 # GSFLOW_print_PRMSparamfile4.m
 # 11/23/16
@@ -68,7 +73,7 @@ import settings
 # NOTE: '/' is directory separator for Linux, '\' for Windows!!
 
 # directory with files to be read in to generate PRMS input files (include slash ('/') at end)
-in_GISdata_dir = 'data/GIS/' # specifically GIS data
+in_GISdata_dir = 'data' + slashstr + 'GIS' + slashstr # specifically GIS data
 
 # parameter file that will be written (name must match that in Control file!)
 parfil_pre = settings.PROJ_CODE
@@ -684,15 +689,13 @@ par_value.append(25)  # default is 15, sagehen example uses 25
 par_name.append('mnsziter') # min iterations for soil zone computations
 par_dim_name.append('one')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
-#par_value.append(7)  # sagehen example uses 7
-par_value.append(20)  # sagehen example uses 7
+par_value.append(7)  # sagehen example uses 7
 
 # - GSFLOW computational parameter
 par_name.append('szconverge') # convergence criteria for soil-zone
 par_dim_name.append('one')
 par_type.append(2) # 1=int, 2=single prec, 3=double prec, 4=char str
-#par_value.append(1e-4)  # [inches] default is 1e-8, sagehen example uses 1e-4
-par_value.append(1e-8)  # [inches] default is 1e-8, sagehen example uses 1e-4
+par_value.append(1e-4)  # [inches] default is 1e-8, sagehen example uses 1e-4
 
 par_name.append('fastcoef_lin')
 par_dim_name.append('nhru')

@@ -431,9 +431,6 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
     IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
     # hard-code to have active cells below streams 10/2/17 (Santa Rosa)
     IBOUND[11-1,51-1] = 1
-
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
-
     print "To do for IBOUND: check if neighboring cells to discharge point are stream cells"
 
 
@@ -618,14 +615,7 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 
     hydcond[:,:,0] = 0.1#K;
     hydcond[:,:,1] = 0.1
-    
-    hydcond1 = np.copy(hydcond[:,:,0])
-    hydcond1[TOP>250] = 0.0001
-    hydcond2 = np.copy(hydcond[:,:,1])
-#    hydcond2(TOP>250) = 0.01
-    
-    hydcond[:,:,0] = hydcond1
-    hydcond[:,:,1] = hydcond1
+
     
     # -- assumed input values
     flow_filunit = 34 # make sure this matches namefile!!
@@ -827,19 +817,8 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     #K[strm_buffer>=3] = 0.08
     #K[strm_buffer>=4] = 0.08
     #K[strm_buffer==5] = 0.08 # farthest from stream and high
-    hydcond[:,:,0] = 0.1#K;
-    hydcond[:,:,1] = 0.001
-    
-    hydcond1 = np.copy(hydcond[:,:,0])
-    hydcond1[TOP<125] = 0.3
-    hydcond1[TOP<75] = 0.5
-    hydcond1[TOP>200] = 0.0001
-    hydcond2 = np.copy(hydcond[:,:,1])
-#    hydcond2[TOP>200] = 0.0001
-#    hydcond2(TOP>250) = 0.01
-    
-    hydcond[:,:,0] = hydcond1
-    hydcond[:,:,1] = hydcond2
+    hydcond[:,:,0] = 0.01#K;
+    hydcond[:,:,1] = 0.01
     
     # -- assumed input values
     flow_filunit = 34 # make sure this matches namefile!!
@@ -1583,18 +1562,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     finf[TOP_mask<=midZ] = 4e-4
     finf[IBOUND==0] = 0
 
-#    finf[:] = 8.8e-6    
-#    finf[:] = 8.8e-4    # this worked pretty well, night 10/1
-
-#    finf[:] = 8.8e-2    # best?
-    finf[:] = 2*8.8e-2    # best? but then too much sat water loss... I think too much water!
-#    finf[:] = 8.8e-1    # not so good again
-
-#    finf[:] = 8.8e-5    # pretty good <~5% error
-#    finf[:] = 1.8e-5    # pretty good <~5% error usually
-    finf[:] = 4.8e-5    # pretty good <~5% error usually
-
-#    finf[:] = 8.8e-4
+    finf[:] = 8.8e-6    
+    finf[:] = 8.8e-4    
     
     # # testing: 
     # finf = np.zeros((NROW,NCOL))
