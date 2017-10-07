@@ -9,6 +9,8 @@ else:
     slashstr = '\\'
 
 parser = SafeConfigParser()
+
+# Read in directory information
 parser.read('settings_test.ini')
 LOCAL_DIR = parser.get('settings', 'local_dir')
 PROJ_NAME = parser.get('settings', 'proj_name')
@@ -16,6 +18,7 @@ control_dir = parser.get('settings', 'control_dir')
 PRMSinput_dir = parser.get('settings', 'PRMSinput_dir')
 MODFLOWinput_dir = parser.get('settings', 'MODFLOWinput_dir')
 PRMSoutput_dir = parser.get('settings', 'PRMSoutput_dir')
+MODFLOWoutput_dir = parser.get('settings', 'MODFLOWoutput_dir')
 # command-line executable for GSFLOW (just used to print message)
 GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
 DEM = parser.get('settings', 'DEM')
@@ -30,28 +33,28 @@ hydcond0 = parser.get('custom_params', 'hydcond') # either single value for cons
 finf0 = parser.get('custom_params', 'finf') # either single value for spatially constant finf or name of file with array [m/d]
 
 
-
-import numpy as np
-NROW = 25
-NCOL = 14
-NLAY = 2
-hydcond = np.ones((NROW,NCOL,NLAY))
-try:
-   float(hydcond0)
-   hydcond = float(hydcond0) * hydcond
-except ValueError:
-   for ii in range(NLAY):
-        hydcond[:,:,ii] = np.genfromtxt(hydcond0, skip_header=1+ii*(NROW+1), \
-        max_rows=NROW, dtype=float)
-        
-finf = np.ones((NROW,NCOL))
-try:
-   float(finf0)
-   finf = float(finf0) * finf
-except ValueError:
-   for ii in range(NLAY):
-        finf[:,:,ii] = np.genfromtxt(finf0, skip_header=1+ii*(NROW+1), \
-        max_rows=NROW, dtype=float)
+## move to MODFLOW_NWT_lib_Shullcas_test.py
+#import numpy as np
+#NROW = 25
+#NCOL = 14
+#NLAY = 2
+#hydcond = np.ones((NROW,NCOL,NLAY))
+#try:
+#   float(hydcond0)
+#   hydcond = float(hydcond0) * hydcond
+#except ValueError:
+#   for ii in range(NLAY):
+#        hydcond[:,:,ii] = np.genfromtxt(hydcond0, skip_header=1+ii*(NROW+1), \
+#        max_rows=NROW, dtype=float)
+#        
+#finf = np.ones((NROW,NCOL))
+#try:
+#   float(finf0)
+#   finf = float(finf0) * finf
+#except ValueError:
+#   for ii in range(NLAY):
+#        finf[:,:,ii] = np.genfromtxt(finf0, skip_header=1+ii*(NROW+1), \
+#        max_rows=NROW, dtype=float)
 
 
 

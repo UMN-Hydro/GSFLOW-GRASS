@@ -12,8 +12,9 @@ This library includes all the separate matlab functions for writing the differen
 import numpy as np
 import pandas as pd # for data structures and reading in data from text file
 import matplotlib.pyplot as plt # matlab-like plots
-from ConfigParser import SafeConfigParser
+#from ConfigParser import SafeConfigParser
 import platform
+import settings_test
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -568,43 +569,24 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
     # (temp place-holder)
-    hydcond = 2*np.ones((NROW,NCOL,NLAY),float) # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,1] = 0.5 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,1] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    hydcond[:,:,0] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,0] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    hydcond[:,:,1] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
+    hydcond = np.ones((NROW,NCOL,NLAY))
+    try:
+       float(settings_test.hydcond0)
+       hydcond = float(settings_test.hydcond0) * hydcond
+    except ValueError:
+       for ii in range(NLAY):
+            hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
+            max_rows=NROW, dtype=float)
+           
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
     Sy = 0.15*np.ones((NROW,NCOL,NLAY),float) # 0.08-0.15 in Sagehen (lower Sy under ridges for volcanic rocks)
     WETDRY = Sy # = Sy in Sagehen (lower Sy under ridges for volcanic rocks)
-    
-    # # use strm_buffer (and elev?)
-    # K = strm_buffer; # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    # K(strm_buffer==0) = 0.04; # very far from streams
-    # K(strm_buffer==0 & TOP>5000) = 0.03; # very far from streams
-    # K(strm_buffer>=1) = 0.5; # close to streams
-    # K(strm_buffer>=2) = 0.4;
-    # K(strm_buffer>=3) = 0.3;
-    # K(strm_buffer>=4) = 0.15;
-    # K(strm_buffer==5) = 0.08; # farthest from stream and high
-    # hydcond(:,:,1) = K;
-    # hydcond(:,:,2) = 0.01;
-    
-    ## use strm_buffer (and elev?)
-    #K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    #K[strm_buffer==0] = 0.04 # very far from streams
-    #K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
-    ## K(strm_buffer>=1) = 0.5; # close to streams
-    #K[strm_buffer>=1] = 0.25 # close to streams
-    #K[strm_buffer>=2] = 0.15
-    #K[strm_buffer>=3] = 0.08
-    #K[strm_buffer>=4] = 0.08
-    #K[strm_buffer==5] = 0.08 # farthest from stream and high
-    hydcond[:,:,0] = 0.01#K;
-    hydcond[:,:,1] = 0.01
-
-    hydcond[:,:,0] = 0.1#K;
-    hydcond[:,:,1] = 0.1
+        
+#    hydcond[:,:,0] = 0.01#K;
+#    hydcond[:,:,1] = 0.01
+#
+#    hydcond[:,:,0] = 0.1#K;
+#    hydcond[:,:,1] = 0.1
 
     
     # -- assumed input values
@@ -1540,7 +1522,7 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
 #    ind = TOP_mask > z_sort[int(round(0.25*NZ))]
 #    finf[IBOUND!=0] = 4e-4 / 10 # m/d (8.8e-4 m/d typical in Sagehen)
 #    finf[ind] = 4e-4; # m/d (8.8e-4 m/d typical in Sagehen)
-    finf = np.zeros((NROW,NCOL)) + 0.001 # from Lauren's test 10/1/17
+#    finf = np.zeros((NROW,NCOL)) + 0.001 # from Lauren's test 10/1/17
     
 #    # scale FINF by elev
 #    # (# Sagehen max 3*8.e-4, min 8.e-4
@@ -1555,6 +1537,16 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
 #
 #    finf[:] = 8.8e-6    
 #    finf[:] = 8.8e-4    
+
+    finf = np.ones((NROW,NCOL))
+    try:
+       float(settings_test.finf0)
+       finf = float(settings_test.finf0) * finf
+    except ValueError:
+       for ii in range(NLAY):
+            finf[:,:,ii] = np.genfromtxt(settings_test.finf0, skip_header=1+ii*(NROW+1), \
+            max_rows=NROW, dtype=float)
+    
     
     # # testing: 
     # finf = np.zeros((NROW,NCOL))
