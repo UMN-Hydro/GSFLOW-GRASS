@@ -96,7 +96,8 @@ MODfil = settings_test.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW FOR 
 # model_mode = 'MODFLOW' # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-parfil = settings_test.PRMSinput_dir + parfil_pre + '_' + model_mode + '.param'
+parfil = settings_test.PRMSinput_dir + slashstr + parfil_pre + '_' + model_mode + '.param'
+print parfil
 
 # Load GIS-generated files with HRU, segment etc information
 # (pandas work like structures in matlab?)

@@ -12,19 +12,30 @@ parser = SafeConfigParser()
 
 # Read in directory information
 parser.read('settings_test.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
 PROJ_NAME = parser.get('settings', 'proj_name')
-control_dir = parser.get('settings', 'control_dir')
-PRMSinput_dir = parser.get('settings', 'PRMSinput_dir')
-MODFLOWinput_dir = parser.get('settings', 'MODFLOWinput_dir')
-PRMSoutput_dir = parser.get('settings', 'PRMSoutput_dir')
-MODFLOWoutput_dir = parser.get('settings', 'MODFLOWoutput_dir')
+
 # command-line executable for GSFLOW (just used to print message)
 GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
 DEM = parser.get('settings', 'DEM')
 GISinput_dir = parser.get('settings', 'GISinput_dir')
 
-PROJ_CODE=PROJ_NAME.replace(" ", "")
+PROJ_CODE=PROJ_NAME.replace(" ", "") # remove blank spaces
+
+gsflow_simdir = parser.get('settings', 'gsflow_simdir')
+control_dir = gsflow_simdir + slashstr + 'control' 
+PRMSinput_dir = gsflow_simdir + slashstr + 'inputs' + slashstr + 'PRMS'
+MODFLOWinput_dir = gsflow_simdir + slashstr + 'inputs' + slashstr + 'MODFLOW_NWT'
+PRMSoutput_dir = gsflow_simdir + slashstr + 'outputs' + slashstr + 'PRMS' # eventually rename?  It's really GSFLOW outputs
+MODFLOWoutput_dir = gsflow_simdir + slashstr + 'outputs' + slashstr + 'MODFLOW_NWT'
+
+#LOCAL_DIR = parser.get('settings', 'local_dir')
+#control_dir = parser.get('settings', 'control_dir')
+#PRMSinput_dir = parser.get('settings', 'PRMSinput_dir')
+#MODFLOWinput_dir = parser.get('settings', 'MODFLOWinput_dir')
+#PRMSoutput_dir = parser.get('settings', 'PRMSoutput_dir')
+#MODFLOWoutput_dir = parser.get('settings', 'MODFLOWoutput_dir')
+
+
 
 # -- problem-specifc variables
 # only ones of these will be read in

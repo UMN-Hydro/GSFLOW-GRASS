@@ -21,7 +21,8 @@ if platform.system() == 'Linux':
 else:
     slashstr = '\\'
 
-GSFLOW_DIR = settings_test.LOCAL_DIR + "/GSFLOW/"
+#GSFLOW_DIR = settings_test.LOCAL_DIR + "/GSFLOW/"
+GSFLOW_DIR = settings_test.gsflow_simdir + "/GSFLOW/"
 
 # - directories
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 

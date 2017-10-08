@@ -415,14 +415,21 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #    # - make discharge point and neighboring cells constant head (similar to Sagehen example)
 #    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
     # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    if (dischargePt_coli < NCOL):
-        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
+#    if (dischargePt_rowi < NROW):
+#        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
+#    if (dischargePt_coli < NCOL):
+#        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -2 # downgrad of discharge pt
+#        if (dischargePt_rowi > 1):
+#            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+#        if (dischargePt_rowi < NROW):
+#            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
+
+    if (dischargePt_coli > 1):
+        IBOUND[dischargePt_rowi-1,dischargePt_coli-2] = -2 # downgrad of discharge pt
         if (dischargePt_rowi > 1):
-            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+            IBOUND[dischargePt_rowi-2,dischargePt_coli-2] = -1 # neighbor points
         if (dischargePt_rowi < NROW):
-            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
+            IBOUND[dischargePt_rowi,dischargePt_coli-2] = -1
     IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
     # active cells below stream reaches!
     print "To do for IBOUND: check if neighboring cells to discharge point are stream cells"
@@ -570,6 +577,7 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
     # (temp place-holder)
     hydcond = np.ones((NROW,NCOL,NLAY))
+    print "hydcond0", hydcond0
     try:
        float(settings_test.hydcond0)
        hydcond = float(settings_test.hydcond0) * hydcond
@@ -756,41 +764,20 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
 
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
-    # (temp place-holder)
-    hydcond = 2*np.ones((NROW,NCOL,NLAY),float) # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,1] = 0.5 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,1] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    hydcond[:,:,0] = 0.1 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-    # hydcond[:,:,0] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
-#    hydcond[:,:,1] = 0.01 # m/d (Sagehen: 0.026 to 0.39 m/d, lower K under ridges for volcanic rocks)
+    hydcond = np.ones((NROW,NCOL,NLAY))
+    print "hydcond0", settings_test.hydcond0
+    try:
+       float(settings_test.hydcond0)
+       hydcond = float(settings_test.hydcond0) * hydcond
+    except ValueError:
+       for ii in range(NLAY):
+            hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
+            max_rows=NROW, dtype=float)
+           
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
     Sy = 0.15*np.ones((NROW,NCOL,NLAY),float) # 0.08-0.15 in Sagehen (lower Sy under ridges for volcanic rocks)
     WETDRY = Sy # = Sy in Sagehen (lower Sy under ridges for volcanic rocks)
     
-    # # use strm_buffer (and elev?)
-    # K = strm_buffer; # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    # K(strm_buffer==0) = 0.04; # very far from streams
-    # K(strm_buffer==0 & TOP>5000) = 0.03; # very far from streams
-    # K(strm_buffer>=1) = 0.5; # close to streams
-    # K(strm_buffer>=2) = 0.4;
-    # K(strm_buffer>=3) = 0.3;
-    # K(strm_buffer>=4) = 0.15;
-    # K(strm_buffer==5) = 0.08; # farthest from stream and high
-    # hydcond(:,:,1) = K;
-    # hydcond(:,:,2) = 0.01;
-    
-    ## use strm_buffer (and elev?)
-    #K = np.copy(strm_buffer) # 0: very far from stream, 5: farthest from stream in strm_buffer, 1: closest to stream
-    #K[strm_buffer==0] = 0.04 # very far from streams
-    #K[(strm_buffer==0) & (TOP>5000)] = 0.03 # very far from streams
-    ## K(strm_buffer>=1) = 0.5; # close to streams
-    #K[strm_buffer>=1] = 0.25 # close to streams
-    #K[strm_buffer>=2] = 0.15
-    #K[strm_buffer>=3] = 0.08
-    #K[strm_buffer>=4] = 0.08
-    #K[strm_buffer==5] = 0.08 # farthest from stream and high
-#    hydcond[:,:,0] = 0.01#K;
-#    hydcond[:,:,1] = 0.01
     
     # -- assumed input values
     flow_filunit = 34 # make sure this matches namefile!!
