@@ -1003,7 +1003,7 @@ for ii in range(NumPars):
 
 # create PRMS input directory if it does not exist:
 if not os.path.isdir(settings_test.PRMSinput_dir):
-    os.mkdir(settings_test.PRMSinput_dir)
+    os.makedirs(settings_test.PRMSinput_dir)
     
 # while we're at it, create PRMS output file if it does not exist:
 if not os.path.isdir(settings_test.PRMSoutput_dir):

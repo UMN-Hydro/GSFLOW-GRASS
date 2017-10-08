@@ -495,11 +495,11 @@ con_filname = settings_test.control_dir + slashstr + con_filname0 + '_' + model_
 
 # create control directory if it does not exist:
 if not os.path.isdir(settings_test.control_dir):
-    os.mkdir(settings_test.control_dir)
+    os.makedirs(settings_test.control_dir)
     
 # while we're at it, create PRMS output file if it does not exist:
 if not os.path.isdir(settings_test.PRMSoutput_dir):
-    os.mkdir(settings_test.PRMSoutput_dir)
+    os.makedirs(settings_test.PRMSoutput_dir)
 
 # - Write to control file
 
