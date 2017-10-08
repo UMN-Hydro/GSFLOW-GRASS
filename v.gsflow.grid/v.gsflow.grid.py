@@ -41,6 +41,12 @@
 #%  required: yes
 #%end
 
+#%option G_OPT_R_INPUT
+#%  key: raster_input
+#%  label: Raster to be resampled to grid resolution
+#%  required: no
+#%end
+
 #%option
 #%  key: dx
 #%  label: Cell size suggestion (x / E / zonal), map units: rounds to DEM
@@ -60,8 +66,14 @@
 #%end
 
 #%option G_OPT_R_OUTPUT
+#%  key: raster_output
+#%  label: Raster (typically DEM) at same resolution as vector grid
+#%  required: no
+#%end
+
+#%option G_OPT_R_OUTPUT
 #%  key: mask_output
-#%  label: Basin mask: inside (1) or outside (0) the watershed?
+#%  label: Raster basin mask: inside (1) or outside (0) the watershed?
 #%  required: no
 #%end
 
@@ -95,14 +107,23 @@ def main():
     Builds a grid for the MODFLOW component of the USGS hydrologic model,
     GSFLOW.
     """
-
+    
     options, flags = gscript.parser()
     basin = options['basin']
+    pp = options['pour_point']
+    raster_input = options['raster_output']
     dx = options['dx']
     dy = options['dy']
     grid = options['output']
     mask = options['mask_output']
-    pp = options['pour_point']
+    raster_output = options['raster_output']
+    # basin='basins_tmp_onebasin'; pp='pp_tmp'; raster_input='DEM'; raster_output='DEM_coarse'; dx=dy='500'; grid='grid_tmp'; mask='mask_tmp'
+    
+    # Fatal if raster input and output are not both set
+    _lena0 = (len(raster_input) == 0)
+    _lenb0 = (len(raster_output) == 0)
+    if _lena0 + _lenb0 == 1:
+        grass.fatal("You must set both raster input and output, or neither.")
         
     # Create grid -- overlaps DEM, one cell of padding
     gscript.use_temp_region()
@@ -162,7 +183,18 @@ def main():
 
     # Basin mask
     if len(mask) > 0:
-        v.to_rast(input=basin, output=mask, use='val', value=1, quiet=True)
+        # Fine resolution region:
+        g.region(n=reg['n'], s=reg['s'], w=reg['w'], e=reg['e'], nsres=reg['nsres'], ewres=reg['ewres'])
+        # Rasterize basin
+        v.to_rast(input=basin, output=mask, use='val', value=1, overwrite=gscript.overwrite(), quiet=True)
+        # Coarse resolution region:
+        g.region(w=str(_w), e=str(_e), s=str(_s), n=str(_n), nsres=str(grid_ratio_ns*reg['nsres']), ewres=str(grid_ratio_ew*reg['ewres']))
+        r.resamp_stats(input=mask, output=mask, method='sum', overwrite=True, quiet=True)
+        r.mapcalc(mask+' = '+mask+' > 0', overwrite=True, quiet=True)
+
+    # Resampled raster
+    if len(raster_output) > 0:
+        r.resamp_stats(input=raster_input, output=raster_output, method='average', overwrite=gscript.overwrite(), quiet=True)
 
     # Pour point
     if len(pp) > 0:
