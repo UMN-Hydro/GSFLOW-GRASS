@@ -1,3 +1,5 @@
+# Based on: GSFLOW_print_data_climatehru_files1.m
+
 # GSFLOW_print_climate_hru_files1.m
 # 11/24/16
 #
@@ -12,32 +14,28 @@
 
 import pandas as pd
 import numpy as np
-from ConfigParser import SafeConfigParser
-from StringIO import StringIO
+import settings_test
+import platform
 
-parser = SafeConfigParser()
-parser.read('settings.ini')
-LOCAL_DIR = parser.get('settings', 'local_dir')
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
 
-GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
 
 
 # *** CUSTOMIZE TO YOUR COMPUTER! *****************************************
 
 # directory for PRMS input files (include slash ('/') at end) - cbh files
 # outputed to here
-PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
+#PRMSinput_dir = GSFLOW_DIR + '/inputs/PRMS/'
+PRMSinput_dir = settings_test.PRMSinput_dir
 
 # PRMSinput_dir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/GSFLOW/ChimTest'
 
-# directory with files to be read in to generate PRMS input files in_GISdata_dir
-in_data_dir = GSFLOW_DIR + '/inputs/PRMS/'
-in_climatedata_dir = in_data_dir + '/climate/' # specifically climate data
-
 # GIS data (for nhru)
-in_data_dir = GSFLOW_DIR + '/DataToReadIn/'
-in_GISdata_dir = in_data_dir + '/GIS/' # specifically GIS data
-HRUfil = in_GISdata_dir + '/HRU.csv'
+in_GISdata_dir  = settings_test.GISinput_dir
+HRUfil = in_GISdata_dir + slashstr + 'HRUs_tmp.txt'
 
 # *************************************************************************
 
@@ -45,11 +43,11 @@ HRUfil = in_GISdata_dir + '/HRU.csv'
 
 # -- Number of HRU's over which to apply data uniformly
 # nhru should be generated dynamically (from GIS data)
-HRUdata = pd.read_csv(HRUfil, header=0)
-nhru = HRUdata['id'].max()
+HRUdata = pd.read_csv(HRUfil)
+nhru = HRUdata.shape[0]
 
 ## -- Set any description of data here (example: location, units)
-descr_str = 'BocaToma'
+descr_str = settings_test.PROJ_CODE
 
 # -- Read in daily values from 1 station for:
 #   - precip (check 'precip_units')
@@ -58,7 +56,7 @@ descr_str = 'BocaToma'
 #   [- swrad [langleys for F temp_units] ]-currently unavailable at Chim
 #   - ymdhms_v
 
-in_datafil = in_climatedata_dir + '/test_boca_toma_F_in.txt'
+in_datafil = settings_test.climate_data_file
 Data = pd.read_csv(in_datafil, skiprows=5, delim_whitespace=True, header=None)
 Data_columns = ['year', 'month', 'day', 'hour', 'min', 'sec', 'tmax', 'tmin', 'precip']
 

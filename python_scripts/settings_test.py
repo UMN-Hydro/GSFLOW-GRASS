@@ -2,6 +2,7 @@
 
 from ConfigParser import SafeConfigParser
 import platform
+import os
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -18,33 +19,57 @@ PROJ_NAME = parser.get('settings', 'proj_name')
 GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
 DEM = parser.get('settings', 'DEM')
 GISinput_dir = parser.get('settings', 'GISinput_dir')
-
-START_DATE = parser.get('settings', 'start_date')
-END_DATE = parser.get('settings', 'end_date')
+climate_data_file = parser.get('settings', 'climate_data_file')
 
 PROJ_CODE=PROJ_NAME.replace(" ", "") # remove blank spaces
 
 gsflow_simdir = parser.get('settings', 'gsflow_simdir')
+
+# for relative pathname
+PRMSinput_dir_rel = 'inputs' + slashstr + 'PRMS_GSFLOW' 
+MODFLOWinput_dir_rel = 'inputs' + slashstr + 'MODFLOW_NWT'
+PRMSoutput_dir_rel = 'outputs' + slashstr + 'PRMS_GSFLOW' 
+MODFLOWoutput_dir_rel = 'outputs' + slashstr + 'MODFLOW_NWT'
+
 control_dir = gsflow_simdir + slashstr + 'control' 
-PRMSinput_dir = gsflow_simdir + slashstr + 'inputs' + slashstr + 'PRMS'
-MODFLOWinput_dir = gsflow_simdir + slashstr + 'inputs' + slashstr + 'MODFLOW_NWT'
-PRMSoutput_dir = gsflow_simdir + slashstr + 'outputs' + slashstr + 'PRMS' # eventually rename?  It's really GSFLOW outputs
-MODFLOWoutput_dir = gsflow_simdir + slashstr + 'outputs' + slashstr + 'MODFLOW_NWT'
-
-#LOCAL_DIR = parser.get('settings', 'local_dir')
-#control_dir = parser.get('settings', 'control_dir')
-#PRMSinput_dir = parser.get('settings', 'PRMSinput_dir')
-#MODFLOWinput_dir = parser.get('settings', 'MODFLOWinput_dir')
-#PRMSoutput_dir = parser.get('settings', 'PRMSoutput_dir')
-#MODFLOWoutput_dir = parser.get('settings', 'MODFLOWoutput_dir')
+PRMSinput_dir = gsflow_simdir + slashstr + PRMSinput_dir_rel 
+MODFLOWinput_dir = gsflow_simdir + slashstr + MODFLOWinput_dir_rel
+PRMSoutput_dir = gsflow_simdir + slashstr + PRMSoutput_dir_rel
+MODFLOWoutput_dir = gsflow_simdir + slashstr + MODFLOWoutput_dir_rel
 
 
+# create directories if they do not exist:
+if not os.path.isdir(control_dir):
+    os.makedirs(control_dir)   
+if not os.path.isdir(PRMSinput_dir):
+    os.makedirs(PRMSinput_dir)
+if not os.path.isdir(MODFLOWinput_dir):
+    os.makedirs(MODFLOWinput_dir)
+if not os.path.isdir(PRMSoutput_dir):
+    os.makedirs(PRMSoutput_dir)
+if not os.path.isdir(MODFLOWoutput_dir):
+    os.makedirs(MODFLOWoutput_dir)
+
+    
 
 # -- problem-specifc variables
 # only ones of these will be read in
 parser.read('custom_params.ini')
 hydcond0 = parser.get('custom_params', 'hydcond') # either single value for constant K or name of file with array [m/d]
 finf0 = parser.get('custom_params', 'finf') # either single value for spatially constant finf or name of file with array [m/d]
+
+START_DATE = parser.get('domain', 'start_date')
+END_DATE = parser.get('domain', 'end_date')
+
+NLAY = int(parser.get('domain', 'NLAY'))
+DZ_str = parser.get('domain', 'DZ')  # for NLAY>1, this is comma-separated array
+value = DZ_str.split(',')
+DZ = []
+for ii in range(NLAY):
+    try:
+      DZ.append(int(value[ii]))
+    except:
+      DZ.append(float(value[ii]))
 
 
 ## move to MODFLOW_NWT_lib_Shullcas_test.py

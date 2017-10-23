@@ -43,8 +43,6 @@ Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
 
 import datetime as dt
 import numpy as np # matlab core
-import scipy as sp # matlab toolboxes
-import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
 import settings_test
 import platform
@@ -75,17 +73,18 @@ con_filname0 = settings_test.PROJ_CODE
 # model_mode = 'MODFLOW'; # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-# data file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
-datafil = settings_test.PRMSinput_dir + slashstr + 'empty.day'
-
 # parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
 parfil_pre = settings_test.PROJ_CODE # will have '_', model_mode following
 
 # MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
-namfil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.nam'
+namfil = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr + settings_test.PROJ_CODE + '.nam'
 
-# output directory that the control file will point to for creating output files (include slash at end!)
-outdir = settings_test.PRMSoutput_dir + slashstr 
+# input directory that the control file will point to for reading in PRMS_GSFLOW inputs
+indir_rel = '..' + slashstr + settings_test.PRMSinput_dir_rel + slashstr 
+
+
+# output directory that the control file will point to for creating PRMS_GSFLOW output files (include slash at end!)
+outdir_rel = '..' + slashstr + settings_test.PRMSoutput_dir_rel + slashstr 
 
 # model start and end dates
 start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
@@ -106,10 +105,10 @@ if model_mode == 'GSFLOW':
     fl_load_init = 0 # 1 to load previously saved initial conditions
     # load initial conditions from this file
 #     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = settings_test.PRMSoutput_dir + slashstr + 'init_cond_outfile'
+    load_init_file = outdir_rel + 'init_cond_outfile' # eventually change so user-specified?
 
 fl_save_init = 1 # 1 to save outputs as initial conditions
-save_init_file = settings_test.PRMSoutput_dir + slashstr + 'init_cond_outfile' # save new results as initial conditions in this file
+save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
 
 # 1: use all pre-processed met data
 fl_all_climate_hru = 0 # (could set to = False)
@@ -129,15 +128,19 @@ if fl_all_climate_hru == 0:
 # If climate_hru, use the following file names (else ignored)
 # (note that WRITE_CLIMATE will produce files with the below names)
 # precip_datafil = strcat(PRMSinput_dir, 'precip_rep30yr.day'); # w/o meltwater
-precip_datafil = settings_test.PRMSinput_dir + slashstr + 'precip.day'
+precip_datafil = indir_rel + 'precip.day'
 # tmax_datafil = strcat(PRMSinput_dir, 'tmax_rep30yr_tadj_plus1C.day'); # to be safe: set as F
 # tmin_datafil = strcat(PRMSinput_dir, 'tmin_rep30yr_tadj_plus1C.day'); # to be safe: set as F
-tmax_datafil = settings_test.PRMSinput_dir + slashstr + 'tmax.day' # to be safe: set as F
-tmin_datafil = settings_test.PRMSinput_dir +slashstr +  'tmin.day' # to be safe: set as F
-solrad_datafil = settings_test.PRMSinput_dir +slashstr +  'swrad.day'
-pet_datafil = settings_test.PRMSinput_dir +slashstr +  'potet.day'
-humidity_datafil = settings_test.PRMSinput_dir + slashstr + 'humidity.day' # for potet_pm
-transp_datafil = settings_test.PRMSinput_dir + slashstr + 'transp.day' # may not be needed in GSFLOW? Is needed!
+tmax_datafil = indir_rel + 'tmax.day' # to be safe: set as F
+tmin_datafil = indir_rel + 'tmin.day' # to be safe: set as F
+solrad_datafil = indir_rel + 'swrad.day'
+pet_datafil = indir_rel + 'potet.day'
+humidity_datafil = indir_rel + 'humidity.day' # for potet_pm
+transp_datafil = indir_rel + 'transp.day' # may not be needed in GSFLOW? Is needed!
+
+# data file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
+datafil = indir_rel + 'empty.day'
+
 
 
 
@@ -176,7 +179,7 @@ if model_mode != 'MODFLOW':
     if model_mode == 'GSFLOW':
         con_par_name.append('csv_output_file')
         con_par_type.append(4)
-        con_par_values.append(outdir + 'gsflow.csv')
+        con_par_values.append(outdir_rel + 'gsflow.csv')
         
         con_par_name.append('modflow_time_zero')
         con_par_type.append(1)
@@ -184,7 +187,7 @@ if model_mode != 'MODFLOW':
 
         con_par_name.append('gsflow_output_file')
         con_par_type.append(4)
-        con_par_values.append(outdir + 'gsflow.out')
+        con_par_values.append(outdir_rel + 'gsflow.out')
 
         con_par_name.append('gsf_rpt') # flag to create csv output file
         con_par_type.append(1)
@@ -207,14 +210,14 @@ if model_mode != 'MODFLOW':
     con_par_type.append(4)
     con_par_values.append(datafil)
 
-    parfil = settings_test.PRMSinput_dir + slashstr + parfil_pre + '_' + model_mode + '.param'
+    parfil = indir_rel + parfil_pre + '_' + model_mode + '.param'
     con_par_name.append('param_file')
     con_par_type.append(4)
     con_par_values.append(parfil)
 
     con_par_name.append('model_output_file')
     con_par_type.append(4 )
-    con_par_values.append(outdir + 'prms.out')
+    con_par_values.append(outdir_rel + 'prms.out')
 
     # new for GSFLOW
     con_par_name.append('parameter_check_flag')
@@ -354,7 +357,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('stat_var_file') # output Statistics file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir + '{}.statvar'.format(settings_test.PROJ_CODE))
+    con_par_values.append(outdir_rel + '{}.statvar'.format(settings_test.PROJ_CODE))
 
     con_par_name.append('statVar_names')
     con_par_type.append(4)
@@ -410,7 +413,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('ani_output_file') # output Statistics file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir + '{}.ani'.format(settings_test.PROJ_CODE))    
+    con_par_values.append(outdir_rel + '{}.ani'.format(settings_test.PROJ_CODE))    
     
     con_par_name.append('aniOutVar_names')
     con_par_type.append(4) 
@@ -492,15 +495,8 @@ if model_mode != 'MODFLOW':
 # % % -----------------------------------------------------------------------
 # Generally, do not change below here
 
-con_filname = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.control'
-
-# create control directory if it does not exist:
-if not os.path.isdir(settings_test.control_dir):
-    os.makedirs(settings_test.control_dir)
-    
-# while we're at it, create PRMS output file if it does not exist:
-if not os.path.isdir(settings_test.PRMSoutput_dir):
-    os.makedirs(settings_test.PRMSoutput_dir)
+con_filname = con_filname0 + '_' + model_mode + '.control'
+con_filname_fullpath = settings_test.control_dir + slashstr + con_filname
 
 # - Write to control file
 
@@ -530,11 +526,8 @@ for x in con_par_values:
     ii = ii + 1
 
 
-    if os.path.isdir(outdir) == False: 
-        os.makedirs(outdir);
-
 # - Write to control file
-fobj = open(con_filname, 'w+') # w+ for write and read
+fobj = open(con_filname_fullpath, 'w+') # w+ for write and read
 fobj.write(title_str + '\n')
 line1 = '####\n'
 for ii in range(0, nvars):
@@ -557,18 +550,15 @@ fobj.close()
 # % % ------------------------------------------------------------------------
  # Prepare for model execution
 
-if model_mode != 'MODFLOW':
-
-    if os.path.isdir(outdir) == False: 
-        os.makedirs(outdir);
-
-    print 'Make sure the below data files are ready: \n   {}\n'.format(datafil)
-    print '   {}\n'.format(precip_datafil)
-    print '   {}\n'.format(tmax_datafil)
-    print '   {}\n'.format(tmin_datafil)
-    print '   {}\n'.format(solrad_datafil)
-
-    print 'Make sure the below parameter file is ready: \n   {}\n'.format(parfil)
+#if model_mode != 'MODFLOW':
+#
+#    print 'Make sure the below data files are ready: \n   {}\n'.format(datafil)
+#    print '   {}\n'.format(precip_datafil)
+#    print '   {}\n'.format(tmax_datafil)
+#    print '   {}\n'.format(tmin_datafil)
+#    print '   {}\n'.format(solrad_datafil)
+#
+#    print 'Make sure the below parameter file is ready: \n   {}\n'.format(parfil)
 
 
 if platform.system() == 'Linux':
@@ -578,13 +568,19 @@ else:
 
 
 #cmd_str_cmt = '#' + GSFLOW_exe_cmt + ' ' + con_filname + ' &> out.txt'
-print 'To run command-line execution, enter at prompt: \n  {}\n'.format(cmd_str)
+print '*** To run command-line execution --> '
+print '***   Go to ' +  settings_test.control_dir
+print '***   and enter at prompt: \n  {}\n'.format(cmd_str)
 
 runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
 fobj = open(runscriptfil, 'w+') 
 #fobj.write(cmd_str_cmt);
-fobj.write('\n\n');
-fobj.write(cmd_str);
+fobj.write('pwd0=`pwd` \n')
+fobj.write('cd ' + settings_test.control_dir + '\n\n')
+fobj.write('echo Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
+fobj.write("echo"  + " '" + cmd_str + "' \n\n");
+fobj.write(cmd_str + '\n\n');
+fobj.write('cd $pwd0 \n')
 fobj.close()
 os.chmod(runscriptfil, 0777)
 

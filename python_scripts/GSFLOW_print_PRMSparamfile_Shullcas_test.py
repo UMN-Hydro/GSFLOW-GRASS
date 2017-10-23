@@ -7,8 +7,6 @@ Based on: GSFLOW_print_PRMSparamfile4.m
 @author: gcng
 """
 import numpy as np # matlab core
-import scipy as sp # matlab toolboxes
-import matplotlib.pyplot as plt # matlab-like plots
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 #from ConfigParser import SafeConfigParser
@@ -991,13 +989,6 @@ for ii in range(NumPars):
         ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[ii]))
         par_num[ii] = par_num[ii] * dim_value[ind]        
 
-# create PRMS input directory if it does not exist:
-if not os.path.isdir(settings_test.PRMSinput_dir):
-    os.makedirs(settings_test.PRMSinput_dir)
-    
-# while we're at it, create PRMS output file if it does not exist:
-if not os.path.isdir(settings_test.PRMSoutput_dir):
-    os.mkdir(settings_test.PRMSoutput_dir)
 
 # - Write to Parameter file
 line1 = '####'

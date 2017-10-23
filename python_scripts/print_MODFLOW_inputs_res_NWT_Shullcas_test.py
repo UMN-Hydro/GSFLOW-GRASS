@@ -9,12 +9,10 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 
 # print_MODFLOW_inputs
 
-import numpy as np
 from MODFLOW_scripts import MODFLOW_NWT_lib_Shullcas_test as mf # functions to write individual MODFLOW files
-import os  # os functions
-#from ConfigParser import SafeConfigParser
 import settings_test
 import platform
+import datetime as dt
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -42,18 +40,26 @@ fl_BoundConstH = 0 # 1 for const head at high elev boundary, needed for numerica
 #    # MODFLOW output files
 #    GSFLOW_outdir = GSFLOW_DIR + slashstr + 'outputs' + slashstr + 'MODFLOW_NWT' + slashstr
 MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr ### Change here for MODFLOW_indir
-MODFLOW_outdir = settings_test.MODFLOWoutput_dir + slashstr ### Change here for MODFLOW_indir
+MODFLOW_indir_rel = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr ### Change here for MODFLOW_indir
+MODFLOW_outdir_rel = '..' + slashstr + settings_test.MODFLOWoutput_dir_rel + slashstr ### Change here for MODFLOW_indir
 
 infile_pre = settings_test.PROJ_CODE
 
-NLAY = 1;
-DZ = [200] # [NLAYx1] [m] ***testing
-# DZ = [350, 100] # [NLAYx1] [m] ***testing
+#NLAY = 1;
+#DZ = [200] # [NLAYx1] [m] ***testing
+## DZ = [350, 100] # [NLAYx1] [m] ***testing
+NLAY = settings_test.NLAY
+DZ = settings_test.DZ
+
 
 # length of transient stress period (follows 1-day steady-state period) [d]
 # perlen_tr = 365; # [d], ok if too long
 # perlen_tr = 365*5 + ceil(365*5/4); # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
-perlen_tr =  1131 + 1 # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
+#perlen_tr =  1131 + 1 # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
+start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
+end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")
+delt = end_date - start_date
+perlen_tr = delt.days
 
 GIS_indir = settings_test.GISinput_dir + slashstr
 
@@ -76,14 +82,6 @@ segment_fil_all = [GIS_indir + 'segments_tmp_4A_INFORMATION.txt',
                    GIS_indir + 'segments_tmp_4C_DOWNSTREAM.txt']
 
 
-# create MODFLOW input directory if it does not exist:
-if not os.path.isdir(MODFLOW_indir):
-    os.makedirs(MODFLOW_indir)
-    
-# while we're at it, create MODFLOW output file if it does not exist:
-if not os.path.isdir(MODFLOW_outdir):
-    os.makedirs(MODFLOW_outdir)
-
 ## 
 dis_fil = mf.write_dis_MOD2_f(MODFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr);
 ba6_fil = mf.write_ba6_MOD3_2(MODFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
@@ -104,5 +102,5 @@ sfr_fil = mf.make_sfr2_f_Mannings(MODFLOW_indir, infile_pre, reach_fil, dis_fil,
 mf.write_OC_PCG_MOD_f(MODFLOW_indir, infile_pre, perlen_tr);
 
 # Write namefile
-nam_fil = mf.write_nam_MOD_f2_NWT(MODFLOW_indir, MODFLOW_outdir, infile_pre, fil_res_in, sw_2005_NWT);
+nam_fil = mf.write_nam_MOD_f2_NWT(MODFLOW_indir, MODFLOW_indir_rel, MODFLOW_outdir_rel, infile_pre, fil_res_in, sw_2005_NWT);
 

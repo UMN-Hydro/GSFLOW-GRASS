@@ -20,7 +20,7 @@ else:
 
 surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
 
-NLAY = 1
+NLAY = settings_test.NLAY
 
 hydcond_fil = 'hydcond_test.txt'
 
@@ -116,11 +116,11 @@ if sw_scheme == 2 or sw_scheme == 3:
     hydcond[:,:,0] = hydcond0
 
 # %% Plot
-fig = plt.figure(figsize=(12,12))
 #ax = fig.add_subplot(2,2,1)
 #im = ax.imshow(TOP_to_plot)
 
 for ilay in range(NLAY):
+    fig = plt.figure(figsize=(12,12))
 #    plt.subplot(2,2,ilay+1)
     im = plt.imshow(hydcond[:,:,ilay])
 #    im.set_clim(3800, 6200)
