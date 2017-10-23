@@ -19,6 +19,9 @@ GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
 DEM = parser.get('settings', 'DEM')
 GISinput_dir = parser.get('settings', 'GISinput_dir')
 
+START_DATE = parser.get('settings', 'start_date')
+END_DATE = parser.get('settings', 'end_date')
+
 PROJ_CODE=PROJ_NAME.replace(" ", "") # remove blank spaces
 
 gsflow_simdir = parser.get('settings', 'gsflow_simdir')

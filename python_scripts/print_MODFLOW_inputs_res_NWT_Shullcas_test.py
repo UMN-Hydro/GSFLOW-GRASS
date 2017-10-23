@@ -44,7 +44,7 @@ fl_BoundConstH = 0 # 1 for const head at high elev boundary, needed for numerica
 MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr ### Change here for MODFLOW_indir
 MODFLOW_outdir = settings_test.MODFLOWoutput_dir + slashstr ### Change here for MODFLOW_indir
 
-infile_pre = 'test2lay_py';
+infile_pre = settings_test.PROJ_CODE
 
 NLAY = 1;
 DZ = [200] # [NLAYx1] [m] ***testing

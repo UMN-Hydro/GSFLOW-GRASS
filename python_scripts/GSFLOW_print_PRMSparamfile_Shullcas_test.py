@@ -14,6 +14,7 @@ import pandas as pd # for data structures and reading in data from text file
 #from ConfigParser import SafeConfigParser
 import settings_test
 import platform
+from MODFLOW_scripts import MODFLOW_NWT_lib_Shullcas_test as mf
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -84,7 +85,8 @@ HRUfil = settings_test.GISinput_dir + slashstr + 'HRUs_tmp.txt'
 segmentfil = settings_test.GISinput_dir + slashstr + 'segments_tmp_4A_INFORMATION.txt'
 reachfil = settings_test.GISinput_dir + slashstr + 'reaches_tmp.txt' # *** NEW FOR GSFLOW, only required here for NREACH, other info is for SFR file
 gvrfil = settings_test.GISinput_dir + slashstr + 'gravity_reservoirs_tmp.txt' # *** NEW FOR GSFLOW
-MODfil = settings_test.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
+GISgridfil = settings_test.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
+
 # *************************************************************************
 
 #%%
@@ -106,19 +108,7 @@ HRUdata = pd.read_csv(HRUfil)
 reachdata = pd.read_csv(reachfil)
 gvrdata = pd.read_csv(gvrfil)
 
-f = file(MODfil, 'r')
-MODdata = {}
-for i in range(6):
-    line = f.readline()
-    line = line.rstrip() # remove newline characters
-    key, value = line.split(': ')
-    if key in ["rows", "cols"]:
-        try:
-          value = int(value)
-        except:
-          value = float(value)
-        MODdata[key] = value
-f.close()
+griddata = mf.read_grid_file_header(GISgridfil)
 
 
 # 2 lines available for comments
@@ -180,12 +170,12 @@ if model_mode == 'GSFLOW':
 # new for GSFLOW:
 # ****to be read in from GIS info****
 dim_name.append('ngwcell')  # total num MODFLOW GW cells 
-dim_value.append(MODdata['rows'] * MODdata['cols'])
+dim_value.append(griddata['rows'] * griddata['cols'])
 
 # new for GSFLOW:
 # ****to be read in from GIS info****
 dim_name.append('nhrucell')  # total num gravity reservoirs (intersections of hru and grid cells)
-dim_value.append(max(gvrdata.gvr_hru_id))
+dim_value.append(len(gvrdata.gvr_hru_id))
 
 # -- Time-series input data dimensions --
 # (some of these data are not needed but are handy to output for calibration)
