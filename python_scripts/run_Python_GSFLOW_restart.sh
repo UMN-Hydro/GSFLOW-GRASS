@@ -1,8 +1,8 @@
 #!/bin/bash
 
 preproc_dir="/home/gcng/workspace/matlab_files/GSFLOW_pre-processor"
-gsflow_simdir="/media/gcng/STORAGE3A/GSFLOW/Shullcas_CrystalLauren5_works_full"
-proj_code="Shullcas"
+gsflow_simdir="/media/gcng/STORAGE3A/GSFLOW/Shullcas_CrystalLauren5_works_res"
+proj_code="Shullcas_res"
 
 python2.7 ${preproc_dir}/python_scripts/settings_test.py
 python2.7 ${preproc_dir}/python_scripts/Create_hydcond_array.py

@@ -102,12 +102,14 @@ ymdhms_m = ymdhms_v[0]
 # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
 # as example for how to stitch together many restarts using a shell script)
 if model_mode == 'GSFLOW':
-    fl_load_init = 0 # 1 to load previously saved initial conditions
-    # load initial conditions from this file
-#     load_init_file = PRMSoutput_dir + 'init_cond_infile' # load initial conditions from this file
-    load_init_file = outdir_rel + 'init_cond_outfile' # eventually change so user-specified?
+    if settings_test.sw_1spinup_2restart == 1:
+        fl_load_init = 0 # 1 to load previously saved initial conditions
+    elif settings_test.sw_1spinup_2restart == 2:
+        fl_load_init = 1 # 1 to load previously saved initial conditions
+        # load initial conditions from this file
+        load_init_file = settings_test.restart_PRMSfil
 
-fl_save_init = 1 # 1 to save outputs as initial conditions
+fl_save_init = 1 # 1 to save outputs as initial conditions for restart runs
 save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
 
 # 1: use all pre-processed met data

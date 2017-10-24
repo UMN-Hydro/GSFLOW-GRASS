@@ -1,7 +1,7 @@
 #!/bin/bash
 
 preproc_dir="/home/gcng/workspace/matlab_files/GSFLOW_pre-processor"
-gsflow_simdir="/media/gcng/STORAGE3A/GSFLOW/Shullcas_CrystalLauren5_works_full"
+gsflow_simdir="/media/gcng/STORAGE3A/GSFLOW/Shullcas_CrystalLauren5_works"
 proj_code="Shullcas"
 
 python2.7 ${preproc_dir}/python_scripts/settings_test.py

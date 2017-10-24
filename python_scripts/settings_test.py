@@ -17,13 +17,20 @@ PROJ_NAME = parser.get('settings', 'proj_name')
 
 # command-line executable for GSFLOW (just used to print message)
 GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
-DEM = parser.get('settings', 'DEM')
+DEM = parser.get('settings', 'DEM') # name of file w/ topography data
 GISinput_dir = parser.get('settings', 'GISinput_dir')
 climate_data_file = parser.get('settings', 'climate_data_file')
 
 PROJ_CODE=PROJ_NAME.replace(" ", "") # remove blank spaces
 
 gsflow_simdir = parser.get('settings', 'gsflow_simdir')
+
+# 1: for spinup, 2: for restart
+sw_1spinup_2restart = int(parser.get('settings', 'sw_1spinup_2restart'))
+if sw_1spinup_2restart == 2:
+    restart_PRMSfil = parser.get('settings', 'restart_PRMSfil')
+    restart_MODfil = parser.get('settings', 'restart_MODfil')
+
 
 # for relative pathname
 PRMSinput_dir_rel = 'inputs' + slashstr + 'PRMS_GSFLOW' 

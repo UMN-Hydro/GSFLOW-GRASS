@@ -946,7 +946,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     nsfrsets = 40  #Maximum number of different sets of trailing waves used to allocate arrays.
     irtflg = 0     #Flag whether transient streamflow routing is active
     
-    project_name = 'TestProject'                                             # used to name the output file (.sfr)
+    project_name = settings_test.PROJ_CODE                                             # used to name the output file (.sfr)
     
     # data_indir = '/home/gcng/workspace/matlab_files/GSFLOW_pre-processor/MODFLOW_scripts/sfr_final/data/';
     # data_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/';
@@ -1394,27 +1394,28 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     IETFLG = 0     # ~=0: Evaporation will be simulated. (*sagehen=0; GSFLOW: =0 for PRMS ET only, =1 for additional ET from below soil zone)
     IUZFCB1 = 61    #Flag for writing rates of groundwater recharge, ET&groundwater discharge in UBUDSV format.0:wont be written, >0: file unit number
     IUZFCB2 = 0   #Writing groundwater recharge, discharge&ET in UBUDSV3 format; >0: file unit number
-    NTRAIL2 = 25   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
+#    NTRAIL2 = 25   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
+    NTRAIL2 = 15   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
     NSETS2 = 100    #Number of wave sets to simulate multiple infiltration periods, 20 usually ok.
     NUZGAG = 0     # number of cells for which to print detailed info on UZ water budget and theta (see uzgag below)
     SURFDEP = 1.0  # average undulation depth within finite diff cell (?)
     
     #Item 2-7:
-    project_name = 'TestProject'   # used to name the output file (.uzf)
+    project_name = settings_test.PROJ_CODE   # used to name the output file (.uzf)
     iuzfbnd = np.copy(IBOUND) # [NROW,NCOL] layer w/ top as land-surface and/or w/ discharge/recharge (see NUZTOP), default: mask with 1's
     iuzfbnd[iuzfbnd<0] = 0
+    iuzfbnd[iuzfbnd>0] = 1
     if IRUNFLG > 0:
         print 'Error!  Input scripts only set up for IRUNFLG = 0!'
         quit()        
 #        irunbnd = importdata('./data/irunbnd.dat'); # [NROW,NCOL] only for IRUNFLG>0, stream seg to which gw discharge is routed
     # vks = importdata('./data/vks.dat'); # [NROW,NCOL] saturated K, no needed if using value in LPF (IUZFOPT=2), [m/d]
-    vks = 4.*np.ones((NROW,NCOL)) 
+    vks = np.copy(iuzfbnd) * 4.
     # Ok to have following parameters as SCALAR (constant for all gridcells) or as ARRAY (NROWxNCOL)
     eps = 3.5  #Brooks-Corey epsilon of the unsaturated zone.
-    thts = 0.35    #Saturated water content of the unsaturated zone
-    thti = 0.0     #initial water content for each vertical column of cells-not specified for steady-state simulations
+    thts = np.copy(iuzfbnd) * 0.35    #Saturated water content of the unsaturated zone
     if NUZGAG > 0:
-        print 'Error!  Input scripts only set up for UZGAG = 0!'
+        print 'Input scripts only set up for UZGAG = 0! Exiting...'
         quit()        
 #        uzgag = importdata('./data/uzgag.dat'); # only for NUZGAG>0; row, col, file unit for output, IUZOPT (flag for what data to output)    
     # - infiltration (in general, not needed  bc provided by PRMS, but option to apply for initial SS period for MODFLOW)
@@ -1476,7 +1477,9 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
 #    finf[:] = 8.8e-6    
 #    finf[:] = 8.8e-4    
 
-    finf = np.ones((NROW,NCOL))
+#    finf = np.ones((NROW,NCOL))
+    finf = np.copy(iuzfbnd)
+    
     try:
        float(settings_test.finf0)
        finf = float(settings_test.finf0) * finf
@@ -1517,7 +1520,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
         NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
         extdp = 15.0*np.ones((NROW,NCOL))   #array of ET extiction zone~altitude of the soil-zone base;specified at least for 1st stress period; only for IETFLG>0
         NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
-        extwc = thts*0.9*np.ones((NROW,NCOL)) #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
+#        extwc = thts*0.9*np.ones((NROW,NCOL)) #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
+        extwc = thts*0.9 #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
     # -------------------------------------------------------------------------
     
     # Ouput file

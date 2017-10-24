@@ -19,29 +19,16 @@ if platform.system() == 'Linux':
 else:
     slashstr = '\\'
 
-#GSFLOW_DIR = settings_test.LOCAL_DIR + "/GSFLOW/"
-GSFLOW_DIR = settings_test.gsflow_simdir + "/GSFLOW/"
 
 # - directories
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 
                 # carried out with MODFLOW-NWT code) 
 fl_BoundConstH = 0 # 1 for const head at high elev boundary, needed for numerical 
-                    # convergence for AGU2016 poster.  Maybe resolved with MODFLOW-NWT?
+                    # convergence for AGU2016 poster.  Seems resolved with MODFLOW-NWT
 
-#if sw_2005_NWT == 1:
-#    # MODFLOW input files
-#    GSFLOW_indir = GSFLOW_DIR + slashstr + 'inputs' + slashstr + 'MODFLOW_2005' + slashstr
-#    # MODFLOW output files
-#    GSFLOW_outdir = GSFLOW_DIR + slashstr + 'outputs' + slashstr + 'MODFLOW_2005' + slashstr
-#    
-#elif sw_2005_NWT == 2:
-#    # MODFLOW input files
-#    GSFLOW_indir = GSFLOW_DIR + slashstr + 'inputs' + slashstr + 'MODFLOW_NWT' + slashstr
-#    # MODFLOW output files
-#    GSFLOW_outdir = GSFLOW_DIR + slashstr + 'outputs' + slashstr + 'MODFLOW_NWT' + slashstr
-MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr ### Change here for MODFLOW_indir
-MODFLOW_indir_rel = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr ### Change here for MODFLOW_indir
-MODFLOW_outdir_rel = '..' + slashstr + settings_test.MODFLOWoutput_dir_rel + slashstr ### Change here for MODFLOW_indir
+MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr 
+MODFLOW_indir_rel = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr 
+MODFLOW_outdir_rel = '..' + slashstr + settings_test.MODFLOWoutput_dir_rel + slashstr 
 
 infile_pre = settings_test.PROJ_CODE
 
@@ -52,10 +39,7 @@ NLAY = settings_test.NLAY
 DZ = settings_test.DZ
 
 
-# length of transient stress period (follows 1-day steady-state period) [d]
-# perlen_tr = 365; # [d], ok if too long
-# perlen_tr = 365*5 + ceil(365*5/4); # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
-#perlen_tr =  1131 + 1 # [d], includes leap years; ok if too long (I think, but maybe run time is longer?)
+# length of transient stress period (follows 1-day steady-state period, ok if longer than actual GSFLOW period) [d]
 start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
 end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")
 delt = end_date - start_date
@@ -65,7 +49,8 @@ GIS_indir = settings_test.GISinput_dir + slashstr
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file
-#fil_res_in = '/home/gcng/workspace/Pfil_res_inrojectFiles/AndesWaterResources/GSFLOW/outputs/MODFLOW/test2lay_melt_30yr.out' % empty string to not use restart file
+if settings_test.sw_1spinup_2restart == 2:
+    fil_res_in = settings_test.restart_MODfil
 
 # for various files: ba6, dis, uzf, lpf
 surfz_fil = GIS_indir + settings_test.DEM + '.asc'
