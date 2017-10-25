@@ -1,0 +1,27 @@
+10/25/17
+
+---------------
+To run on Linux 
+---------------
+Run the shell script (in python_scripts): run_Python_GSFLOW_current.sh
+
+Notes:
+- need to customize inputs in settings.ini (can be different file name; if so, set it file name in "input_file" in run_Python_GSFLOW_current.sh
+- For settings.ini file, see settings_test.py for more info about each entry.  In particular: 
+	- hydcond and finf are set to values for spatially constant entries, and they are set to file name for spatially distributed entries. Create_hydcond_array.py is run to create spatially distributed K (nothing exists yet for spatially distributed finf) 
+	- for NLAY>1, dz should be comma-separated list of dz values.  E.g., dz=50, 100
+- Need to hit "Enter" after model completes - will figure out later how to take care of this.
+
+
+------------------
+To run on Windows
+------------------
+See run_Python_GSFLOW_current.sh as guide to how to manually enter at command prompt.
+
+Notes:
+- Create customized settings.ini, make sure it is named settings.ini.  You can name it something else with more informative file name, but then just copy it into "settings.ini" before you run scripts.  File should be in the directory that you run things in from command prompt.
+- See above Notes about settings.ini entries
+- Run the Python scripts in the order shown
+- Unsure if run_GSFLOW.py will work properly on Windows, but I THINK it should.  If it does not, simply run manually the GSFLOW executable (with control file) at command prompt, as you have been doing.
+- If run_GSFLOW.py DOES work: you may need to hit "Enter" after the model completes. 
+
