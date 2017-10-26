@@ -11,13 +11,17 @@ import settings_test
 
 if platform.system() == 'Linux':
     slashstr = '/'
-else:
+elif platform.system() == 'Windows':
     slashstr = '\\'
 
-cmd_str = settings_test.control_dir + slashstr + settings_test.PROJ_CODE + '_GSFLOW.sh'
+model_mode = 'GSFLOW'
+cmd_str = settings_test.control_dir + slashstr + settings_test.PROJ_CODE + '_' + model_mode
 
 if platform.system() == 'Linux':
-    cmd_str = cmd_str + ' > out.txt'
+    cmd_str = cmd_str + '.sh > out.txt'
+elif platform.system() == 'Windows':
+    cmd_str = cmd_str + '.bat'
 
 os.system(cmd_str)
+
 

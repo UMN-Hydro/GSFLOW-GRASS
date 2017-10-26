@@ -565,7 +565,7 @@ fobj.close()
 
 if platform.system() == 'Linux':
     cmd_str = settings_test.GSFLOW_exe + ' ' + con_filname + ' &> out.txt'
-else:
+elif platform.system() == 'Windows':
     cmd_str = settings_test.GSFLOW_exe + ' ' + con_filname
 
 
@@ -574,16 +574,27 @@ print '*** To run command-line execution --> '
 print '***   Go to ' +  settings_test.control_dir
 print '***   and enter at prompt: \n  {}\n'.format(cmd_str)
 
-runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
-fobj = open(runscriptfil, 'w+') 
-#fobj.write(cmd_str_cmt);
-fobj.write('pwd0=`pwd` \n')
-fobj.write('cd ' + settings_test.control_dir + '\n\n')
-fobj.write('echo Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
-fobj.write("echo"  + " '" + cmd_str + "' \n\n");
-fobj.write(cmd_str + '\n\n');
-fobj.write('cd $pwd0 \n')
-fobj.close()
-os.chmod(runscriptfil, 0777)
-
+if platform.system() == 'Linux':
+    runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
+    fobj = open(runscriptfil, 'w+') 
+    fobj.write('pwd0=`pwd` \n')
+    fobj.write('cd ' + settings_test.control_dir + '\n\n')
+    fobj.write('echo Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
+    fobj.write("echo"  + " '" + cmd_str + "' \n\n");
+    fobj.write(cmd_str + '\n\n');
+    fobj.write('cd $pwd0 \n')
+    fobj.close()
+    os.chmod(runscriptfil, 0777)
+elif platform.system() == 'Windows':
+    runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.bat'
+    fobj = open(runscriptfil, 'w+') 
+    fobj.write('SET CURRENTDIR="%cd%" \n')
+    fobj.write('cd ' + settings_test.control_dir + '\n\n')
+    fobj.write('ECHO Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
+    fobj.write("ECHO"  + " '" + cmd_str + "' \n\n");
+    fobj.write(cmd_str + '\n\n');
+    fobj.write('cd %CURRENTDIR% \n')
+    fobj.close()
+    
+    
 
