@@ -26,9 +26,9 @@ Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
 #==============================================================================
 # ## Control file
 # 
-# # see PRMS manual: 
-# #   - list of control variables in Appendix 1 Table 1-2 (p.33-36), 
-# #   - description of control file on p.126
+# # see GSFLOW manual: 
+# #   - list of control parameters in Appendix 1 Table A1-1 (p.135-136), 
+# #   - description of control file begins on p.134
 # 
 # # general syntax (various parameters listed in succession):
 # #   line 1: '####'
@@ -37,8 +37,6 @@ Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
 # #   line 4: data type -> 1=int, 2=single prec, 3=double prec, 4=char str
 # #   line 5-end: parameter values, 1 per line
 # #
-# # *** CUSTOMIZE TO YOUR COMPUTER! *****************************************
-# # NOTE: '/' is directory separator for Linux, '\' for Windows!!
 #==============================================================================
 
 import datetime as dt
@@ -61,88 +59,17 @@ if platform.system() == 'Linux':
 else:
     slashstr = '\\'
 
-# control file that will be written with this script
-# (will be in control_dir with model mode suffix)
-
-con_filname0 = settings_test.PROJ_CODE
-
-
 # - choose one:
 # model_mode = 'WRITE_CLIMATE'; # creates pre-processed climate_hru files
 # model_mode = 'PRMS'; # run only PRMS
 # model_mode = 'MODFLOW'; # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-# parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
-parfil_pre = settings_test.PROJ_CODE # will have '_', model_mode following
-
-# MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
-namfil = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr + settings_test.PROJ_CODE + '.nam'
-
 # input directory that the control file will point to for reading in PRMS_GSFLOW inputs
 indir_rel = '..' + slashstr + settings_test.PRMSinput_dir_rel + slashstr 
 
-
 # output directory that the control file will point to for creating PRMS_GSFLOW output files (include slash at end!)
 outdir_rel = '..' + slashstr + settings_test.PRMSoutput_dir_rel + slashstr 
-
-# model start and end dates
-start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
-end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")
-
-ymdhms_v = np.array([datetime_to_list(start_date),
-                     datetime_to_list(end_date)])                     
-
-#First MODFLOW initial stress period (can be earlier than model start date;
-# useful when using load_init_file and modflow period represents longer 
-# period that started earlier).  
-ymdhms_m = ymdhms_v[0]
-
-# initial condition files 
-# (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
-# as example for how to stitch together many restarts using a shell script)
-if model_mode == 'GSFLOW':
-    if settings_test.sw_1spinup_2restart == 1:
-        fl_load_init = 0 # 1 to load previously saved initial conditions
-    elif settings_test.sw_1spinup_2restart == 2:
-        fl_load_init = 1 # 1 to load previously saved initial conditions
-        # load initial conditions from this file
-        load_init_file = settings_test.restart_PRMSfil
-
-fl_save_init = 1 # 1 to save outputs as initial conditions for restart runs
-save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
-
-# 1: use all pre-processed met data
-fl_all_climate_hru = 0 # (could set to = False)
-
-if fl_all_climate_hru == 0:
-    # pick one:
-#     precip_module = 'precip_1sta'
-    precip_module = 'climate_hru'
-    
-    # pick one:
-#     temp_module = 'temp_1sta';
-    temp_module = 'climate_hru';
-
-    et_module = 'potet_pt' # set pt_alpha(nhru, nmonth), currently all = 1.26
-    solrad_module = 'ddsolrad'
-
-# If climate_hru, use the following file names (else ignored)
-# (note that WRITE_CLIMATE will produce files with the below names)
-# precip_datafil = strcat(PRMSinput_dir, 'precip_rep30yr.day'); # w/o meltwater
-precip_datafil = indir_rel + 'precip.day'
-# tmax_datafil = strcat(PRMSinput_dir, 'tmax_rep30yr_tadj_plus1C.day'); # to be safe: set as F
-# tmin_datafil = strcat(PRMSinput_dir, 'tmin_rep30yr_tadj_plus1C.day'); # to be safe: set as F
-tmax_datafil = indir_rel + 'tmax.day' # to be safe: set as F
-tmin_datafil = indir_rel + 'tmin.day' # to be safe: set as F
-solrad_datafil = indir_rel + 'swrad.day'
-pet_datafil = indir_rel + 'potet.day'
-humidity_datafil = indir_rel + 'humidity.day' # for potet_pm
-transp_datafil = indir_rel + 'transp.day' # may not be needed in GSFLOW? Is needed!
-
-# data file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
-datafil = indir_rel + 'empty.day'
-
 
 
 
@@ -160,16 +87,20 @@ con_par_type = [] # 1=int, 2=single prec, 3=double prec, 4=char str
 con_par_values = [] # control parameter values
 
 
-# First 2 blocks should be specified, rest are optional (though default 
+# First 2 sections should be specified, rest are optional (though default 
 # values exist for all variables, see last column of App 1 Table 1-2 p.33).  
 
-# 1 - Variables pertaining to simulation execution and required input and output files 
-#     (some variable values left out if default is the only choice we want)
+#############
+# Section 1 #
+# Variables pertaining to simulation execution and required input and output files 
+# (some variable values left out if default is the only choice we want)
 
 con_par_name.append('model_mode') # typically 'PRMS', also 'FROST' or 'WRITE_CLIMATE'
 con_par_type.append(4) 
 con_par_values.append(model_mode) #
 
+# MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
+namfil = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr + settings_test.PROJ_CODE + '.nam'
 con_par_name.append('modflow_name')
 con_par_type.append(4) 
 con_par_values.append(namfil)
@@ -177,12 +108,32 @@ con_par_values.append(namfil)
 # no more inputs needed for MODFLOW-only runs
 if model_mode != 'MODFLOW':
 
+    # model start and end dates
+    start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
+    end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")       
+    ymdhms_v = np.array([datetime_to_list(start_date),
+                         datetime_to_list(end_date)])                     
+                         
+    con_par_name.append('start_time')
+    con_par_type.append(1)
+    con_par_values.append(ymdhms_v[0,:])
+
+    con_par_name.append('end_time')
+    con_par_type.append(1)
+    con_par_values.append(ymdhms_v[1,:]) # year, month, day, hour, minute, second
+
+    
     # for GSFLOW
     if model_mode == 'GSFLOW':
         con_par_name.append('csv_output_file')
         con_par_type.append(4)
         con_par_values.append(outdir_rel + 'gsflow.csv')
-        
+
+
+        #First MODFLOW initial stress period (can be earlier than model start date;
+        # useful when using load_init_file and modflow period represents longer 
+        # period that started earlier).  
+        ymdhms_m = ymdhms_v[0]        
         con_par_name.append('modflow_time_zero')
         con_par_type.append(1)
         con_par_values.append(ymdhms_m) # year, month, day, hour, minute, second
@@ -199,19 +150,14 @@ if model_mode != 'MODFLOW':
         con_par_type.append(1)
         con_par_values.append(7)
     
-
-    con_par_name.append('start_time')
-    con_par_type.append(1)
-    con_par_values.append(ymdhms_v[0,:])
-
-    con_par_name.append('end_time')
-    con_par_type.append(1)
-    con_par_values.append(ymdhms_v[1,:]) # year, month, day, hour, minute, second
-
+    # data (observation) file that the control file will point to (generate with PRMS_print_climate_hru_files2.m)
+    datafil = indir_rel + 'empty.day'  # empty file if using climate_hru
     con_par_name.append('data_file')
     con_par_type.append(4)
     con_par_values.append(datafil)
 
+    # parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
+    parfil_pre = settings_test.PROJ_CODE # will have '_', model_mode following
     parfil = indir_rel + parfil_pre + '_' + model_mode + '.param'
     con_par_name.append('param_file')
     con_par_type.append(4)
@@ -230,38 +176,49 @@ if model_mode != 'MODFLOW':
     con_par_type.append(1)
     con_par_values.append(1)
 
-    # 2 - Variables pertaining to module selection and simulation options
+    #############
+    # Section 2 #
+    # Variables pertaining to module selection and simulation options
 
     # - module selection:
     #    See PRMS manual: Table 2 (pp. 12-13), summary pp. 14-16, details in
     #    Appendix 1 (pp. 29-122)
 
+    # pick one:
+#     precip_module = 'precip_1sta'
+    precip_module = 'climate_hru'
+    
+    # pick one:
+#     temp_module = 'temp_1sta';
+    temp_module = 'climate_hru';
+
+    et_module = 'potet_pt' # Priestly-Talyor, set pt_alpha(nhru, nmonth), currently all = 1.26
+    solrad_module = 'ddsolrad'
+    
+    # If climate_hru, use the following file names (else ignored)
+    # (note that WRITE_CLIMATE will produce files with the below names)
+    precip_datafil = indir_rel + 'precip.day' # if precip_module = 'climate_hru'
+    tmax_datafil = indir_rel + 'tmax.day' # set as F, if temp_module = 'climate_hru'
+    tmin_datafil = indir_rel + 'tmin.day' # set as F, if temp_module = 'climate_hru'
+    solrad_datafil = indir_rel + 'swrad.day' # if solrad_module = 'climate_hru'
+    pet_datafil = indir_rel + 'potet.day' # if et_module = 'climate_hru'
+    humidity_datafil = indir_rel + 'humidity.day' # if et_module = 'climate_hru'
+    wind_datafil = indir_rel + 'wind.day' # if et_module = 'climate_hru'
+    transp_datafil = indir_rel + 'transp.day' # if transp_module = 'climate_hru'
+    
     # meteorological data
     con_par_name.append('precip_module') # precip distribution method (should match temp)
     con_par_type.append(4) 
-    if fl_all_climate_hru == 1:
-        con_par_values.append('climate_hru') # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
-    else:
-        con_par_values.append(precip_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
+    con_par_values.append(precip_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
     
     if con_par_values[-1] == 'climate_hru': # index -1 for last element
         con_par_name.append('precip_day') # file with precip data for each HRU
         con_par_type.append(4) 
-        con_par_values.append(precip_datafil) # file name
-    
-
-        # Below: harmless mistake in original matlab version
-
-    con_par_name.append('humidity_day')
-    con_par_type.append(4)
-    con_par_values.append(humidity_datafil) # file name
+        con_par_values.append(precip_datafil) # file name    
 
     con_par_name.append('temp_module') # temperature distribution method (should match precip)
     con_par_type.append(4) 
-    if fl_all_climate_hru == 1:
-        con_par_values.append('climate_hru') # climate_hru, temp_1sta, temp_dist2, temp_laps, ide_dist, xyz_dist
-    else:
-        con_par_values.append(temp_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
+    con_par_values.append(temp_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
     
     if con_par_values[-1] == 'climate_hru':
         con_par_name.append('tmax_day') # file with precip data for each HRU
@@ -271,13 +228,9 @@ if model_mode != 'MODFLOW':
         con_par_type.append(4) 
         con_par_values.append(tmin_datafil) # file name
     
-
     con_par_name.append('solrad_module') # solar rad distribution method
     con_par_type.append(4) 
-    if fl_all_climate_hru == 1:
-        con_par_values.append('climate_hru') # climate_hru, temp_1sta, temp_dist2, temp_laps, ide_dist, xyz_dist
-    else:
-        con_par_values.append(solrad_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
+    con_par_values.append(solrad_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
     
     if con_par_values[-1] == 'climate_hru':
         con_par_name.append('swrad_day') # file with precip data for each HRU
@@ -286,14 +239,19 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('et_module') # method for calculating ET
     con_par_type.append(4) 
-    if fl_all_climate_hru == 1:
-        con_par_values.append('climate_hru') # climate_hru, temp_1sta, temp_dist2, temp_laps, ide_dist, xyz_dist
-    else:
-        con_par_values.append(et_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
+    con_par_values.append(et_module) # climate_hru, ide_dist, precip_1sta, precip_dist2, precip_laps, or xyz_dist
     if con_par_values[-1] == 'climate_hru':
         con_par_name.append('potet_day,') # file with precip data for each HRU
         con_par_type.append(4) 
         con_par_values.append(pet_datafil) # file name
+    elif con_par_values[-1] == 'potet_pm':
+        con_par_name.append('humidity_day')
+        con_par_type.append(4)
+        con_par_values.append(humidity_datafil) # file name
+        con_par_name.append('wind_day')
+        con_par_type.append(4)
+        con_par_values.append(humidity_datafil) # file name
+    
 
     con_par_name.append('transp_module') # transpiration simulation method
     con_par_type.append(4) 
@@ -318,12 +276,14 @@ if model_mode != 'MODFLOW':
     con_par_type.append(1) 
     con_par_values.append(0) # 0 for no, use default    
 
+
+    # runoff
     con_par_name.append('srunoff_module') # surface runoff/infil calc method
     con_par_type.append(4) 
 #     con_par_values.append('srunoff_smidx_casc') # runoff_carea or srunoff_smidx
     con_par_values.append('srunoff_smidx') # runoff_carea or srunoff_smidx (updated name for GSFLOW)
 
-    # strmflow: directly routes runoff to basin outlet 
+    # strmflow for PRMS-only: directly routes runoff to basin outlet 
     # muskingum: moves through stream segments, change in stream segment storages is by Muskingum eq
     # strmflow_in_out: moves through stream segments, input to stream segment = output to stream segment
     # strmflow_lake: for lakes...
@@ -333,8 +293,8 @@ if model_mode != 'MODFLOW':
         con_par_type.append(4) 
         con_par_values.append('strmflow_in_out') # strmflow, muskingum, strmflow_in_out, or strmflow_lake
     
-    # cascade module
-    ncascade = 0
+    # cascade module (hru-to-hru routing)
+    ncascade = 0 # 0 b/c hru's are sub-basins that flow directly to stream
     if ncascade > 0: # default: ncascade = 0
         con_par_name.append('cascade_flag') # runoff routing between HRU's
         con_par_type.append(1) 
@@ -350,8 +310,11 @@ if model_mode != 'MODFLOW':
     con_par_values.append(0)
 
 
-    # 3 - Output file: Statistic Variables (statvar) Files
-    #     See list in PRMS manual Table 1-5 pp.61-74 for variables you can print
+    #############
+    # Section 3 #
+    # Output file: Statistic Variables (statvar) Files
+    # See list in GSFLOW manual Table A1-2 and PRMS manual Table 1-5 pp.61-74 
+    # for variables you can print
     con_par_name.append('statsON_OFF') # flag to create Statistics output variables
     con_par_type.append(1) 
     con_par_values.append(1)
@@ -405,9 +368,11 @@ if model_mode != 'MODFLOW':
     # add lines here to specify different variable indices other than 1
     con_par_values.append(ind)
     
-    # 4 - "Animation" output files (spatial data)
-    #     See list in: (1) PRMS manual Table 1-5 pp.61-74 and (2) GSFLOW 
-    #     Input Instructions manual Table A1-2 for variables you can print
+    #############
+    # Section 4 #
+    # "Animation" output files (spatial data)
+    # See list in: (1) PRMS manual Table 1-5 pp.61-74 and (2) GSFLOW 
+    # Input Instructions manual Table A1-2 for variables you can print
     con_par_name.append('aniOutON_OFF') # flag to create Statistics output variables
     con_par_type.append(1) 
     con_par_values.append(1)
@@ -425,48 +390,22 @@ if model_mode != 'MODFLOW':
     'sat_recharge',  # [nhru] HRU total recharge to the saturated zone 
     'streamflow_sfr']))  # [nsegment] Streamflow as computed by SFR for each segment 
         
-    # 4 - For GUI (otherwise ignored during command line execution)
 
-    # GSFLOW: ignore these
-#     con_par_name.append('ndispGraphs') # number runtime graphs with GUI
-#     con_par_type.append(1) 
-#     con_par_values.append(2)
-# 
-#     con_par_name.append('dispVar_names') # variables for runtime plot
-#     con_par_type.append(4) 
-#     con_par_values.append( 
-#     np.array(['basin_cfs', 
-#     'runoff']))
-# 
-#     # index of dispVar_names to be displayed in runtime plots
-#     con_par_name.append('dispVar_element') # variable indices for runtime plot
-#     con_par_type.append(4) 
-#     ind = np.squeeze(np.where(np.array(con_par_name) == 'dispVar_names'))
-#     con_par_num_i = con_par_values[ind].size
-#     con_par_type.append(4) 
-#     ind = np.ones((con_par_num_i, 1), int).astype(str) # index of variables (can be 1 to max index of StatVar)
-#     # add lines here to specify different variable indices other than 1
-#     ind[1] = '2'
-#     con_par_values.append(ind)
-# 
-#     con_par_name.append('dispGraphsBuffSize') # num timesteps (days) before updating runtime plot
-#     con_par_type.append(1) 
-#     con_par_values.append(1)
-# 
-#     con_par_name.append('initial_deltat') # initial time step length (hrs)
-#     con_par_type.append(2) 
-#     con_par_values.append(24.0) # 24 hrs matches model's daily time step
-# 
-#     # previously for PRMS, omit
-#     con_par_name.append('executable_desc')
-#     con_par_type.append(4) 
-#     con_par_values.append('PRMS IV')
-# 
-#     con_par_name.append('executable_model')
-#     con_par_type.append(4) 
-#     con_par_values.append(PRMS_exe)
+    #############
+    # Section 5 #
+    # Initial condition files for restart
 
-    # 5 - Initial condition file
+    # initial condition files 
+    # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
+    # as example for how to stitch together many restarts using a shell script)
+    if model_mode == 'GSFLOW':
+        if settings_test.sw_1spinup_2restart == 1:
+            fl_load_init = 0 # 1 to load previously saved initial conditions
+        elif settings_test.sw_1spinup_2restart == 2:
+            fl_load_init = 1 # 1 to load previously saved initial conditions
+            # load initial conditions from this file
+            load_init_file = settings_test.restart_PRMSfil
+   
 
     # (default is init_vars_from_file = 0, but still need to specify for GUI)
     con_par_name.append('init_vars_from_file') # use IC from initial cond file
@@ -478,6 +417,9 @@ if model_mode != 'MODFLOW':
         con_par_type.append(4) 
         con_par_values.append(load_init_file) # 0 for no, use default
     
+    fl_save_init = 1 # 1 to save outputs as initial conditions for restart runs
+    save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
+
     # (default is save_vars_to_file = 0, but still need to specify for GUI)
     con_par_name.append('save_vars_to_file') # save IC to output file
     con_par_type.append(1) 
@@ -489,7 +431,10 @@ if model_mode != 'MODFLOW':
         con_par_values.append(save_init_file) # 0 for no, use default
 
 
-    # 6 - Suppress printing of some execution warnings
+    #############
+    # Section 6 #
+    # Suppress printing of some execution warnings
+
     con_par_name.append('print_debug')
     con_par_type.append(1) 
     con_par_values.append(-1)
@@ -497,6 +442,9 @@ if model_mode != 'MODFLOW':
 # % % -----------------------------------------------------------------------
 # Generally, do not change below here
 
+# control file that will be written with this script
+# (will be in control_dir with model mode suffix)
+con_filname0 = settings_test.PROJ_CODE
 con_filname = con_filname0 + '_' + model_mode + '.control'
 con_filname_fullpath = settings_test.control_dir + slashstr + con_filname
 

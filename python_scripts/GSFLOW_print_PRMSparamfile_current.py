@@ -19,25 +19,7 @@ if platform.system() == 'Linux':
 else:
     slashstr = '\\'
 
-# GSFLOW_print_PRMSparamfile4.m
-# 11/23/16
-# (based on PRMS_print_paramfile3.m, 11/25/15)
-# gcng
-#
-# This version is NOT for climate_hru (climate_hru is for pre-processed time
-# series data)
-#
-# v4 - includes cascade
 
-# Creates inputs files with PRMS parameters (**not GSFLOW parameters***)
-# leaves out many of the "extra" options.  
-# GSFLOW Input files:
-#   - control file (generate with GSFLOW_print_controlfile4*.m)
-#   - parameter files (generate with GSFLOW_print_PRMSparamfile4.m)
-#   - variable / data files (generate with GSFLOW_print_ObsMet_files1.m)
-# (Control file includes names of parameter and data files.  Thus, 
-# parameter and variable file names must match those specified there!!)
-#
 # note on order of parameter values when there are 2 dimensions: 
 # par_value[ii] = (ndim1, ndim2), par_value[ii] = par_value[ii](:)
 #
@@ -46,8 +28,9 @@ else:
 
 ### Parameter file
 
-# See Appendix 1 Table 1-1 (p.30-31) for Dimensions list, Appendix 1 Table 1-
-# 3 for parameters (by module) (p.37-59), description p. 128
+# See Appendix 1 Table A1-4 (p.145) for Dimensions list, Appendix 1 Table A1-5
+# for parameter variable list (by module) (p.147-150) and A1-6 to A1-22 for 
+# parameter details. Description begins p. 142
 
 # general syntax - Dimensions
 #   line 1: '####'
@@ -73,10 +56,6 @@ else:
 
 # parameter file that will be written (name must match that in Control file!)
 parfil_pre = settings_test.PROJ_CODE
-
-fl_veg_shift = 0 # shift veg upslope (for pt_alpha)
-if fl_veg_shift == 1:
-    parfil_pre = parfil_pre + 'VegShift'
 
 # GIS-generated files read in to provide values to PRMS input file
 HRUfil = settings_test.GISinput_dir + slashstr + 'HRUs_tmp.txt'
@@ -110,8 +89,8 @@ griddata = mf.read_grid_file_header(GISgridfil)
 
 
 # 2 lines available for comments
-title_str1 = 'TEST'
-title_str2 = 'much based on merced and sagehen examples, NOT using climate_hru'
+title_str1 = settings_test.PROJ_CODE
+title_str2 = 'many parameters based on merced and sagehen examples'
 
 #%%
 # n_Dim, n_par, should be dynamically generated
@@ -407,30 +386,22 @@ par_value.append(50* np.ones((dim_value[ind],1)))  # [-], default: 0.4, approx s
 # -- Potential ET distribution --
 # ** No parameters here when using et_module = climate_hru **
 # ** If et_module is pet_pt (Priestly-Taylor): **
-# ** CHANGE FOR SPECIFIC SITE - CHIMBORAZO ***
 # bare soil pt_alpha: 0.35 [Khaldi et al. 2014] to 1.04 [Flint and Childsb
 #   1991, AFM]) check McMahon et al., 2013 HESS Table S8
-x,hrui_melt = hru_elev.max(0),hru_elev.argmax(0)
-
+# *** CHANGE FOR SPECIFIC SITE
+x,hrui_HiElevBarren = hru_elev.max(0),hru_elev.argmax(0)
 veg_thresh = 4400 # m (Rachel's email 12/8/16 8:33am), approx veg elev line
-veg_thresh_shift = veg_thresh + 500 # Morueta-Holme et al. 2015: shift >500m since 1802
 par_name.append('pt_alpha') # alpha for Priestly-Taylor, ave ~1.26 but often higher in dry and windy regions (up to 2.14 or 2.47 - but this is open water)
-# Crystal had 1.7 as a windy guess
 par_dim_name.append(['nhru', 'nmonths'])
 par_num.append(1)
-
 for x in par_dim_name[-1]:
     ind = np.squeeze(np.where(np.array(dim_name) == x))
     par_num.append(par_num[-1] * dim_value[ind])
 par_type.append(2) # 1=int, 2=single prec, 3=double prec, 4=char str
 pt_alpha = 1.26*np.ones((par_num[-1],1))  # [-], default: 1.26
-if fl_veg_shift == 1: 
-    ind = np.squeeze(np.where(hru_elev > veg_thresh_shift))
-    pt_alpha[ind] = 1.0
-else:
-    ind = np.squeeze(np.where(hru_elev > veg_thresh))
-    pt_alpha[ind] = 1.0
-pt_alpha[hrui_melt] = 0.75
+ind = np.squeeze(np.where(hru_elev > veg_thresh))
+pt_alpha[ind] = 1.0
+pt_alpha[hrui_HiElevBarren] = 0.75
 par_value.append(pt_alpha)  # [-]
 
 
@@ -447,6 +418,7 @@ ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
 #par_value.append(0.5 * np.ones((dim_value[ind],1)))  # default 0.5
 par_value.append(0.23 * np.ones((dim_value[ind],1)))  # approx sagehen
 
+# *** CHANGE FOR SPECIFIC SITE
 par_name.append('soil_type') # only for ET calc, 1: sand, 2: loam, 3: clay
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
@@ -947,6 +919,8 @@ NumPars = len(par_name)
 
 
 ## -----------------------------------------------------------------------
+# Generally, do not need to edit below here
+
 # Many more parameters that are not specified here.  Do a check to make
 # sure not using any modules that require unspecified parameters:
 ind = np.squeeze(np.where(np.array(dim_name) == 'nobs'))

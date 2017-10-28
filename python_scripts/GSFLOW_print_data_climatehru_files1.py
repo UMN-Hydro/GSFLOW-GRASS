@@ -60,6 +60,7 @@ in_datafil = settings_test.climate_data_file
 Data = pd.read_csv(in_datafil, skiprows=5, delim_whitespace=True, header=None)
 Data_columns = ['year', 'month', 'day', 'hour', 'min', 'sec', 'tmax', 'tmin', 'precip']
 
+# daily data
 #tmax must be F
 #tmin must be F
 #precip must be inch
@@ -78,15 +79,15 @@ if 'swrad' in Data.columns:
 
 # -- These files will be generated (names must match those in Control file!)
 #    (generally don't change this)
-empty_datafil = PRMSinput_dir + '/empty.day'
-precip_datafil = PRMSinput_dir + '/precip.day'
-tmax_datafil = PRMSinput_dir + '/tmax.day'
-tmin_datafil = PRMSinput_dir + '/tmin.day'
-hum_datafil = PRMSinput_dir + '/humidity.day' # fake! 
-solrad_datafil = PRMSinput_dir + '/swrad.day'
+empty_datafil = PRMSinput_dir + slashstr + 'empty.day'
+precip_datafil = PRMSinput_dir + slashstr + 'precip.day'
+tmax_datafil = PRMSinput_dir + slashstr + 'tmax.day'
+tmin_datafil = PRMSinput_dir + slashstr + 'tmin.day'
+hum_datafil = PRMSinput_dir + slashstr + 'humidity.day' # needed for Penman-Monteith
+solrad_datafil = PRMSinput_dir + slashstr + 'swrad.day'
 
 # - how many of above met variables to process (0 thru N)
-N = 4
+N = 3
 
 # - Write to data variable files
 print_fmt1 = ["%4d"] + ["%2d"] * 5
