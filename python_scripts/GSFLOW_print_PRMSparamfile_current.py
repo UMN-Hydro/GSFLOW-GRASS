@@ -961,7 +961,7 @@ if nsol > 0:
     quit()
 print('Warning!  Script assumes the following... ')
 print('   climate_hru for precip_module and temp_module')
-print('   climate_hru for solrad_module')
+print('   ddsolrad for solrad_module')
 print('   climate_hru or pet_pt (Priestly-Taylor) for et_module (for PotET)')
 print('   transp_tindex for transp_module')
 print('   runoff_smidx for runoff_module')

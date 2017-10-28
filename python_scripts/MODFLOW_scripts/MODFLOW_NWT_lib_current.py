@@ -97,7 +97,7 @@ def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_indir_rel, GSFLOW_outdir_rel, infi
         fobj.write('IRED         90 ' + fil_res_in + '\n');
     fobj.write('IWRT         91 ' + GSFLOW_outdir_rel + fil_res_out + '\n')
     fobj.write('DATA(BINARY) 34 ' + GSFLOW_outdir_rel + 'test.bud \n'); # MODFLOW LPF output file, make sure 34 is unit listed in lpf file!!
-    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir_rel + 'testhead.dat \n') # MODFLOW output file
+    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir_rel + 'testhead.bhd \n') # MODFLOW output file
     fobj.write('DATA(BINARY) 61 ' + GSFLOW_outdir_rel + 'uzf.dat \n') # MODFLOW output file
     fobj.write('DATA         52 ' + GSFLOW_outdir_rel + 'ibound.dat \n') # MODFLOW output file    
     fobj.close()
@@ -944,7 +944,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     nstrail = 10    #Number of trailing-waive increments, incr for better mass balance (10-20 rec'd, sagehen uses 8)    
     isuzn = 1   #Maximum number of vertical cells used to define the unsaturated zone beneath a stream reach (for icalc=1 (Mannings for depth): use isuzn=1)
     nsfrsets = 40  #Maximum number of different sets of trailing waves used to allocate arrays.
-    irtflg = 0     #Flag whether transient streamflow routing is active
+    irtflg = 0     #Flag whether transient streamflow routing is active (using kinematic wave approx to St Venant's eq)
     
     project_name = settings_test.PROJ_CODE                                             # used to name the output file (.sfr)
     
