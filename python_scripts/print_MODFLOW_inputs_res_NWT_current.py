@@ -23,8 +23,6 @@ else:
 # - directories
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 
                 # carried out with MODFLOW-NWT code) 
-fl_BoundConstH = 0 # 1 for const head at high elev boundary, needed for numerical 
-                    # convergence for AGU2016 poster.  Seems resolved with MODFLOW-NWT
 
 MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr 
 MODFLOW_indir_rel = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr 
@@ -69,7 +67,7 @@ segment_fil_all = [GIS_indir + 'segments_tmp_4A_INFORMATION.txt',
 
 ## 
 dis_fil = mf.write_dis_MOD2_f(MODFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr);
-ba6_fil = mf.write_ba6_MOD3_2(MODFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH); # list this below write_dis_MOD2_f
+ba6_fil = mf.write_ba6_MOD3_2(MODFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil); # list this below write_dis_MOD2_f
 
 # flow algorithm
 if sw_2005_NWT == 1:

@@ -279,7 +279,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 # (had to be careful of numerical convergence problems; set constant head for 
 # outer boundary to avoid these.  Later resolved with NWT by Leila)
 
-def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH):
+def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil):
 
 #    # ==== TO RUN AS SCRIPT ===================================================
 #    # - directories
@@ -390,13 +390,7 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
         BOTM[:,:,ii] = np.genfromtxt(dis_fil, skip_header=7+(ii+1)*(NROW+1), \
         max_rows=NROW, dtype=float)
 
-    
-    # - make boundary cells constant head above a certain elevation
-    # IBOUNDin(ind_bound & TOP(2:end-1,2:end-1) > 4500) = -1;
-    if fl_BoundConstH == 1:
-        IBOUNDin[ind_bound & (TOP[1:-1-1+1,1:-1-1+1] > 3500)] = -1 # ***this used for AGU2016 to have convergence
-        IBOUND[1:-1-1+1,1:-1-1+1] = IBOUNDin
-
+   
 #    # - make discharge point and neighboring cells constant head (similar to Sagehen example)
 #    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
     # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
