@@ -121,9 +121,9 @@ ii = 0
 while True:
     # NOTE: for some reason, int w/ bit-length info is trailed by 0!!!
     a_info = binbuild( nitems=nread, nbytes=prec, typecode='i', infile=fid )
-    if not a_info:
-        break
     kstp = binbuild(nitems=1, nbytes=prec, typecode='i', infile=fid ) # FIX THESE TO SCALAR
+    if not kstp:
+        break
     kper = binbuild(nitems=1, nbytes=prec, typecode='i', infile=fid ) # FIX THESE TO SCALAR
     pertim = binbuild(nitems=1, nbytes=prec, typecode='f', infile=fid ) # FIX THESE TO SCALAR
     totim = binbuild(nitems=1, nbytes=prec, typecode='f', infile=fid ) # FIX THESE TO SCALAR
