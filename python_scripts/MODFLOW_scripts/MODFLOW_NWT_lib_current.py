@@ -96,10 +96,10 @@ def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_indir_rel, GSFLOW_outdir_rel, infi
     if len(fil_res_in) != 0:
         fobj.write('IRED         90 ' + fil_res_in + '\n');
     fobj.write('IWRT         91 ' + GSFLOW_outdir_rel + fil_res_out + '\n')
-    fobj.write('DATA(BINARY) 34 ' + GSFLOW_outdir_rel + 'test.bud \n'); # MODFLOW LPF output file, make sure 34 is unit listed in lpf file!!
-    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir_rel + 'testhead.bhd \n') # MODFLOW output file
-    fobj.write('DATA(BINARY) 61 ' + GSFLOW_outdir_rel + 'uzf.dat \n') # MODFLOW output file
-    fobj.write('DATA         52 ' + GSFLOW_outdir_rel + 'ibound.dat \n') # MODFLOW output file    
+    fobj.write('DATA(BINARY) 34 ' + GSFLOW_outdir_rel + infile_pre + '.bud \n'); # MODFLOW LPF output file, make sure 34 is unit listed in lpf file!!
+    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir_rel + infile_pre + '_head.bhd \n') # MODFLOW output file
+    fobj.write('DATA(BINARY) 61 ' + GSFLOW_outdir_rel + infile_pre + '_uzf.dat \n') # MODFLOW output file
+    fobj.write('DATA         52 ' + GSFLOW_outdir_rel + infile_pre + '_ibound.dat \n') # MODFLOW output file    
     fobj.close()
 
 #%%
