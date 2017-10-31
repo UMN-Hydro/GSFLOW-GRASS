@@ -91,7 +91,7 @@ IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
 IBOUND0 = np.copy(IBOUND)
 IBOUND0.astype(int)
 IBOUND0[IBOUND0>0] = 1 # active cells
-IBOUND0[IBOUND0<0] = 0 # constant head cells
+IBOUND0[IBOUND0<0] = 1 # constant head cells
 # (IBOUND0 = 0 for no flow)
 
 IBOUNDin = IBOUND0[1:-1,1:-1]
