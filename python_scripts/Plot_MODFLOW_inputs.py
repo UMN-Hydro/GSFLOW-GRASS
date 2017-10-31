@@ -60,6 +60,28 @@ for ii in range(NLAY):
 
 IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
 
+# -- find boundary cells
+IBOUND0 = np.copy(IBOUND)
+IBOUND0.astype(int)
+IBOUND0[IBOUND0>0] = 1 # active cells
+IBOUND0[IBOUND0<0] = 0 # constant head cells
+# (IBOUND0 = 0 for no flow)
+
+IBOUNDin = IBOUND0[1:-1,1:-1]
+IBOUNDu = IBOUND0[0:-2,1:-1] # up
+IBOUNDd = IBOUND0[2:,1:-1] # down
+IBOUNDl = IBOUND0[1:-1,0:-2] # left
+IBOUNDr = IBOUND0[1:-1,2:] # right
+
+# - inner boundary (of inner grid domain,i.e. domain[1:-1,1:-1])
+ind_bound_in = np.logical_and(IBOUNDin==1, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==1, IBOUNDin-IBOUNDd==1), \
+IBOUNDin-IBOUNDl==1), IBOUNDin-IBOUNDr==1))
+# - outer boundary (of inner grid domain, i.e. domain[1:-1,1:-1])
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
+
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
 
 HY = np.zeros((NROW, NCOL, NLAY),float); # hyd conductivity
 VKA = np.zeros((NROW, NCOL, NLAY),float); # vertical hyd conductivity
@@ -85,9 +107,11 @@ for ii in range(NLAY):
 # -- plot IBOUND [BA6] for active cells
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(2,2,1)
-im = ax.imshow(IBOUND, interpolation='none')
-#im.set_clim(3800, 6200)
-im.set_cmap(plt.cm.hsv)
+ncmap = np.max(IBOUND) - np.min(IBOUND) + 1
+cmap = plt.get_cmap('Set1',ncmap)
+im = ax.imshow(IBOUND, interpolation='none',cmap=cmap)
+im.set_clim(np.min(IBOUND)-0.5, np.max(IBOUND)+0.5)
+fig.colorbar(im, orientation='horizontal')
 plt.title('IBOUND (active cells)')
 
 
@@ -102,15 +126,23 @@ max_to_plot = np.max(TOP_to_plot)
 
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(2,2,1)
-im = ax.imshow(TOP_to_plot, interpolation='none')
+x = np.copy(TOP_to_plot)
+x2 = x[1:-1,1:-1]
+x2[ind_bound_out] = 0
+x[1:-1,1:-1] = x2
+im = ax.imshow(x, interpolation='none')
 im.set_clim(min_to_plot, max_to_plot)
 im.set_cmap(plt.cm.terrain)
 # use im.get_clim() to get the limits and generalize
 fig.colorbar(im, orientation='horizontal')
 plt.title('TOP')
 for ilay in range(NLAY):
+    x = np.copy(BOTM_to_plot[:,:,ilay])
+    x2 = x[1:-1,1:-1]
+    x2[ind_bound_out] = 0
+    x[1:-1,1:-1] = x2
     plt.subplot(2,2,2+ilay)
-    im = plt.imshow(BOTM_to_plot[:,:,ilay], interpolation='none')
+    im = plt.imshow(x, interpolation='none')
     im.set_clim(min_to_plot, max_to_plot)
     fig.colorbar(im, orientation='horizontal')
     plt.set_cmap(plt.cm.terrain)
@@ -119,9 +151,13 @@ for ilay in range(NLAY):
 
 # -- Hydraulic conductivity [UPW]   
 for ilay in range(NLAY):
+    x = np.copy(HY[:,:,ilay])
+    x2 = x[1:-1,1:-1]
+    x2[ind_bound_out] = 0
+    x[1:-1,1:-1] = x2   
     fig = plt.figure(figsize=(12,12))
     plt.subplot(2,2,ilay+1)
-    im = plt.imshow(HY[:,:,ilay], interpolation='none')
+    im = plt.imshow(x, interpolation='none')
     plt.set_cmap(plt.cm.cool)
 #    im.set_clim(3800, 6200)
     fig.colorbar(im, orientation='horizontal')

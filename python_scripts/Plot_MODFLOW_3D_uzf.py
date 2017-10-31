@@ -17,9 +17,14 @@ else:
     slashstr = '\\'
 
 
-# ***Select which option:
-# (1: head, 2: water table depth, 3: change in head per print-time increment)
-sw_head_WTD_dhead = 3
+# ***Select which variable to plot:
+# 0: 'UZF RECHARGE'
+# 1: 'SURFACE LEAKAGE' (negative)
+# 2: 'HORT+DUN'
+# 3: 'SURFACE LEAKAGE' (positive)
+# 4: 'STORAGE CHANGE'
+sw_PlotVar = 0
+
 
 
 #%% from Settings file 
@@ -27,10 +32,12 @@ sw_head_WTD_dhead = 3
 # *** Change file names as needed
 uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'uzf.dat'  # head data
 surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
+ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
 
 print '\n******************************************'
 print 'Plotting results from: ', uzf_file
 print ' (domain data in: ' + surfz_fil + ')'
+print ' (active cells info in: ' + ba6_fil + ')'
 print '******************************************\n'
 
 #%% In general: don't change below here
@@ -76,17 +83,37 @@ DELR = (NSEW[2]-NSEW[3])/NCOL # width of column [m]
 DELC = (NSEW[0]-NSEW[1])/NROW # height of row [m]
 
 
+# -- get active cells
+IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
 # =========================================================================
 
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
+# -- find boundary cells
+IBOUND0 = np.copy(IBOUND)
+IBOUND0.astype(int)
+IBOUND0[IBOUND0>0] = 1 # active cells
+IBOUND0[IBOUND0<0] = 0 # constant head cells
+# (IBOUND0 = 0 for no flow)
+
+IBOUNDin = IBOUND0[1:-1,1:-1]
+IBOUNDu = IBOUND0[0:-2,1:-1] # up
+IBOUNDd = IBOUND0[2:,1:-1] # down
+IBOUNDl = IBOUND0[1:-1,0:-2] # left
+IBOUNDr = IBOUND0[1:-1,2:] # right
+
+# - inner boundary (of inner grid domain,i.e. domain[1:-1,1:-1])
+ind_bound_in = np.logical_and(IBOUNDin==1, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==1, IBOUNDin-IBOUNDd==1), \
+IBOUNDin-IBOUNDl==1), IBOUNDin-IBOUNDr==1))
+# - outer boundary (of inner grid domain, i.e. domain[1:-1,1:-1])
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
+
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
+
 
 
 fl_binary = 1;  # 1 for binary
 fl_dble = 0;  # 1 for dble prec, 0 for single prec
-
 
 
 # Save precision to variables;
@@ -112,8 +139,7 @@ def binbuild(nitems, nbytes, typecode, infile):
         outdata.append( struct.unpack(typecode, x) )
     return np.squeeze(np.array(outdata))
 
-all_head_all = np.zeros([NROW,NCOL,0])
-time_info = np.zeros([4,0])
+time_info = np.zeros([2,0])
 all_label = []
 nvar = 5;
 ii = 0
@@ -148,29 +174,35 @@ while True:
         all_data = np.reshape(data, (nrow,ncol,ilay), order='C') 
 #        all_data = reshape(data,ncol,nrow,ilay);
 #        all_data = permute(all_data, [2 1 3]);
+
+    if ii == 0:
+        if nread == 0:
+            all_data_all = np.zeros([NROW,NCOL,nvar,0])
+        elif nread == 1:
+            all_data_all = np.zeros([NROW,NCOL,ilay,nvar,0])
         
     var_i = ii % nvar;
     if ii % 100 == 0:  # mod 100
         if nread == 0:
-            all_head_all2 = np.zeros([NROW,NCOL,nvar,ii+100])
-            all_head_all2[:,:,:ii] = all_head_all
-            all_head_all = all_head_all2
+            all_data_all2 = np.zeros([NROW,NCOL,nvar,ii+100])
+            all_data_all2[:,:,:,:ii] = all_data_all
+            all_data_all = all_data_all2
         elif nread == 1:
-            all_head_all2 = np.zeros([NROW,NCOL,ilay,nvar,ii+100])
-            all_head_all2[:,:,:ii] = all_head_all
-            all_head_all = all_head_all2
+            all_data_all2 = np.zeros([NROW,NCOL,ilay,nvar,ii+100])
+            all_data_all2[:,:,:,:,:ii] = all_data_all
+            all_data_all = all_data_all2
             
         time_info2 = np.zeros([2,ii+100])
         time_info2[:,:ii] = time_info
         time_info = time_info2
     
     if nread == 0:
-        all_head_all[:,:,var_i,t_i] = all_data
+        all_data_all[:,:,var_i,t_i] = all_data
     elif nread == 1:
-        all_head_all[:,:,:,var_i,t_i] = all_data
+        all_data_all[:,:,:,var_i,t_i] = all_data
     time_info[:,t_i] = [kstp, kper]
     if ii < 5:
-        all_label.append(label)
+        all_label.append(str.strip(''.join(label)))
     
     if (ii % nvar) == 0: 
         t_i = t_i + 1
@@ -179,72 +211,64 @@ while True:
 fid.close()    
 
 if nread == 0:
-    all_head_all = all_head_all[:,:,:,:t_i]
+    all_data_all = all_data_all[:,:,:,:t_i]
 elif nread == 1:
-    all_head_all = all_head_all[:,:,:,:,:t_i]
+    all_data_all = all_data_all[:,:,:,:,:t_i]
 time_info = time_info[:,:t_i]
 ntimes = t_i
 
+data_all = all_data_all[:,:,:,sw_PlotVar,:]
+    
 
-#x = np.arange(DELR/2., DELR*NCOL+DELR/2., DELR)
-#y = np.arange(DELC/2., DELC*NROW+DELC/2., DELC)
-#X, Y = np.meshgrid(x,y)
-#
-#
+# -- Plot
+x = np.arange(DELR/2., DELR*NCOL+DELR/2., DELR)
+y = np.arange(DELC/2., DELC*NROW+DELC/2., DELC)
+X, Y = np.meshgrid(x,y)
+
+
 #data_head_all_NaN = data_head_all
 #data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan
 #data_head_all_NaN[data_head_all_NaN <= 999] = np.nan
-#
-#
-## use this to plot WTD:
-#TOP2 = np.tile(TOP[:,:,np.newaxis], (1,1,ntimes))
-#WTD_all = TOP2 - data_head_all_NaN
-#
-## use this to plot change in head:        
-#dhead_all = np.zeros((NROW,NCOL,ntimes))
-#dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
-#
-#
-#
-## head plot movie
-#plt.figure()
-#for ii in range(ntimes):
-#    for lay_i in range(NLAY):
-#        
-#        if sw_head_WTD_dhead == 1:
-#            # head:
-#            ti = 'head [m], '
-#            data_all = data_head_all_NaN
-#        elif sw_head_WTD_dhead == 2:        
-#            # WTD:
-#            ti = 'WTD [m], '
-#            data_all = WTD_all
-#        elif sw_head_WTD_dhead == 3:
-#            # change in head:
-#            ti = 'Change in head [m], '
-#            data_all = dhead_all
-#               
-#        data = data_all[:,:,ii]    
-#        
-#        if ii == 0:
-#            plt.subplot(2,2,lay_info[0,ii])
-#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
-#            p.set_cmap(plt.cm.hsv)
-#            plt.colorbar(p)
-##            plt.clim()
-#            x = data_all[~np.isnan(data_all)]
-#            p.set_clim(vmin=np.min(x), vmax=np.max(x))
-#            plt.xlabel('[m]', fontsize=16)
-#            plt.ylabel('[m]', fontsize=16)
-#        else:
-#            p.set_data(data)        
-#            str0 = ti + str(time_info[0,ii]) + ', lay ' + str(int(lay_info[0,ii]))
-#            plt.title(str0)
-#        plt.tight_layout()
-#                      
-#    #    plt.show()
-#        plt.pause(0.5)
-#            
-#    #plt.savefig("myplot.png", dpi = 300)
-#
-#
+
+lay_i0 = 0
+
+# head plot movie
+ti = all_label[sw_PlotVar]
+plt.figure()
+for ii in range(ntimes):
+    for lay_i in [lay_i0]:
+#    for lay_i in range(ilay):
+        
+        if nread == 0:              
+            data = data_all[:,:,ii]    
+        elif nread == 1:
+            data = data_all[:,:,lay_i,ii]   
+        
+        # only show active domain, with outline around it
+        data[IBOUND == 0] = np.nan
+        data2 = data[1:-1,1:-1]
+        data2[ind_bound_out] = 0
+        data[1:-1,1:-1] = data2
+        
+        if ii == 0:
+            plt.subplot(2,2,1)
+            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+            p.set_cmap(plt.cm.rainbow)
+            plt.colorbar(p)
+#            plt.clim()
+            x = data_all[~np.isnan(data_all)]
+            p.set_clim(vmin=np.min(x), vmax=np.max(x))
+            plt.xlabel('[m]', fontsize=16)
+            plt.ylabel('[m]', fontsize=16)
+        else:
+            p.set_data(data)        
+            str0 = ti + ' ' + str(int(time_info[0,ii])) 
+            plt.title(str0)
+        plt.tight_layout()
+                      
+    #    plt.show()
+        plt.pause(0.5)
+            
+    #plt.savefig("myplot.png", dpi = 300)
+
+
