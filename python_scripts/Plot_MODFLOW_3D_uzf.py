@@ -199,7 +199,6 @@ while True:
         time_info2[:,:ii] = time_info
         time_info = time_info2
     
-    print str.strip(''.join(label))
     if nread == 0:
         all_data_all[:,:,var_i,t_i] = all_data
     elif nread == 1:
@@ -267,7 +266,7 @@ for ii in range(ntimes):
 #            plt.clim()
             x = data_all[~np.isnan(data_all)]
             p.set_clim(vmin=np.min(x), vmax=np.max(x))
-#            p.set_clim(vmin=0, vmax=250)
+#            p.set_clim(vmin=0, vmax=25)
             plt.xlabel('[m]', fontsize=16)
             plt.ylabel('[m]', fontsize=16)
         else:

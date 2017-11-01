@@ -113,6 +113,7 @@ im = ax.imshow(IBOUND, interpolation='none',cmap=cmap)
 im.set_clim(np.min(IBOUND)-0.5, np.max(IBOUND)+0.5)
 fig.colorbar(im, orientation='horizontal')
 plt.title('IBOUND (active cells)')
+plt.savefig("ActiveCells.png", dpi = 300)    
 
 
 # -- plot domain discretization [DIS]
@@ -147,20 +148,19 @@ for ilay in range(NLAY):
     fig.colorbar(im, orientation='horizontal')
     plt.set_cmap(plt.cm.terrain)
     plt.title('BOTM lay' + str(ilay+1));
-    
+plt.savefig("Elev.png", dpi = 300)    
 
 # -- Hydraulic conductivity [UPW]   
+fig = plt.figure(figsize=(12,12))
 for ilay in range(NLAY):
     x = np.copy(HY[:,:,ilay])
     x2 = x[1:-1,1:-1]
     x2[ind_bound_out] = 0
     x[1:-1,1:-1] = x2   
-    fig = plt.figure(figsize=(12,12))
     plt.subplot(2,2,ilay+1)
     im = plt.imshow(x, interpolation='none')
     plt.set_cmap(plt.cm.cool)
 #    im.set_clim(3800, 6200)
     fig.colorbar(im, orientation='horizontal')
-    plt.title('HydCond in lay' + str(ilay+1));
-    
-    
+    plt.title('HydCond in lay' + str(ilay+1));   
+plt.savefig("HydCond.png", dpi = 300)

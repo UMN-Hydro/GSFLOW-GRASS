@@ -370,15 +370,15 @@ if model_mode != 'MODFLOW':
     
     #############
     # Section 4 #
-    # "Animation" output files (spatial data)
+    # "Animation" output files (spatially distributed HRU data)
     # See list in: (1) PRMS manual Table 1-5 pp.61-74 and (2) GSFLOW 
     # Input Instructions manual Table A1-2 for variables you can print
-    con_par_name.append('aniOutON_OFF') # flag to create Statistics output variables
+    con_par_name.append('aniOutON_OFF') # flag to create HRU-distributed output variables
     con_par_type.append(1) 
     con_par_values.append(1)
 #     con_par_values.append(0)
 
-    con_par_name.append('ani_output_file') # output Statistics file location, name
+    con_par_name.append('ani_output_file') # output file location, name
     con_par_type.append(4) 
     con_par_values.append(outdir_rel + '{}.ani'.format(settings_test.PROJ_CODE))    
     
