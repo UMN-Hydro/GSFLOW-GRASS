@@ -30,7 +30,7 @@ sw_PlotVar = 0
 #%% from Settings file 
 
 # *** Change file names as needed
-uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'uzf.dat'  # head data
+uzf_file = settings_test.MODFLOWoutput_dir + slashstr + settings_test.PROJ_CODE + '_uzf.dat'  # head data
 surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
 ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
 
@@ -53,6 +53,9 @@ elif platform.linux_distribution()[0][:3] == 'Red':
 else:
     sys.exit("You should add your OS binary formatting to this script!")
 
+
+#uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'uzf_win.dat'  # head data
+#nread = 0
 
 # -- get surface elevations [m] (to plot WTD)
 # function for parsing ASCII grid header in GIS data files
@@ -147,9 +150,9 @@ t_i = 0
 while True:
     # NOTE: for some reason, int w/ bit-length info is trailed by 0!!!
     a_info = binbuild( nitems=nread, nbytes=prec, typecode='i', infile=fid )
-    if not a_info:
-        break
     kstp = binbuild(nitems=1, nbytes=prec, typecode='i', infile=fid ) # FIX THESE TO SCALAR
+    if not kstp:
+        break
     kper = binbuild(nitems=1, nbytes=prec, typecode='i', infile=fid ) # FIX THESE TO SCALAR
 #    pertim = binbuild(nitems=1, nbytes=prec, typecode='f', infile=fid ) # FIX THESE TO SCALAR
 #    totim = binbuild(nitems=1, nbytes=prec, typecode='f', infile=fid ) # FIX THESE TO SCALAR
@@ -196,6 +199,7 @@ while True:
         time_info2[:,:ii] = time_info
         time_info = time_info2
     
+    print str.strip(''.join(label))
     if nread == 0:
         all_data_all[:,:,var_i,t_i] = all_data
     elif nread == 1:
@@ -217,7 +221,11 @@ elif nread == 1:
 time_info = time_info[:,:t_i]
 ntimes = t_i
 
-data_all = all_data_all[:,:,:,sw_PlotVar,:]
+if nread == 0:
+    data_all = all_data_all[:,:,sw_PlotVar,:]
+elif nread == 1:
+    data_all = all_data_all[:,:,:,sw_PlotVar,:]
+#    dd = all_data_all[:,:,1,sw_PlotVar,:] - all_data_all[:,:,0,sw_PlotVar,:]
     
 
 # -- Plot
@@ -243,6 +251,7 @@ for ii in range(ntimes):
             data = data_all[:,:,ii]    
         elif nread == 1:
             data = data_all[:,:,lay_i,ii]   
+#            data = dd[:,:,ii]   
         
         # only show active domain, with outline around it
         data[IBOUND == 0] = np.nan
@@ -258,6 +267,7 @@ for ii in range(ntimes):
 #            plt.clim()
             x = data_all[~np.isnan(data_all)]
             p.set_clim(vmin=np.min(x), vmax=np.max(x))
+#            p.set_clim(vmin=0, vmax=250)
             plt.xlabel('[m]', fontsize=16)
             plt.ylabel('[m]', fontsize=16)
         else:
