@@ -71,6 +71,12 @@
 #%  required: no
 #%end
 
+#%option G_OPT_V_OUTPUT
+#%  key: bc_cell
+#%  label: Constant-head boundary condition cell
+#%  required: yes
+#%end
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -110,6 +116,7 @@ def main():
     dy = options['dy']
     grid = options['output']
     mask = options['mask_output']
+    bc_cell = options['bc_cell']
     # basin='basins_tmp_onebasin'; pp='pp_tmp'; raster_input='DEM'; raster_output='DEM_coarse'; dx=dy='500'; grid='grid_tmp'; mask='mask_tmp'
     
     """
@@ -201,27 +208,24 @@ def main():
         v.what_vect(map=pp, query_map=grid, column='col', query_column='col', quiet=True)
 
     # Next point downstream of the pour point
-    if len(output_next_downstream) > 0:
-        _pp = gscript.vector_db_select(map=streams, columns='x2,y2', where='cat='+str(cat))
-        _xy = np.squeeze(_pp['values'].values())
-        _x = float(_xy[0])
-        _y = float(_xy[1])
-        # NEED TO ADD IF-STATEMENT HERE TO AVOID AUTOMATIC OVERWRITING!!!!!!!!!!!
-        try:
-            v.db_droptable(table=output_pour_point, flags='f')
-        except:
-            pass
-        pptmp = vector.Vector(output_pour_point)
-        _cols = [(u'cat',       'INTEGER PRIMARY KEY'),
-                 (u'x',         'DOUBLE PRECISION'),
-                 (u'y',         'DOUBLE PRECISION')]
-        pptmp.open('w', tab_name=output_pour_point, tab_cols=_cols)
-        point0 = Point(_x,_y)
-        pptmp.write(point0, cat=1, attrs=(str(_x), str(_y)), )
-        pptmp.table.conn.commit()
-        pptmp.build()
-        pptmp.close()
-
+    if len(bc_cell) > 0:
+        ########## NEED TO USE TRUE TEMPORARY FILE ##########
+        # May not work with dx != dy!
+        v.to_rast(input=pp, output='tmp', use='val', value=1, overwrite=True)
+        r.buffer(input='tmp', output='tmp', distances=float(dx)*1.5, overwrite=True)
+        r.mapcalc('tmp = (tmp == 2) * '+raster_input, overwrite=True)
+        r.drain(input=raster_input, start_points=pp, output='tmp2', overwrite=True)
+        r.mapcalc('tmp = tmp2 * tmp', overwrite=True)
+        r.null(map='tmp', setnull=0)
+        r.to_vect(input='tmp', output=bc_cell, type='point', column='z',
+                  overwrite=gscript.overwrite(), quiet=True)
+        v.db_addcolumn(map=bc_cell, columns=('row integer','col integer'), quiet=True)
+        v.build(map=bc_cell, quiet=True)
+        v.what_vect(map=bc_cell, query_map=grid, column='row', \
+                    query_column='row', quiet=True)
+        v.what_vect(map=bc_cell, query_map=grid, column='col', \
+                    query_column='col', quiet=True)
+        
     g.region(n=reg['n'], s=reg['s'], w=reg['w'], e=reg['e'], nsres=reg['nsres'], ewres=reg['ewres'])
 
 

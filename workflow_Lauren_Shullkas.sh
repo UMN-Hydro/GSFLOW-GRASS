@@ -19,6 +19,7 @@ gravity_reservoirs=gravity_reservoirs_tmp
 basin_mask=basin_mask_tmp
 basin_mask_out=basin_mask
 pour_point=pp_tmp
+bc_cell=bc_cell
 icalc=1 # how to compute hydraulic geometry
 
 # Set region
@@ -56,7 +57,7 @@ v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$str
 v.gsflow.segments input=$streams_onebasin output=$segments icalc=$icalc --o
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
-v.gsflow.grid basin=$basins_onebasin  pour_point=$pour_point raster_input=$DEM dx=$grid_res dy=$grid_res output=$grid mask_output=$basin_mask --o
+v.gsflow.grid basin=$basins_onebasin  pour_point=$pour_point raster_input=$DEM dx=$grid_res dy=$grid_res output=$grid mask_output=$basin_mask bc_cell=$bc_cell --o
 
 # Hydrologically-correct DEM for MODFLOW
 r.gsflow.hydrodem dem=$DEM grid=$grid streams=$streams res=500 streams_modflow=$streams_MODFLOW dem_modflow=$DEM_coarse --o
@@ -84,5 +85,5 @@ g.region rast=$DEM
 #g.region vect=$basins_onebasin
 
 # Export tables and discharge point
-v.gsflow.export reaches_input=$reaches segments_input=$segments gravres_input=$gravity_reservoirs hru_input=$HRUs pour_point_input=$pour_point reaches_output=$reaches segments_output=$segments gravres_output=$gravity_reservoirs hru_output=$HRUs pour_point_output=$pour_point --o
+v.gsflow.export reaches_input=$reaches segments_input=$segments gravres_input=$gravity_reservoirs hru_input=$HRUs pour_point_input=$pour_point bc_cell_input=$bc_cell reaches_output=$reaches segments_output=$segments gravres_output=$gravity_reservoirs hru_output=$HRUs pour_point_output=$pour_point bc_cell_output=$bc_cell --o
 
