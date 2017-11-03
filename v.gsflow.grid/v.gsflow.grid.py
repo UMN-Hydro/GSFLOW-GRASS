@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ############################################################################
 #
-# MODULE:       v.gsflow.reaches
+# MODULE:       v.gsflow.grid
 #
 # AUTHOR(S):    Andrew Wickert
 #
