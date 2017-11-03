@@ -105,7 +105,7 @@ def main():
     options, flags = gscript.parser()
     basin = options['basin']
     pp = options['pour_point']
-    raster_input = options['raster_output']
+    raster_input = options['raster_input']
     dx = options['dx']
     dy = options['dy']
     grid = options['output']
