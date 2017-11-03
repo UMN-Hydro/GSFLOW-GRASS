@@ -66,12 +66,6 @@
 #%end
 
 #%option G_OPT_R_OUTPUT
-#%  key: raster_output
-#%  label: Raster (typically DEM) at same resolution as vector grid
-#%  required: no
-#%end
-
-#%option G_OPT_R_OUTPUT
 #%  key: mask_output
 #%  label: Raster basin mask: inside (1) or outside (0) the watershed?
 #%  required: no
@@ -116,14 +110,15 @@ def main():
     dy = options['dy']
     grid = options['output']
     mask = options['mask_output']
-    raster_output = options['raster_output']
     # basin='basins_tmp_onebasin'; pp='pp_tmp'; raster_input='DEM'; raster_output='DEM_coarse'; dx=dy='500'; grid='grid_tmp'; mask='mask_tmp'
     
+    """
     # Fatal if raster input and output are not both set
     _lena0 = (len(raster_input) == 0)
     _lenb0 = (len(raster_output) == 0)
     if _lena0 + _lenb0 == 1:
         grass.fatal("You must set both raster input and output, or neither.")
+    """
         
     # Create grid -- overlaps DEM, one cell of padding
     gscript.use_temp_region()
@@ -192,9 +187,11 @@ def main():
         r.resamp_stats(input=mask, output=mask, method='sum', overwrite=True, quiet=True)
         r.mapcalc(mask+' = '+mask+' > 0', overwrite=True, quiet=True)
 
+    """
     # Resampled raster
     if len(raster_output) > 0:
         r.resamp_stats(input=raster_input, output=raster_output, method='average', overwrite=gscript.overwrite(), quiet=True)
+    """
 
     # Pour point
     if len(pp) > 0:
