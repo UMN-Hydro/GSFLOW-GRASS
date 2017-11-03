@@ -120,15 +120,15 @@ def main():
     g.region(raster=dem)
     g.region(vector=grid)
     v.to_rast(input=streams, output=streams_MODFLOW, use='val', value=1.0,
-              overwrite=gscript.overwrite())
+              type='line', overwrite=gscript.overwrite(), quiet=True)
     r.mapcalc(streams_MODFLOW+" = "+streams_MODFLOW+" * DEM", overwrite=True)
-    g.region(res=resolution)
+    g.region(res=resolution, quiet=True)
     r.resamp_stats(input=streams_MODFLOW, output=streams_MODFLOW, 
-                   method='minimum', overwrite=gscript.overwrite())
+                   method='minimum', overwrite=gscript.overwrite(), quiet=True)
     r.resamp_stats(input=dem, output=DEM_MODFLOW, method='average',
-                   overwrite=gscript.overwrite())
+                   overwrite=gscript.overwrite(), quiet=True)
     r.patch(input=streams_MODFLOW+','+DEM_MODFLOW, output=DEM_MODFLOW,
-            overwrite=True)
+            overwrite=True, quiet=True)
 
 if __name__ == "__main__":
     main()
