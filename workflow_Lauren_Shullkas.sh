@@ -3,6 +3,7 @@ DEM=DEM
 DEM_coarse=DEM_coarse # MODFLOW resolution
 accumulation=accumulation_tmp
 streams=streams_tmp
+streams_MODFLOW=streams_MODFLOW
 streams_onebasin=${streams}_onebasin
 basins=basins_tmp
 basins_onebasin=${basins}_onebasin
@@ -55,7 +56,10 @@ v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$str
 v.gsflow.segments input=$streams_onebasin output=$segments icalc=$icalc --o
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
-v.gsflow.grid basin=$basins_onebasin  pour_point=$pour_point raster_input=$DEM dx=$grid_res dy=$grid_res output=$grid mask_output=$basin_mask raster_output=$DEM_coarse --o
+v.gsflow.grid basin=$basins_onebasin  pour_point=$pour_point raster_input=$DEM dx=$grid_res dy=$grid_res output=$grid mask_output=$basin_mask --o
+
+# Hydrologically-correct DEM for MODFLOW
+r.gsflow.hydrodem dem=$DEM grid=$grid streams=$streams res=500 streams_modflow=$streams_MODFLOW dem_modflow=$DEM_coarse --o
 
 # GSFLOW reaches: intersection of segments and grid
 v.gsflow.reaches segment_input=$segments grid_input=$grid elevation=$DEM output=$reaches --o
@@ -69,12 +73,12 @@ v.gsflow.gravres hru_input=$HRUs grid_input=$grid output=$gravity_reservoirs --o
 
 # Export DEM with MODFLOW resolution
 # Also export basin mask -- 1s where basin exists and 0 where it doesn't
-v.to.rast in=$basins_onebasin out=$basin_mask use=val val=1 --o
-g.region vect=$grid res=$grid_res
-r.resamp.stats in=$basin_mask out=$basin_mask method=sum --o
-r.mapcalc "$basin_mask = $basin_mask > 0" --o
-#g.region rast=$DEM
-r.out.ascii input=$DEM output=$DEM.asc null_value=0 --o
+##v.to.rast in=$basins_onebasin out=$basin_mask use=val val=1 --o
+##g.region vect=$grid res=$grid_res
+##r.resamp.stats in=$basin_mask out=$basin_mask method=sum --o
+##r.mapcalc "$basin_mask = $basin_mask > 0" --o
+g.region rast=$DEM_coarse
+r.out.ascii input=$DEM_coarse output=$DEM.asc null_value=0 --o
 r.out.ascii input=$basin_mask output=$basin_mask_out.asc null_value=0 --o
 g.region rast=$DEM
 #g.region vect=$basins_onebasin
