@@ -131,19 +131,19 @@ def main():
     grid_ratio_ns = np.round(regnew['nsres']/reg['nsres'])
     grid_ratio_ew = np.round(regnew['ewres']/reg['ewres'])
     # Get S, W, and then move the unit number of grid cells over to get N and E
-    # and include 1 (new) cell of padding around the whole watershed
-    _s_dist = np.abs(reg_grid_edges_sn - (regnew['s'] - 2.*regnew['nsres']) )
+    # and include 3 cells of padding around the whole watershed
+    _s_dist = np.abs(reg_grid_edges_sn - (regnew['s'] - 3.*regnew['nsres']) )
     _s_idx = np.where(_s_dist == np.min(_s_dist))[0][0]
     _s = float(reg_grid_edges_sn[_s_idx])
     _n_grid = np.arange(_s, reg['n'] + 2*grid_ratio_ns*reg['nsres'], grid_ratio_ns*reg['nsres'])
-    _n_dist = np.abs(_n_grid - (regnew['n'] + 2.*regnew['nsres']))
+    _n_dist = np.abs(_n_grid - (regnew['n'] + 3.*regnew['nsres']))
     _n_idx = np.where(_n_dist == np.min(_n_dist))[0][0]
     _n = float(_n_grid[_n_idx])
-    _w_dist = np.abs(reg_grid_edges_we - (regnew['w'] - 2.*regnew['ewres']))
+    _w_dist = np.abs(reg_grid_edges_we - (regnew['w'] - 3.*regnew['ewres']))
     _w_idx = np.where(_w_dist == np.min(_w_dist))[0][0]
     _w = float(reg_grid_edges_we[_w_idx])
     _e_grid = np.arange(_w, reg['e'] + 2*grid_ratio_ew*reg['ewres'], grid_ratio_ew*reg['ewres'])
-    _e_dist = np.abs(_e_grid - (regnew['e'] + 2.*regnew['ewres']))
+    _e_dist = np.abs(_e_grid - (regnew['e'] + 3.*regnew['ewres']))
     _e_idx = np.where(_e_dist == np.min(_e_dist))[0][0]
     _e = float(_e_grid[_e_idx])
     # Finally make the region
@@ -199,6 +199,28 @@ def main():
         v.build(map=pp, quiet=True)
         v.what_vect(map=pp, query_map=grid, column='row', query_column='row', quiet=True)
         v.what_vect(map=pp, query_map=grid, column='col', query_column='col', quiet=True)
+
+    # Next point downstream of the pour point
+    if len(output_next_downstream) > 0:
+        _pp = gscript.vector_db_select(map=streams, columns='x2,y2', where='cat='+str(cat))
+        _xy = np.squeeze(_pp['values'].values())
+        _x = float(_xy[0])
+        _y = float(_xy[1])
+        # NEED TO ADD IF-STATEMENT HERE TO AVOID AUTOMATIC OVERWRITING!!!!!!!!!!!
+        try:
+            v.db_droptable(table=output_pour_point, flags='f')
+        except:
+            pass
+        pptmp = vector.Vector(output_pour_point)
+        _cols = [(u'cat',       'INTEGER PRIMARY KEY'),
+                 (u'x',         'DOUBLE PRECISION'),
+                 (u'y',         'DOUBLE PRECISION')]
+        pptmp.open('w', tab_name=output_pour_point, tab_cols=_cols)
+        point0 = Point(_x,_y)
+        pptmp.write(point0, cat=1, attrs=(str(_x), str(_y)), )
+        pptmp.table.conn.commit()
+        pptmp.build()
+        pptmp.close()
 
     g.region(n=reg['n'], s=reg['s'], w=reg['w'], e=reg['e'], nsres=reg['nsres'], ewres=reg['ewres'])
 
