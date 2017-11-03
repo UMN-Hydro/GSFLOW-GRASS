@@ -100,6 +100,15 @@ for ii in range(NLAY):
       DZ.append(float(value[ii]))
 
 
+hydcond0_arr_str = hydcond0
+value = hydcond0_arr_str.split(',')
+hydcond0 = []
+for ii in range(NLAY):
+    try:
+      hydcond0.append(float(value[ii]))
+    except:
+      hydcond0 = hydcond0_arr_str
+
 ## move to MODFLOW_NWT_lib_Shullcas_test.py
 #import numpy as np
 #NROW = 25

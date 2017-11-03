@@ -25,6 +25,9 @@ else:
 # 4: 'STORAGE CHANGE'
 sw_PlotVar = 0
 
+# ***Optional: set plot variable limits, set to empty list for default of min / max values
+clim = [0, 250]
+#clim = [] # empty list for default min, max plot limits
 
 
 #%% from Settings file 
@@ -53,8 +56,7 @@ elif platform.linux_distribution()[0][:3] == 'Red':
 else:
     sys.exit("You should add your OS binary formatting to this script!")
 
-
-#uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'uzf_win.dat'  # head data
+#uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'Shullcas_uzf_win.dat'  # head data
 #nread = 0
 
 # -- get surface elevations [m] (to plot WTD)
@@ -163,46 +165,57 @@ while True:
     a_info = binbuild(nitems=nread, nbytes=prec, typecode='i', infile=fid )
     
     a_data = binbuild(nitems=nread, nbytes=prec, typecode='i', infile=fid )
-    if nread == 0:
-        nn = ncol*nrow
-    else:
-        nn = a_data/prec # is floor divide OK? Also, shouldn't it just be nlay?
+    nn = ncol*nrow*ilay
+    
+#    if nread == 0:
+#        nn = ncol*nrow*ilay
+#    else:
+#        nn = a_data/prec # is floor divide OK? Also, shouldn't it just be nlay?
     
     data = binbuild(nitems=nn, nbytes=prec, typecode='f', infile=fid)
     a_data = binbuild(nitems=nread, nbytes=prec, typecode='i', infile=fid )
-    
-    if nread == 0:
-        all_data = np.reshape(data, (nrow,ncol), order='C') 
-    else:
-        all_data = np.reshape(data, (nrow,ncol,ilay), order='C') 
+
+#    print data.shape
+        
+#    if nread == 0:
+#        all_data = np.reshape(data, (nrow,ncol), order='C') 
+#    else:
+#        all_data = np.reshape(data, (ncol,nrow,ilay), order='F') 
+#        all_data = np.transpose(all_data, axes=(1,0,2)) 
+    all_data = np.reshape(data, (ncol,nrow,ilay), order='F') 
+    all_data = np.transpose(all_data, axes=(1,0,2)) 
+#        print 'here1'
+#        all_data = np.reshape(data[nrow,ncol,0], (nrow,ncol), order='C') 
+#        print 'here'
+
 #        all_data = reshape(data,ncol,nrow,ilay);
 #        all_data = permute(all_data, [2 1 3]);
 
     if ii == 0:
-        if nread == 0:
-            all_data_all = np.zeros([NROW,NCOL,nvar,0])
-        elif nread == 1:
-            all_data_all = np.zeros([NROW,NCOL,ilay,nvar,0])
+#        if nread == 0:
+#            all_data_all = np.zeros([NROW,NCOL,nvar,0])
+#        elif nread == 1:
+        all_data_all = np.zeros([NROW,NCOL,ilay,nvar,0])
         
     var_i = ii % nvar;
     if ii % 100 == 0:  # mod 100
-        if nread == 0:
-            all_data_all2 = np.zeros([NROW,NCOL,nvar,ii+100])
-            all_data_all2[:,:,:,:ii] = all_data_all
-            all_data_all = all_data_all2
-        elif nread == 1:
-            all_data_all2 = np.zeros([NROW,NCOL,ilay,nvar,ii+100])
-            all_data_all2[:,:,:,:,:ii] = all_data_all
-            all_data_all = all_data_all2
+#        if nread == 0:
+#            all_data_all2 = np.zeros([NROW,NCOL,nvar,ii+100])
+#            all_data_all2[:,:,:,:ii] = all_data_all
+#            all_data_all = all_data_all2
+#        elif nread == 1:
+        all_data_all2 = np.zeros([NROW,NCOL,ilay,nvar,ii+100])
+        all_data_all2[:,:,:,:,:ii] = all_data_all
+        all_data_all = all_data_all2
             
         time_info2 = np.zeros([2,ii+100])
         time_info2[:,:ii] = time_info
         time_info = time_info2
     
-    if nread == 0:
-        all_data_all[:,:,var_i,t_i] = all_data
-    elif nread == 1:
-        all_data_all[:,:,:,var_i,t_i] = all_data
+#    if nread == 0:
+#        all_data_all[:,:,var_i,t_i] = all_data
+#    elif nread == 1:
+    all_data_all[:,:,:,var_i,t_i] = all_data
     time_info[:,t_i] = [kstp, kper]
     if ii < 5:
         all_label.append(str.strip(''.join(label)))
@@ -213,17 +226,17 @@ while True:
 
 fid.close()    
 
-if nread == 0:
-    all_data_all = all_data_all[:,:,:,:t_i]
-elif nread == 1:
-    all_data_all = all_data_all[:,:,:,:,:t_i]
+#if nread == 0:
+#    all_data_all = all_data_all[:,:,:,:t_i]
+#elif nread == 1:
+all_data_all = all_data_all[:,:,:,:,:t_i]
 time_info = time_info[:,:t_i]
 ntimes = t_i
 
-if nread == 0:
-    data_all = all_data_all[:,:,sw_PlotVar,:]
-elif nread == 1:
-    data_all = all_data_all[:,:,:,sw_PlotVar,:]
+#if nread == 0:
+#    data_all = all_data_all[:,:,sw_PlotVar,:]
+#elif nread == 1:
+data_all = all_data_all[:,:,:,sw_PlotVar,:]
 #    dd = all_data_all[:,:,1,sw_PlotVar,:] - all_data_all[:,:,0,sw_PlotVar,:]
     
 
@@ -243,13 +256,14 @@ lay_i0 = 0
 ti = all_label[sw_PlotVar]
 plt.figure()
 for ii in range(ntimes):
+#for ii in range(2):
     for lay_i in [lay_i0]:
 #    for lay_i in range(ilay):
         
-        if nread == 0:              
-            data = data_all[:,:,ii]    
-        elif nread == 1:
-            data = data_all[:,:,lay_i,ii]   
+#        if nread == 0:              
+#            data = data_all[:,:,ii]    
+#        elif nread == 1:
+        data = data_all[:,:,lay_i,ii]   
 #            data = dd[:,:,ii]   
         
         # only show active domain, with outline around it
@@ -265,8 +279,16 @@ for ii in range(ntimes):
             plt.colorbar(p)
 #            plt.clim()
             x = data_all[~np.isnan(data_all)]
-            p.set_clim(vmin=np.min(x), vmax=np.max(x))
-#            p.set_clim(vmin=0, vmax=25)
+#            if len(clim) == 0:
+#                p.set_clim(vmin=np.min(x), vmax=np.max(x))
+#            else:
+#                p.set_clim(vmin=clim[0], vmax=clim[1])
+            try:
+                clim
+                p.set_clim(vmin=clim[0], vmax=clim[1])
+                del clim                
+            except NameError:
+                p.set_clim(vmin=np.min(x), vmax=np.max(x))
             plt.xlabel('[m]', fontsize=16)
             plt.ylabel('[m]', fontsize=16)
         else:
@@ -276,8 +298,13 @@ for ii in range(ntimes):
         plt.tight_layout()
                       
     #    plt.show()
-        plt.pause(0.5)
+        plt.pause(1)
             
     #plt.savefig("myplot.png", dpi = 300)
 
+#try:
+#    clim
+#    clim = None # set for next run
+#except:
+#    
 

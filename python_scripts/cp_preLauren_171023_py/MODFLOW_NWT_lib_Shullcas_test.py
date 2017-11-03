@@ -12,6 +12,7 @@ This library includes all the separate matlab functions for writing the differen
 import numpy as np
 import pandas as pd # for data structures and reading in data from text file
 import matplotlib.pyplot as plt # matlab-like plots
+#from ConfigParser import SafeConfigParser
 import platform
 import settings_test
 
@@ -19,30 +20,22 @@ if platform.system() == 'Linux':
     slashstr = '/'
 else:
     slashstr = '\\'
+#    
+#parser = SafeConfigParser()
+#parser.read('settings.ini')
+#LOCAL_DIR = parser.get('settings', 'local_dir')
+#
+#GSFLOW_DIR = LOCAL_DIR + "/GSFLOW"
+#
+#GIS_indir = GSFLOW_DIR + "/DataToReadIn/GIS/"
 
 
-# function for parsing ASCII grid header in GIS data files
-def read_grid_file_header(fname):
-    f = open(fname, 'r')
-    sdata = {}
-    for i in range(6):
-        line = f.readline()
-        line = line.rstrip() # remove newline characters
-        key, value = line.split(': ')
-        try:
-          value = int(value)
-        except:
-          value = float(value)
-        sdata[key] = value
-    f.close()
-
-    return sdata
 
 
 #%%
 # baesd on: write_nam_MOD_f2_NWT.m
 
-def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_indir_rel, GSFLOW_outdir_rel, infile_pre, fil_res_in, sw_2005_NWT):
+def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_outdir, infile_pre, fil_res_in, sw_2005_NWT):
 # v2 - allows for restart option (init)
 # _NWT: from Leila's email, her work from spring 2017, incorporates
 # MODFLOW-NWT.
@@ -81,25 +74,25 @@ def write_nam_MOD_f2_NWT(GSFLOW_indir, GSFLOW_indir_rel, GSFLOW_outdir_rel, infi
     # -- .nam file with full paths
     fil_nam_0 = GSFLOW_indir + slashstr + fil_nam
     fobj = open(fil_nam_0, 'w+')
-    fobj.write('LIST          7 ' + GSFLOW_outdir_rel + 'test.lst \n') # MODFLOW output file
-    fobj.write('BAS6          8 ' + GSFLOW_indir_rel + fil_ba6 + '\n')
+    fobj.write('LIST          7 ' + GSFLOW_outdir + slashstr + 'test.lst \n') # MODFLOW output file
+    fobj.write('BAS6          8 ' + GSFLOW_indir + slashstr + fil_ba6 + '\n')
     if sw_2005_NWT == 1:    
-        fobj.write('LPF          11 ' + GSFLOW_indir_rel + fil_lpf + '\n')
-        fobj.write('PCG          19 ' + GSFLOW_indir_rel + fil_pcg + '\n')
+        fobj.write('LPF          11 ' + GSFLOW_indir + slashstr + fil_lpf + '\n')
+        fobj.write('PCG          19 ' + GSFLOW_indir + slashstr + fil_pcg + '\n')
     elif sw_2005_NWT == 2:
-        fobj.write('UPW          25 ' + GSFLOW_indir_rel + fil_upw + '\n')
-        fobj.write('NWT          17 ' + GSFLOW_indir_rel + fil_nwt + '\n')
-    fobj.write('OC           22 ' + GSFLOW_indir_rel + fil_oc + '\n')
-    fobj.write('DIS          10 ' + GSFLOW_indir_rel + fil_dis + '\n')
-    fobj.write('UZF          12 ' + GSFLOW_indir_rel + fil_uzf + '\n')
-    fobj.write('SFR          13 ' + GSFLOW_indir_rel + fil_sfr + '\n')
+        fobj.write('UPW          25 ' + GSFLOW_indir + slashstr + fil_upw + '\n')
+        fobj.write('NWT          17 ' + GSFLOW_indir + slashstr + fil_nwt + '\n')
+    fobj.write('OC           22 ' + GSFLOW_indir + slashstr + fil_oc + '\n')
+    fobj.write('DIS          10 ' + GSFLOW_indir + slashstr + fil_dis + '\n')
+    fobj.write('UZF          12 ' + GSFLOW_indir + slashstr + fil_uzf + '\n')
+    fobj.write('SFR          13 ' + GSFLOW_indir + slashstr + fil_sfr + '\n')
     if len(fil_res_in) != 0:
         fobj.write('IRED         90 ' + fil_res_in + '\n');
-    fobj.write('IWRT         91 ' + GSFLOW_outdir_rel + fil_res_out + '\n')
-    fobj.write('DATA(BINARY) 34 ' + GSFLOW_outdir_rel + infile_pre + '.bud \n'); # MODFLOW LPF output file, make sure 34 is unit listed in lpf file!!
-    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir_rel + infile_pre + '_head.bhd \n') # MODFLOW output file
-    fobj.write('DATA(BINARY) 61 ' + GSFLOW_outdir_rel + infile_pre + '_uzf.dat \n') # MODFLOW output file
-    fobj.write('DATA         52 ' + GSFLOW_outdir_rel + infile_pre + '_ibound.dat \n') # MODFLOW output file    
+    fobj.write('IWRT         91 ' + GSFLOW_outdir + slashstr + fil_res_out + '\n')
+    fobj.write('DATA(BINARY) 34 ' + GSFLOW_outdir + 'test.bud \n'); # MODFLOW LPF output file, make sure 34 is unit listed in lpf file!!
+    fobj.write('DATA(BINARY) 51 ' + GSFLOW_outdir + slashstr + 'testhead.dat \n') # MODFLOW output file
+    fobj.write('DATA(BINARY) 61 ' + GSFLOW_outdir + slashstr + 'uzf.dat \n') # MODFLOW output file
+    fobj.write('DATA         52 ' + GSFLOW_outdir + slashstr + 'ibound.dat \n') # MODFLOW output file    
     fobj.close()
 
 #%%
@@ -185,7 +178,18 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
     
     ## ------------------------------------------------------------------------
     # -- Read in data from files
-    sdata = read_grid_file_header(surfz_fil)
+    f = open(surfz_fil, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
         
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
@@ -279,7 +283,7 @@ def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
 # (had to be careful of numerical convergence problems; set constant head for 
 # outer boundary to avoid these.  Later resolved with NWT by Leila)
 
-def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil):
+def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fil, fl_BoundConstH):
 
 #    # ==== TO RUN AS SCRIPT ===================================================
 #    # - directories
@@ -320,7 +324,18 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
     # -- IBOUND(NROW,NCOL,NLAY): <0 const head, 0 no flow, >0 variable head
     # use basin mask (set IBOUND>0 within watershed, =0 outside watershed, <0 at discharge point and 2 neighboring pixels)
     # mask_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/basinmask_dischargept.asc';
-    sdata = read_grid_file_header(mask_fil)
+    f = open(mask_fil, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
     NCOL = sdata['cols']
@@ -336,7 +351,7 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
     dischargePt_coli = int(value2[3])
       
     # - force some cells to be active to correspond to stream reaches
-#    print "Warning!!  Hard-coded to set some IBOUND values to be active!! Check Andy's GIS algorithm..."
+    print "Warning!!  Hard-coded to set some IBOUND values to be active!! Check Andy's GIS algorithm..."
     #IBOUND[14-1,33-1] = 1
     #IBOUND[11-1,35-1] = 1
     #IBOUND[12-1,34-1] = 1
@@ -390,7 +405,13 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
         BOTM[:,:,ii] = np.genfromtxt(dis_fil, skip_header=7+(ii+1)*(NROW+1), \
         max_rows=NROW, dtype=float)
 
-   
+    
+    # - make boundary cells constant head above a certain elevation
+    # IBOUNDin(ind_bound & TOP(2:end-1,2:end-1) > 4500) = -1;
+    if fl_BoundConstH == 1:
+        IBOUNDin[ind_bound & (TOP[1:-1-1+1,1:-1-1+1] > 3500)] = -1 # ***this used for AGU2016 to have convergence
+        IBOUND[1:-1-1+1,1:-1-1+1] = IBOUNDin
+
 #    # - make discharge point and neighboring cells constant head (similar to Sagehen example)
 #    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = -2 # downgrad of discharge pt
     # IBOUND[dischargePt_rowi-2,dischargePt_coli-1] = -1 # neighbor points
@@ -403,30 +424,14 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #        if (dischargePt_rowi < NROW):
 #            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
 
-    # *** SPECIFIC TO SHULLCAS
-#    print "setting constant head downgradient of outlet - Shullcas"
-#    if (dischargePt_coli > 1):
-#        IBOUND[dischargePt_rowi-1,dischargePt_coli-2] = -2 # downgrad of discharge pt
-#        if (dischargePt_rowi > 1):
-#            IBOUND[dischargePt_rowi-2,dischargePt_coli-2] = -1 # neighbor points
-#        if (dischargePt_rowi < NROW):
-#            IBOUND[dischargePt_rowi,dischargePt_coli-2] = -1
-#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
-#    # active cells below stream reaches!
-    
-    print "setting constant head downgradient of outlet - Santa Rosa"
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    if (dischargePt_coli < NCOL):
-        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -1 # downgrad of discharge pt
+    if (dischargePt_coli > 1):
+        IBOUND[dischargePt_rowi-1,dischargePt_coli-2] = -2 # downgrad of discharge pt
         if (dischargePt_rowi > 1):
-            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+            IBOUND[dischargePt_rowi-2,dischargePt_coli-2] = -1 # neighbor points
         if (dischargePt_rowi < NROW):
-            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
-    # hard-code to have active cells below streams 10/2/17 (Santa Rosa)
-    IBOUND[11-1,51-1] = 1
-    
+            IBOUND[dischargePt_rowi,dischargePt_coli-2] = -1
+    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
+    # active cells below stream reaches!
     print "To do for IBOUND: check if neighboring cells to discharge point are stream cells"
     
     M = np.ones((NROW,NCOL,NLAY),float)
@@ -539,7 +544,18 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # - domain dimensions, maybe already in surfz_fil and botm_fil{}?
     # NLAY = 2;
     # surfz_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/topo.asc';
-    sdata = read_grid_file_header(surfz_fil)
+    f = open(surfz_fil, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
         
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
@@ -561,11 +577,10 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
     # (temp place-holder)
     hydcond = np.ones((NROW,NCOL,NLAY))
-#    print "hydcond0", hydcond0
+    print "hydcond0", hydcond0
     try:
-       float(settings_test.hydcond0[0])
-       for lay_i in range(settings_test.NLAY):
-           hydcond[:,:,lay_i] = float(settings_test.hydcond0[lay_i]) * hydcond[:,:,lay_i]
+       float(settings_test.hydcond0)
+       hydcond = float(settings_test.hydcond0) * hydcond
     except ValueError:
        for ii in range(NLAY):
             hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
@@ -719,7 +734,18 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     # - domain dimensions, maybe already in surfz_fil and botm_fil{}?
     # NLAY = 2;
     # surfz_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/topo.asc';
-    sdata = read_grid_file_header(surfz_fil)
+    f = open(surfz_fil, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
         
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
@@ -739,11 +765,10 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
     hydcond = np.ones((NROW,NCOL,NLAY))
-#    print "hydcond0", settings_test.hydcond0
+    print "hydcond0", settings_test.hydcond0
     try:
-       float(settings_test.hydcond0[0])
-       for lay_i in range(settings_test.NLAY):
-           hydcond[:,:,lay_i] = float(settings_test.hydcond0[lay_i]) * hydcond[:,:,lay_i]
+       float(settings_test.hydcond0)
+       hydcond = float(settings_test.hydcond0) * hydcond
     except ValueError:
        for ii in range(NLAY):
             hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
@@ -956,9 +981,9 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     nstrail = 10    #Number of trailing-waive increments, incr for better mass balance (10-20 rec'd, sagehen uses 8)    
     isuzn = 1   #Maximum number of vertical cells used to define the unsaturated zone beneath a stream reach (for icalc=1 (Mannings for depth): use isuzn=1)
     nsfrsets = 40  #Maximum number of different sets of trailing waves used to allocate arrays.
-    irtflg = 0     #Flag whether transient streamflow routing is active (using kinematic wave approx to St Venant's eq)
+    irtflg = 0     #Flag whether transient streamflow routing is active
     
-    project_name = settings_test.PROJ_CODE                                             # used to name the output file (.sfr)
+    project_name = 'TestProject'                                             # used to name the output file (.sfr)
     
     # data_indir = '/home/gcng/workspace/matlab_files/GSFLOW_pre-processor/MODFLOW_scripts/sfr_final/data/';
     # data_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/';
@@ -1055,7 +1080,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
         BOTM_RCH.append(BOTM[ind_i-1, ind_j-1, ind_k-1])
     
     # - change STRTOP to be just below TOP
-    print 'Setting STRTOP (stream top) to be just below (2m) corresponding grid TOP'
+    print 'Changing STRTOP (stream top) to be just below (2m) corresponding grid TOP'
     STRTOP = np.array(TOP_RCH) - 2 # 2 m below TOP
     if any(STRTOP-reach_data_all['STRTHICK'] < BOTM_RCH):
         print 'Error! STRTOP is below BOTM of the corresponding layer! Exiting...'
@@ -1115,30 +1140,31 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
 #     end
         
     # -- threshold slope at minimum 0.001
-    ind = np.where(reach_data_all['SLOPE'] < 0.001)
+    print 'threshold slope at minimum 0.001 for numerical reasons'
+    ind = np.where(reach_data_all['SLOPE'] < 0.01)
     reach_data_all.loc[reach_data_all.index[ind],'SLOPE'] = 0.001
 
-#    print 'setting various streambed properties (overwriting values in ' + reach_fil + ')'
-#
-#    # -- set streambed thickness (Sagehen uses constant 1m)
-#    reach_data_all.loc[:,'STRTHICK'] = 1 # [m]
-#
-#    # -- set streambed hydraulic conductivity (Sagehen example: 5 m/d)
-#    reach_data_all.loc[:,'STRHC1'] = 5 # [m]
-#    
-#    # set streambed theta_s
-#    reach_data_all.loc[:,'THTS'] = 0.35
-#    
-#    # set streambed initial theta
-#    reach_data_all.loc[:,'THTI'] = 0.3
-#    
-#    # set streambed Brooks-Corey exp (sagehen example is 3.5)
-#    reach_data_all.loc[:,'EPS'] = 3.5
-#    
-#    # set streambed unsaturated zone saturated hydraulic conductivity
-#    # (sagehen example is 0.3 m/d)
-#    reach_data_all.loc[:,'UHC'] = 0.3    
-#    
+    print 'setting various streambed properties (overwriting values in ' + reach_fil + ')'
+
+    # -- set streambed thickness (Sagehen uses constant 1m)
+    reach_data_all.loc[:,'STRTHICK'] = 1 # [m]
+
+    # -- set streambed hydraulic conductivity (Sagehen example: 5 m/d)
+    reach_data_all.loc[:,'STRHC1'] = 5 # [m]
+    
+    # set streambed theta_s
+    reach_data_all.loc[:,'THTS'] = 0.35
+    
+    # set streambed initial theta
+    reach_data_all.loc[:,'THTI'] = 0.3
+    
+    # set streambed Brooks-Corey exp (sagehen example is 3.5)
+    reach_data_all.loc[:,'EPS'] = 3.5
+    
+    # set streambed unsaturated zone saturated hydraulic conductivity
+    # (sagehen example is 0.3 m/d)
+    reach_data_all.loc[:,'UHC'] = 0.3    
+    
     nss = segment_data_4A.shape[0]
     # if isstruct(stress_periods)
     #     stress_periods = stress_periods.data;
@@ -1341,7 +1367,7 @@ def MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment):
 
 def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil):
 
-#    print 'UZF: Had to play around alot with finf (infiltration) to get convergence!!'
+    print 'UZF: Had to play around alot with finf (infiltration) to get convergence!!'
 
 
 #     ######### TO RUN AS SCRIPT ##############################################
@@ -1380,7 +1406,18 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     uz_file = infile_pre + '.uzf'
     
     # surfz_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/topo.asc';
-    sdata = read_grid_file_header(surfz_fil)
+    f = open(surfz_fil, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
         
     NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
     NROW = sdata['rows'] 
@@ -1406,28 +1443,27 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     IETFLG = 0     # ~=0: Evaporation will be simulated. (*sagehen=0; GSFLOW: =0 for PRMS ET only, =1 for additional ET from below soil zone)
     IUZFCB1 = 61    #Flag for writing rates of groundwater recharge, ET&groundwater discharge in UBUDSV format.0:wont be written, >0: file unit number
     IUZFCB2 = 0   #Writing groundwater recharge, discharge&ET in UBUDSV3 format; >0: file unit number
-#    NTRAIL2 = 25   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
-    NTRAIL2 = 15   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
+    NTRAIL2 = 25   #Number of trailing waves to define theta profile, 10 to 20 usually ok, higher for better mass balance
     NSETS2 = 100    #Number of wave sets to simulate multiple infiltration periods, 20 usually ok.
     NUZGAG = 0     # number of cells for which to print detailed info on UZ water budget and theta (see uzgag below)
     SURFDEP = 1.0  # average undulation depth within finite diff cell (?)
     
     #Item 2-7:
-    project_name = settings_test.PROJ_CODE   # used to name the output file (.uzf)
+    project_name = 'TestProject'   # used to name the output file (.uzf)
     iuzfbnd = np.copy(IBOUND) # [NROW,NCOL] layer w/ top as land-surface and/or w/ discharge/recharge (see NUZTOP), default: mask with 1's
     iuzfbnd[iuzfbnd<0] = 0
-    iuzfbnd[iuzfbnd>0] = 1
     if IRUNFLG > 0:
         print 'Error!  Input scripts only set up for IRUNFLG = 0!'
         quit()        
 #        irunbnd = importdata('./data/irunbnd.dat'); # [NROW,NCOL] only for IRUNFLG>0, stream seg to which gw discharge is routed
     # vks = importdata('./data/vks.dat'); # [NROW,NCOL] saturated K, no needed if using value in LPF (IUZFOPT=2), [m/d]
-    vks = np.copy(iuzfbnd) * 4.
+    vks = 4.*np.ones((NROW,NCOL)) 
     # Ok to have following parameters as SCALAR (constant for all gridcells) or as ARRAY (NROWxNCOL)
     eps = 3.5  #Brooks-Corey epsilon of the unsaturated zone.
-    thts = np.copy(iuzfbnd) * 0.35    #Saturated water content of the unsaturated zone
+    thts = 0.35    #Saturated water content of the unsaturated zone
+    thti = 0.0     #initial water content for each vertical column of cells-not specified for steady-state simulations
     if NUZGAG > 0:
-        print 'Input scripts only set up for UZGAG = 0! Exiting...'
+        print 'Error!  Input scripts only set up for UZGAG = 0!'
         quit()        
 #        uzgag = importdata('./data/uzgag.dat'); # only for NUZGAG>0; row, col, file unit for output, IUZOPT (flag for what data to output)    
     # - infiltration (in general, not needed  bc provided by PRMS, but option to apply for initial SS period for MODFLOW)
@@ -1489,9 +1525,7 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
 #    finf[:] = 8.8e-6    
 #    finf[:] = 8.8e-4    
 
-#    finf = np.ones((NROW,NCOL))
-    finf = np.copy(iuzfbnd)
-    
+    finf = np.ones((NROW,NCOL))
     try:
        float(settings_test.finf0)
        finf = float(settings_test.finf0) * finf
@@ -1532,8 +1566,7 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
         NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
         extdp = 15.0*np.ones((NROW,NCOL))   #array of ET extiction zone~altitude of the soil-zone base;specified at least for 1st stress period; only for IETFLG>0
         NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
-#        extwc = thts*0.9*np.ones((NROW,NCOL)) #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
-        extwc = thts*0.9 #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
+        extwc = thts*0.9*np.ones((NROW,NCOL)) #array of Extinction water content; EXTWC must be between (THTS-Sy) and THTS; only for IETFLG>0 and 
     # -------------------------------------------------------------------------
     
     # Ouput file

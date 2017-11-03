@@ -190,6 +190,7 @@ dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
 
 # head plot movie
 plt.figure()
+ctr = 0
 for ii in range(ntimes):
     for lay_i in range(NLAY):
         
@@ -206,9 +207,20 @@ for ii in range(ntimes):
             ti = 'Change in head [m], '
             data_all = dhead_all
                
-        data = data_all[:,:,ii]    
+#        data = data_all[:,:,ii]    
+        data = data_all[:,:,ctr]    
         
         if ii == 0:
+#            if lay_i == 0:
+#                pv = []
+#                
+#            pv.append(plt.subplot(2,2,lay_info[0,ii]))
+#            pv[lay_i] = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+#            pv[lay_i.set_cmap(plt.cm.hsv)
+##            plt.colorbar(pv[lay_i])
+##            plt.clim()
+#            x = data_all[~np.isnan(data_all)]
+#            pv[lay_i].set_clim(vmin=np.min(x), vmax=np.max(x))
             plt.subplot(2,2,lay_info[0,ii])
             p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
             p.set_cmap(plt.cm.hsv)
@@ -220,12 +232,14 @@ for ii in range(ntimes):
             plt.ylabel('[m]', fontsize=16)
         else:
             p.set_data(data)        
+#            pv[lay_i].set_data(data)        
             str0 = ti + str(time_info[0,ii]) + ', lay ' + str(int(lay_info[0,ii]))
             plt.title(str0)
         plt.tight_layout()
                       
     #    plt.show()
         plt.pause(0.5)
+        ctr = ctr + 1
             
     #plt.savefig("myplot.png", dpi = 300)
 
