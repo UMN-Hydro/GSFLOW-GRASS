@@ -21,6 +21,8 @@ basin_mask_out=basin_mask
 pour_point=pp_tmp
 bc_cell=bc_cell
 icalc=1 # how to compute hydraulic geometry
+x_outlet=482452.076604
+y_outlet=8672978.0598
 
 # Set region
 g.region -p rast=$DEM_orig
@@ -51,7 +53,8 @@ v.stream.network map=$streams
 
 # Restrict to a single basin
 basin_outlet_cat=2638 #2840 #2485 # You must find and define this after building the stream network
-v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$streams_onebasin output_basin=$basins_onebasin cat=$basin_outlet_cat output_pour_point=$pour_point --o
+#v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$streams_onebasin output_basin=$basins_onebasin cat=$basin_outlet_cat output_pour_point=$pour_point --o
+v.stream.inbasin input_streams=$streams input_basins=$basins output_streams=$streams_onebasin output_basin=$basins_onebasin x_outlet=$x_outlet y_outlet=$y_outlet output_pour_point=$pour_point --o
 
 # GSFLOW segments: sections of stream that define subbasins
 v.gsflow.segments input=$streams_onebasin output=$segments icalc=$icalc --o
