@@ -164,7 +164,6 @@ v.gsflow_export(reaches_input=reaches,
                 segments_output=segments,
                 gravres_output=gravity_reservoirs,
                 hru_output=HRUs,
-                pour_point_output=pour_point,
-                bc_cell_output=bc_cell,
+                pour_point_boundary_output=pour_point,
                 overwrite=True)
                 
