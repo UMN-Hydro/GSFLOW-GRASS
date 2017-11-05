@@ -10,8 +10,18 @@ Created on Sat Oct  7 18:33:11 2017
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt # matlab-like plots
+from readSettings import Settings
 import platform
-import settings_test
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -19,7 +29,7 @@ else:
     slashstr = '\\'
 
 
-# ***SET FOLLOWING BASED ON SITE
+# ***SET FOLLOWING BASED ON SITE **********************************************
 
 sw_scheme = 2 # 1: based on elev, 2: based on streams, 3: based on both
 
@@ -36,21 +46,21 @@ if sw_scheme >= 2:
     buffer_hydcond = np.array([0.4, 0.2]) # will use the first npix_stream_buffer values
     strm_hydcond = 0.6  # for stream pixels
              
-  
+# *****************************************************************************
 
 # %%
 
 # Only run this script if using spatially distributed K
 try:
-   float(settings_test.hydcond0)
+   float(Settings.hydcond0)
    fl_runscript = 0 # don't run this script, set constant K
 except ValueError:
    fl_runscript = 1 # run this script to generate spatially variable K
-   hydcond_fil = settings_test.hydcond0
+   hydcond_fil = Settings.hydcond0
 
 
-surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
-NLAY = settings_test.NLAY
+surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
+NLAY = Settings.NLAY
 
 
 if fl_runscript == 1:
@@ -105,7 +115,7 @@ if fl_runscript == 1:
     # ----- Based on stream channel -----
     
     if sw_scheme == 2 or sw_scheme == 3:
-        reach_fil = settings_test.GISinput_dir + slashstr + 'reaches_tmp.txt'
+        reach_fil = Settings.GISinput_dir + slashstr + 'reaches.txt'
         reach_data_all = pd.read_csv(reach_fil)       # 
     
         # Set stream cell only

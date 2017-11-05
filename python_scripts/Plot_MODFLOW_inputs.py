@@ -13,7 +13,17 @@ Will plot:
 import platform
 import numpy as np
 from matplotlib import pyplot as plt
-import settings_test
+from readSettings import Settings
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -22,9 +32,9 @@ else:
 
 
 # *** Change file names as needed
-dis_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.dis'
-ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
-flo_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.upw'
+dis_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.dis'
+ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
+flo_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.upw'
 
 # *** Set flag_print=1 to print figures to files
 fl_print = 0

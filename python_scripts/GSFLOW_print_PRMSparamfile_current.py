@@ -10,9 +10,20 @@ import numpy as np # matlab core
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 #from ConfigParser import SafeConfigParser
-import settings_test
+from MODFLOW_scripts import MODFLOW_NWT_lib_current as mf
+from readSettings import Settings
 import platform
-from MODFLOW_scripts import MODFLOW_NWT_lib_Shullcas_test as mf
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
+
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -55,14 +66,14 @@ else:
 # NOTE: '/' is directory separator for Linux, '\' for Windows!!
 
 # parameter file that will be written (name must match that in Control file!)
-parfil_pre = settings_test.PROJ_CODE
+parfil_pre = Settings.PROJ_CODE
 
 # GIS-generated files read in to provide values to PRMS input file
-HRUfil = settings_test.GISinput_dir + slashstr + 'HRUs_tmp.txt'
-segmentfil = settings_test.GISinput_dir + slashstr + 'segments_tmp_4A_INFORMATION.txt'
-reachfil = settings_test.GISinput_dir + slashstr + 'reaches_tmp.txt' # *** NEW FOR GSFLOW, only required here for NREACH, other info is for SFR file
-gvrfil = settings_test.GISinput_dir + slashstr + 'gravity_reservoirs_tmp.txt' # *** NEW FOR GSFLOW
-GISgridfil = settings_test.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
+HRUfil = Settings.GISinput_dir + slashstr + 'HRUs.txt'
+segmentfil = Settings.GISinput_dir + slashstr + 'segments_4A_INFORMATION.txt'
+reachfil = Settings.GISinput_dir + slashstr + 'reaches.txt' # *** NEW FOR GSFLOW, only required here for NREACH, other info is for SFR file
+gvrfil = Settings.GISinput_dir + slashstr + 'gravity_reservoirs.txt' # *** NEW FOR GSFLOW
+GISgridfil = Settings.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW FOR GSFLOW, only required here for ngwcell (NROW*NCOL)
 
 # *************************************************************************
 
@@ -75,7 +86,7 @@ GISgridfil = settings_test.GISinput_dir + slashstr + 'basin_mask.asc' # *** NEW 
 # model_mode = 'MODFLOW' # run only MODFLOW-2005
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
-parfil = settings_test.PRMSinput_dir + slashstr + parfil_pre + '_' + model_mode + '.param'
+parfil = Settings.PRMSinput_dir + slashstr + parfil_pre + '_' + model_mode + '.param'
 print parfil
 
 # Load GIS-generated files with HRU, segment etc information
@@ -89,7 +100,7 @@ griddata = mf.read_grid_file_header(GISgridfil)
 
 
 # 2 lines available for comments
-title_str1 = settings_test.PROJ_CODE
+title_str1 = Settings.PROJ_CODE
 title_str2 = 'many parameters based on merced and sagehen examples'
 
 #%%

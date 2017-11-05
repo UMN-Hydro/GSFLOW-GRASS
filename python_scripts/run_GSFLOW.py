@@ -7,7 +7,17 @@ Created on Wed Oct 25 07:43:05 2017
 
 import os
 import platform
-import settings_test
+from readSettings import Settings
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -15,7 +25,7 @@ elif platform.system() == 'Windows':
     slashstr = '\\'
 
 model_mode = 'GSFLOW'
-cmd_str = settings_test.control_dir + slashstr + settings_test.PROJ_CODE + '_' + model_mode
+cmd_str = Settings.control_dir + slashstr + Settings.PROJ_CODE + '_' + model_mode
 
 if platform.system() == 'Linux':
     cmd_str = cmd_str + '.sh > out.txt'

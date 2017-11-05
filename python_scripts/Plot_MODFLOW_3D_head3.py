@@ -9,7 +9,16 @@ import platform
 import struct
 import numpy as np
 from matplotlib import pyplot as plt
-import settings_test
+from readSettings import Settings
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -23,12 +32,14 @@ sw_head_WTD_dhead = 2
 
 
 #%% from Settings file
-head_file = settings_test.MODFLOWoutput_dir + slashstr + settings_test.PROJ_CODE + '_head.bhd'  # head data
-surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
+head_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_head.bhd'  # head data
+surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
+ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
 
 print '\n******************************************'
 print 'Plotting results from: ', head_file
 print ' (WTD=TOP-HEAD calculated using topo data in: ' + surfz_fil + ')'
+print ' (active cells info in: ' + ba6_fil + ')'
 print '******************************************\n'
 
 #%% In general: don't change below here
@@ -165,9 +176,9 @@ data_head_all = data_head_all[:,:,:ii]
 time_info = time_info[:,:ii]
 lay_info = lay_info[:,:ii]
 ntimeslay = ii # ntimes x nlay
-ntimes = ntimeslay / NLAY
 
 NLAY = np.max(lay_info)
+ntimes = ntimeslay / NLAY
 
 x = np.arange(DELR/2., DELR*NCOL+DELR/2., DELR)
 y = np.arange(DELC/2., DELC*NROW+DELC/2., DELC)
@@ -186,6 +197,33 @@ WTD_all = TOP2 - data_head_all_NaN
 # use this to plot change in head:        
 dhead_all = np.zeros((NROW,NCOL,ntimeslay))
 dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
+
+# -- get active cells
+IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
+
+# -- find boundary cells
+IBOUND0 = np.copy(IBOUND)
+IBOUND0.astype(int)
+IBOUND0[IBOUND0>0] = 1 # active cells
+IBOUND0[IBOUND0<0] = 1 # constant head cells
+# (IBOUND0 = 0 for no flow)
+
+IBOUNDin = IBOUND0[1:-1,1:-1]
+IBOUNDu = IBOUND0[0:-2,1:-1] # up
+IBOUNDd = IBOUND0[2:,1:-1] # down
+IBOUNDl = IBOUND0[1:-1,0:-2] # left
+IBOUNDr = IBOUND0[1:-1,2:] # right
+
+# - inner boundary (of inner grid domain,i.e. domain[1:-1,1:-1])
+ind_bound_in = np.logical_and(IBOUNDin==1, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==1, IBOUNDin-IBOUNDd==1), \
+IBOUNDin-IBOUNDl==1), IBOUNDin-IBOUNDr==1))
+# - outer boundary (of inner grid domain, i.e. domain[1:-1,1:-1])
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
+
+ind_bound_out = np.logical_and(IBOUNDin==0, np.logical_or(np.logical_or(np.logical_or(IBOUNDin-IBOUNDu==-1, IBOUNDin-IBOUNDd==-1), \
+IBOUNDin-IBOUNDl==-1), IBOUNDin-IBOUNDr==-1))
+
 
 # mask with just outline (outer boundary) of watershed
 outline = np.ones((NROW,NCOL))*np.nan
@@ -222,7 +260,7 @@ for ii in range(ntimes):
                 pv = []
                 
             av.append(plt.subplot(2,2,lay_info[0,ctr]))
-            pv.append(av[lay_i].imshow(data, interpolation='none'))
+            pv.append(av[lay_i].imshow(data, interpolation='nearest'))
             pv[lay_i].set_cmap(plt.cm.cool)
             plt.colorbar(pv[lay_i])
 #            plt.clim()
@@ -249,7 +287,7 @@ for ii in range(ntimes):
         av[lay_i].set_title(str0)
         plt.tight_layout()
 
-        im2 = av[lay_i].imshow(outline, interpolation='none')
+        im2 = av[lay_i].imshow(outline, interpolation='nearest')
 #        im2 = plt.imshow(outline, interpolation='none')
         im2.set_clim(0, 1)
         cmap = plt.get_cmap('binary',2)

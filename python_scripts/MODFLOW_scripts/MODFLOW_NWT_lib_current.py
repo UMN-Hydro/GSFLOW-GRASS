@@ -12,8 +12,18 @@ This library includes all the separate matlab functions for writing the differen
 import numpy as np
 import pandas as pd # for data structures and reading in data from text file
 import matplotlib.pyplot as plt # matlab-like plots
+from readSettings import Settings
 import platform
-import settings_test
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -336,17 +346,18 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #    dischargePt_coli = int(value2[3])
 
     f = open(dischargept_fil, 'r')
-    for ii in range(2):
-        line = f.readline()
-        line = line[-1].rstrip()
+    ctr = 0
+    for line in f:
+        line = line.rstrip()
         value1, value2 = line.split(': ')
         value2 = value2.split(' ')
-        if ii == 0:
+        if ctr == 0:
             dischargePt_rowi = int(value2[1])
             dischargePt_coli = int(value2[3])
         else:
             DowngradPt_rowi = int(value2[1])
             DowngradPt_coli = int(value2[3])            
+        ctr = ctr + 1
     f.close()    
       
     # - force some cells to be active to correspond to stream reaches
@@ -580,12 +591,12 @@ def write_lpf_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     hydcond = np.ones((NROW,NCOL,NLAY))
 #    print "hydcond0", hydcond0
     try:
-       float(settings_test.hydcond0[0])
-       for lay_i in range(settings_test.NLAY):
-           hydcond[:,:,lay_i] = float(settings_test.hydcond0[lay_i]) * hydcond[:,:,lay_i]
+       float(Settings.hydcond0[0])
+       for lay_i in range(Settings.NLAY):
+           hydcond[:,:,lay_i] = float(Settings.hydcond0[lay_i]) * hydcond[:,:,lay_i]
     except ValueError:
        for ii in range(NLAY):
-            hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
+            hydcond[:,:,ii] = np.genfromtxt(Settings.hydcond0, skip_header=1+ii*(NROW+1), \
             max_rows=NROW, dtype=float)
            
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
@@ -756,14 +767,14 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
     
     # -- Base hydcond, Ss (all layers), and Sy (top layer only) on data from files
     hydcond = np.ones((NROW,NCOL,NLAY))
-#    print "hydcond0", settings_test.hydcond0
+#    print "hydcond0", Settings.hydcond0
     try:
-       float(settings_test.hydcond0[0])
-       for lay_i in range(settings_test.NLAY):
-           hydcond[:,:,lay_i] = float(settings_test.hydcond0[lay_i]) * hydcond[:,:,lay_i]
+       float(Settings.hydcond0[0])
+       for lay_i in range(Settings.NLAY):
+           hydcond[:,:,lay_i] = float(Settings.hydcond0[lay_i]) * hydcond[:,:,lay_i]
     except ValueError:
        for ii in range(NLAY):
-            hydcond[:,:,ii] = np.genfromtxt(settings_test.hydcond0, skip_header=1+ii*(NROW+1), \
+            hydcond[:,:,ii] = np.genfromtxt(Settings.hydcond0, skip_header=1+ii*(NROW+1), \
             max_rows=NROW, dtype=float)
            
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
@@ -975,7 +986,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     nsfrsets = 40  #Maximum number of different sets of trailing waves used to allocate arrays.
     irtflg = 0     #Flag whether transient streamflow routing is active (using kinematic wave approx to St Venant's eq)
     
-    project_name = settings_test.PROJ_CODE                                             # used to name the output file (.sfr)
+    project_name = Settings.PROJ_CODE                                             # used to name the output file (.sfr)
     
     # data_indir = '/home/gcng/workspace/matlab_files/GSFLOW_pre-processor/MODFLOW_scripts/sfr_final/data/';
     # data_indir = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/';
@@ -1430,7 +1441,7 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     SURFDEP = 1.0  # average undulation depth within finite diff cell (?)
     
     #Item 2-7:
-    project_name = settings_test.PROJ_CODE   # used to name the output file (.uzf)
+    project_name = Settings.PROJ_CODE   # used to name the output file (.uzf)
     iuzfbnd = np.copy(IBOUND) # [NROW,NCOL] layer w/ top as land-surface and/or w/ discharge/recharge (see NUZTOP), default: mask with 1's
     iuzfbnd[iuzfbnd<0] = 0
     iuzfbnd[iuzfbnd>0] = 1
@@ -1512,11 +1523,11 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     finf = np.copy(iuzfbnd)
     
     try:
-       float(settings_test.finf0)
-       finf = float(settings_test.finf0) * finf
+       float(Settings.finf0)
+       finf = float(Settings.finf0) * finf
     except ValueError:
        for ii in range(NLAY):
-            finf[:,:,ii] = np.genfromtxt(settings_test.finf0, skip_header=1+ii*(NROW+1), \
+            finf[:,:,ii] = np.genfromtxt(Settings.finf0, skip_header=1+ii*(NROW+1), \
             max_rows=NROW, dtype=float)
     
     

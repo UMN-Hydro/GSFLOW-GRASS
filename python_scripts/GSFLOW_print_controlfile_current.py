@@ -42,8 +42,18 @@ Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
 import datetime as dt
 import numpy as np # matlab core
 import os  # os functions
-import settings_test
+from readSettings import Settings
 import platform
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 
 # creates start and end date strings
@@ -66,10 +76,10 @@ else:
 model_mode = 'GSFLOW' # run coupled PRMS-MODFLOW
 
 # input directory that the control file will point to for reading in PRMS_GSFLOW inputs
-indir_rel = '..' + slashstr + settings_test.PRMSinput_dir_rel + slashstr 
+indir_rel = '..' + slashstr + Settings.PRMSinput_dir_rel + slashstr 
 
 # output directory that the control file will point to for creating PRMS_GSFLOW output files (include slash at end!)
-outdir_rel = '..' + slashstr + settings_test.PRMSoutput_dir_rel + slashstr 
+outdir_rel = '..' + slashstr + Settings.PRMSoutput_dir_rel + slashstr 
 
 
 
@@ -77,7 +87,7 @@ outdir_rel = '..' + slashstr + settings_test.PRMSoutput_dir_rel + slashstr
 
 # Project-specific entries ->
 
-title_str = settings_test.PROJ_NAME
+title_str = Settings.PROJ_NAME
 
 # n_par_max should be dynamically generated
 con_par_name = []  # name of control file parameter
@@ -100,7 +110,7 @@ con_par_type.append(4)
 con_par_values.append(model_mode) #
 
 # MODFLOW namefile that the control file will point to (generate with write_nam_MOD.m)
-namfil = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr + settings_test.PROJ_CODE + '.nam'
+namfil = '..' + slashstr + Settings.MODFLOWinput_dir_rel + slashstr + Settings.PROJ_CODE + '.nam'
 con_par_name.append('modflow_name')
 con_par_type.append(4) 
 con_par_values.append(namfil)
@@ -109,8 +119,8 @@ con_par_values.append(namfil)
 if model_mode != 'MODFLOW':
 
     # model start and end dates
-    start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
-    end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")       
+    start_date = dt.datetime.strptime(Settings.START_DATE, "%Y-%m-%d")
+    end_date = dt.datetime.strptime(Settings.END_DATE, "%Y-%m-%d")       
     ymdhms_v = np.array([datetime_to_list(start_date),
                          datetime_to_list(end_date)])                     
                          
@@ -157,7 +167,7 @@ if model_mode != 'MODFLOW':
     con_par_values.append(datafil)
 
     # parameter file that the control file will point to (generate with PRMS_print_paramfile3.m)
-    parfil_pre = settings_test.PROJ_CODE # will have '_', model_mode following
+    parfil_pre = Settings.PROJ_CODE # will have '_', model_mode following
     parfil = indir_rel + parfil_pre + '_' + model_mode + '.param'
     con_par_name.append('param_file')
     con_par_type.append(4)
@@ -322,7 +332,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('stat_var_file') # output Statistics file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir_rel + '{}.statvar'.format(settings_test.PROJ_CODE))
+    con_par_values.append(outdir_rel + '{}.statvar'.format(Settings.PROJ_CODE))
 
     con_par_name.append('statVar_names')
     con_par_type.append(4)
@@ -380,7 +390,7 @@ if model_mode != 'MODFLOW':
 
     con_par_name.append('ani_output_file') # output file location, name
     con_par_type.append(4) 
-    con_par_values.append(outdir_rel + '{}.ani'.format(settings_test.PROJ_CODE))    
+    con_par_values.append(outdir_rel + '{}.ani'.format(Settings.PROJ_CODE))    
     
     con_par_name.append('aniOutVar_names')
     con_par_type.append(4) 
@@ -399,12 +409,12 @@ if model_mode != 'MODFLOW':
     # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
     # as example for how to stitch together many restarts using a shell script)
     if model_mode == 'GSFLOW':
-        if settings_test.sw_1spinup_2restart == 1:
+        if Settings.sw_1spinup_2restart == 1:
             fl_load_init = 0 # 1 to load previously saved initial conditions
-        elif settings_test.sw_1spinup_2restart == 2:
+        elif Settings.sw_1spinup_2restart == 2:
             fl_load_init = 1 # 1 to load previously saved initial conditions
             # load initial conditions from this file
-            load_init_file = settings_test.restart_PRMSfil
+            load_init_file = Settings.restart_PRMSfil
    
 
     # (default is init_vars_from_file = 0, but still need to specify for GUI)
@@ -444,9 +454,9 @@ if model_mode != 'MODFLOW':
 
 # control file that will be written with this script
 # (will be in control_dir with model mode suffix)
-con_filname0 = settings_test.PROJ_CODE
+con_filname0 = Settings.PROJ_CODE
 con_filname = con_filname0 + '_' + model_mode + '.control'
-con_filname_fullpath = settings_test.control_dir + slashstr + con_filname
+con_filname_fullpath = Settings.control_dir + slashstr + con_filname
 
 # - Write to control file
 
@@ -512,33 +522,33 @@ fobj.close()
 
 
 if platform.system() == 'Linux':
-    cmd_str = settings_test.GSFLOW_exe + ' ' + con_filname + ' &> out.txt'
+    cmd_str = Settings.GSFLOW_exe + ' ' + con_filname + ' 2>&1 | tee out.txt' # also save stderr and stdout to out.txt
 elif platform.system() == 'Windows':
-    cmd_str = settings_test.GSFLOW_exe + ' ' + con_filname
+    cmd_str = Settings.GSFLOW_exe + ' ' + con_filname
 
 
 #cmd_str_cmt = '#' + GSFLOW_exe_cmt + ' ' + con_filname + ' &> out.txt'
 print '*** To run command-line execution --> '
-print '***   Go to ' +  settings_test.control_dir
+print '***   Go to ' +  Settings.control_dir
 print '***   and enter at prompt: \n  {}\n'.format(cmd_str)
 
 if platform.system() == 'Linux':
-    runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
+    runscriptfil = Settings.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
     fobj = open(runscriptfil, 'w+') 
     fobj.write('pwd0=`pwd` \n')
-    fobj.write('cd ' + settings_test.control_dir + '\n\n')
-    fobj.write('echo Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
+    fobj.write('cd ' + Settings.control_dir + '\n\n')
+    fobj.write('echo Running GSFLOW in ' + Settings.gsflow_simdir + ': \n')
     fobj.write("echo"  + " '" + cmd_str + "' \n\n");
     fobj.write(cmd_str + '\n\n');
     fobj.write('cd $pwd0 \n')
     fobj.close()
     os.chmod(runscriptfil, 0777)
 elif platform.system() == 'Windows':
-    runscriptfil = settings_test.control_dir + slashstr + con_filname0 + '_' + model_mode + '.bat'
+    runscriptfil = Settings.control_dir + slashstr + con_filname0 + '_' + model_mode + '.bat'
     fobj = open(runscriptfil, 'w+') 
     fobj.write('SET CURRENTDIR="%cd%" \n')
-    fobj.write('cd ' + settings_test.control_dir + '\n\n')
-    fobj.write('ECHO Running GSFLOW in ' + settings_test.gsflow_simdir + ': \n')
+    fobj.write('cd ' + Settings.control_dir + '\n\n')
+    fobj.write('ECHO Running GSFLOW in ' + Settings.gsflow_simdir + ': \n')
     fobj.write("ECHO"  + " '" + cmd_str + "' \n\n");
     fobj.write(cmd_str + '\n\n');
     fobj.write('cd %CURRENTDIR% \n')

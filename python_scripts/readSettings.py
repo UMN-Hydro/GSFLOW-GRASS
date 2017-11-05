@@ -40,17 +40,23 @@ class Settings(object):
         #parser.read('settings_test.ini')
         parser.read(input_file)
         self.PROJ_NAME = parser.get('settings', 'proj_name')
+        self.PROJ_CODE=self.PROJ_NAME.replace(" ", "") # remove blank spaces
 
         # command-line executable for GSFLOW (just used to print message)
         self.GSFLOW_exe = parser.get('settings', 'gsflow_exe')
-        #DEM = parser.get('settings', 'DEM') # name of file w/ topography data (in GIS data directory)
-        self.GISinput_dir = parser.get('settings', 'GISinput_dir')
-        self.climate_data_file = parser.get('settings', 'climate_data_file')
+        
+        self.fl_print_climate_hru = int(parser.get('settings', 'fl_print_climate_hru'))
+        if self.fl_print_climate_hru == 1:        
+            self.climate_data_file = parser.get('settings', 'climate_data_file')
+        else:
+            self.climate_hru_dir = parser.get('settings', 'climate_hru_dir')
+            print "STILL NEED TO WRITE CODE TO MOVE EXISTING CLIMATE\_HRU FILES TO INPUT DIRECTORY!"
 
-        self.PROJ_CODE=self.PROJ_NAME.replace(" ", "") # remove blank spaces
 
-        self.gsflow_simdir = parser.get('settings', 'gsflow_simdir')
-
+        self.gsflow_path_simdir = parser.get('settings', 'gsflow_path_simdir')
+        self.gsflow_simdir = self.gsflow_path_simdir + slashstr + self.PROJ_CODE
+        self.GISinput_dir = self.gsflow_simdir + slashstr + 'GIS'
+        
         # 1: for spinup (starts with steady-state run), 2: for restart (run AFTER spinup)
         self.sw_1spinup_2restart = int(parser.get('settings', 'sw_1spinup_2restart'))
         if self.sw_1spinup_2restart == 2:
@@ -90,7 +96,7 @@ class Settings(object):
         # -- problem-specifc variables
 
         # either single value for constant K or name of file with array [m/d]
-        # 
+        self.fl_create_hydcond = int(parser.get('custom_params', 'fl_create_hydcond'))
         hydcond0 = parser.get('custom_params', 'hydcond') 
         # either single value for spatially constant finf or name of file with array [m/d]
         self.finf0 = parser.get('custom_params', 'finf') 

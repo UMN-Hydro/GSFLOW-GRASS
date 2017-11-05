@@ -14,11 +14,20 @@ import sys
 import platform
 import numpy as np
 from matplotlib import pyplot as plt
-import settings_test
 import pandas as pd
 import datetime as dt
 import matplotlib.dates as mdates
 import gsflow_csv_table as gvar  # all variable names, units, and descriptions
+from readSettings import Settings
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -33,7 +42,7 @@ PlotVar.append('basinppt')
 PlotVar.append('basinactet')
 
 # -- data files
-gsflow_csv_fil = settings_test.PRMSoutput_dir + slashstr + 'gsflow.csv'  # gsflow time series data
+gsflow_csv_fil = Settings.PRMSoutput_dir + slashstr + 'gsflow.csv'  # gsflow time series data
 
 # -- save figure to this file
 savefigfile = 'fig.png'
@@ -77,7 +86,7 @@ for ii in range(len(PlotVar)):
     plt.ylabel(unit)
     
 plt.legend(PlotVar)
-plt.title(settings_test.PROJ_CODE)
+plt.title(Settings.PROJ_CODE)
 
 plt.savefig(savefigfile, dpi = 300)
 

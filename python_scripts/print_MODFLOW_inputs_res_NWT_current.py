@@ -10,9 +10,19 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 # print_MODFLOW_inputs
 
 from MODFLOW_scripts import MODFLOW_NWT_lib_current as mf # functions to write individual MODFLOW files
-import settings_test
-import platform
 import datetime as dt
+from readSettings import Settings
+import platform
+import sys
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -24,31 +34,31 @@ else:
 sw_2005_NWT = 2 # 1 for MODFLOW-2005; 2 for MODFLOW-NWT algorithm (both can be 
                 # carried out with MODFLOW-NWT code) 
 
-MODFLOW_indir = settings_test.MODFLOWinput_dir + slashstr 
-MODFLOW_indir_rel = '..' + slashstr + settings_test.MODFLOWinput_dir_rel + slashstr 
-MODFLOW_outdir_rel = '..' + slashstr + settings_test.MODFLOWoutput_dir_rel + slashstr 
+MODFLOW_indir = Settings.MODFLOWinput_dir + slashstr 
+MODFLOW_indir_rel = '..' + slashstr + Settings.MODFLOWinput_dir_rel + slashstr 
+MODFLOW_outdir_rel = '..' + slashstr + Settings.MODFLOWoutput_dir_rel + slashstr 
 
-infile_pre = settings_test.PROJ_CODE
+infile_pre = Settings.PROJ_CODE
 
 #NLAY = 1;
 #DZ = [200] # [NLAYx1] [m] ***testing
 ## DZ = [350, 100] # [NLAYx1] [m] ***testing
-NLAY = settings_test.NLAY
-DZ = settings_test.DZ
+NLAY = Settings.NLAY
+DZ = Settings.DZ
 
 
 # length of transient stress period (follows 1-day steady-state period, ok if longer than actual GSFLOW period) [d]
-start_date = dt.datetime.strptime(settings_test.START_DATE, "%Y-%m-%d")
-end_date = dt.datetime.strptime(settings_test.END_DATE, "%Y-%m-%d")
+start_date = dt.datetime.strptime(Settings.START_DATE, "%Y-%m-%d")
+end_date = dt.datetime.strptime(Settings.END_DATE, "%Y-%m-%d")
 delt = end_date - start_date
 perlen_tr = delt.days
 
-GIS_indir = settings_test.GISinput_dir + slashstr
+GIS_indir = Settings.GISinput_dir + slashstr
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file
-if settings_test.sw_1spinup_2restart == 2:
-    fil_res_in = settings_test.restart_MODfil
+if Settings.sw_1spinup_2restart == 2:
+    fil_res_in = Settings.restart_MODfil
 
 # for various files: ba6, dis, uzf, lpf
 surfz_fil = GIS_indir + 'DEM.asc'
@@ -56,13 +66,13 @@ surfz_fil = GIS_indir + 'DEM.asc'
 # for various files: ba6, uzf
 mask_fil = GIS_indir + 'basin_mask.asc'
 # for ba6 (pour point)
-dischargept_fil = GIS_indir + 'pp_tmp.txt'
+dischargept_fil = GIS_indir + 'pour_point.txt'
 
 # for sfr
-reach_fil = GIS_indir + 'reaches_tmp.txt'
-segment_fil_all = [GIS_indir + 'segments_tmp_4A_INFORMATION.txt', 
-                   GIS_indir + 'segments_tmp_4B_UPSTREAM.txt', 
-                   GIS_indir + 'segments_tmp_4C_DOWNSTREAM.txt']
+reach_fil = GIS_indir + 'reaches.txt'
+segment_fil_all = [GIS_indir + 'segments_4A_INFORMATION.txt', 
+                   GIS_indir + 'segments_4B_UPSTREAM.txt', 
+                   GIS_indir + 'segments_4C_DOWNSTREAM.txt']
 
 
 ## 

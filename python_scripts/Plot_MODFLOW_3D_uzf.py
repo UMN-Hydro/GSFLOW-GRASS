@@ -9,7 +9,16 @@ import platform
 import struct
 import numpy as np
 from matplotlib import pyplot as plt
-import settings_test
+from readSettings import Settings
+
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -33,9 +42,9 @@ clim = [0, 250]
 #%% from Settings file 
 
 # *** Change file names as needed
-uzf_file = settings_test.MODFLOWoutput_dir + slashstr + settings_test.PROJ_CODE + '_uzf.dat'  # head data
-surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
-ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
+uzf_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_uzf.dat'  # head data
+surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
+ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
 
 print '\n******************************************'
 print 'Plotting results from: ', uzf_file
@@ -56,7 +65,7 @@ elif platform.linux_distribution()[0][:3] == 'Red':
 else:
     sys.exit("You should add your OS binary formatting to this script!")
 
-#uzf_file = settings_test.MODFLOWoutput_dir + slashstr + 'Shullcas_uzf_win.dat'  # head data
+#uzf_file = Settings.MODFLOWoutput_dir + slashstr + 'Shullcas_uzf_win.dat'  # head data
 #nread = 0
 
 # -- get surface elevations [m] (to plot WTD)
@@ -280,8 +289,8 @@ for ii in range(ntimes):
         
         if ii == 0:
             plt.subplot(2,2,1)
-#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
-            p = plt.imshow(data, interpolation='none')
+#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='nearest')
+            p = plt.imshow(data, interpolation='nearest')
             p.set_cmap(plt.cm.rainbow)
             plt.colorbar(p)
 #            plt.clim()
@@ -303,7 +312,7 @@ for ii in range(ntimes):
             str0 = ti + ' ' + str(int(time_info[0,ii])) 
             plt.title(str0)
         plt.tight_layout()
-        im2 = plt.imshow(outline, interpolation='none')
+        im2 = plt.imshow(outline, interpolation='nearest')
 #        im2 = plt.imshow(outline, interpolation='none')
         im2.set_clim(0, 1)
         cmap = plt.get_cmap('binary',2)
