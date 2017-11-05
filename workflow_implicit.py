@@ -36,14 +36,14 @@ gisdb = config.get('GRASS', 'gisdb') # ADD THIS!
 
 # path to the GRASS GIS launch script
 # MS Windows
-grass7bin_win = r'C:\OSGeo4W\bin\grass72svn.bat'
+grass7bin_win = r'C:\OSGeo4W\bin\grass'+version+'svn.bat'
 # uncomment when using standalone WinGRASS installer
 # grass7bin_win = r'C:\Program Files (x86)\GRASS GIS 7.2.0\grass72.bat'
 # Linux
-grass7bin_lin = 'grass72'
+grass7bin_lin = 'grass'+version
 # Mac OS X
 # this is TODO
-grass7bin_mac = '/Applications/GRASS/GRASS-7.2.app/'
+grass7bin_mac = '/Applications/GRASS/GRASS-'+version[0]+'.'version[1]+'.app/'
 
 # DATA
 # define GRASS DATABASE
