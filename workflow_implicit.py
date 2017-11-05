@@ -17,7 +17,7 @@ from ConfigParser import ConfigParser
 # READ CONFIG VARIABLES #
 #########################
 config = ConfigParser()
-config.read('settings.ini')
+config.read('/home/awickert/dataanalysis/GRASS-fluvial-profiler/settings.ini')
 
 # Global input variables
 # project_name becomes GRASS location name
@@ -28,7 +28,8 @@ MODFLOW_grid_resolution = config.get('GRASS', 'MODFLOW_grid_resolution_meters')
 outlet_point_x = config.get('GRASS', 'outlet_point_x')
 outlet_point_y = config.get('GRASS', 'outlet_point_y')
 icalc = config.get('GRASS', 'icalc')
-gisdb = config.get('GRASS', 'gisdb') # ADD THIS!
+gisdb = config.get('GRASS', 'gisdb')
+version = config.get('GRASS', 'version')
 
 ########################
 # RUN GRASS IMPLICITLY #
@@ -43,67 +44,102 @@ grass7bin_win = r'C:\OSGeo4W\bin\grass'+version+'svn.bat'
 grass7bin_lin = 'grass'+version
 # Mac OS X
 # this is TODO
-grass7bin_mac = '/Applications/GRASS/GRASS-'+version[0]+'.'version[1]+'.app/'
-
-# DATA
-# define GRASS DATABASE
-# add your path to grassdata (GRASS GIS database) directory
-#gisdb = os.path.join(os.path.expanduser("~"), "grassdata")
-# the following path is the default path on MS Windows
-# gisdb = os.path.join(os.path.expanduser("~"), "Documents/grassdata")
+grass7bin_mac = '/Applications/GRASS/GRASS-'+version[0]+'.'+version[1]+'.app/'
 
 # specify (existing) location and mapset
 location = project_name
 mapset   = "PERMANENT"
+location_path = os.path.join(gisdb, location)
+
+########### SOFTWARE
+if sys.platform.startswith('linux'):
+    # we assume that the GRASS GIS start script is available and in the PATH
+    # query GRASS 7 itself for its GISBASE
+    grass7bin = grass7bin_lin
+elif sys.platform.startswith('win'):
+    grass7bin = grass7bin_win
+else:
+    raise OSError('Platform not configured.')
 
 # Using existing location
-if project_name == '':
-
-    ########### SOFTWARE
-    if sys.platform.startswith('linux'):
-        # we assume that the GRASS GIS start script is available and in the PATH
-        # query GRASS 7 itself for its GISBASE
-        grass7bin = grass7bin_lin
-    elif sys.platform.startswith('win'):
-        grass7bin = grass7bin_win
-    else:
-        raise OSError('Platform not configured.')
-
+if os.path.isdir(location_path):
     # query GRASS 7 itself for its GISBASE
     startcmd = [grass7bin, '--config', 'path']
-
+    p = subprocess.Popen(startcmd, shell=False,
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, "ERROR: Cannot find GRASS GIS 7 start script (%s)" % startcmd
+        sys.exit(-1)
+    gisbase = out.strip('\n\r')
 # Making new location
 else:
-    #  from georeferenced data file
-    startcmd = grass7bin + ' -c ' + DEM_input + ' -e ' + location_path
-
-
-p = subprocess.Popen(startcmd, shell=False,
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-out, err = p.communicate()
-if p.returncode != 0:
-    print >>sys.stderr, "ERROR: Cannot find GRASS GIS 7 start script (%s)" % startcmd
-    sys.exit(-1)
-gisbase = out.strip('\n\r')
+    startcmd = grass7bin + ' --config path'
+    p = subprocess.Popen(startcmd, shell=True, 
+					     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if p.returncode != 0:
+  	    print >>sys.stderr, 'ERROR: %s' % err
+  	    print >>sys.stderr, "ERROR: Cannot find GRASS GIS 7 start script (%s)" % startcmd
+  	    sys.exit(-1)
+    if sys.platform.startswith('linux'):
+  	    gisbase = out.strip('\n')
+    elif sys.platform.startswith('win'):
+        if out.find("OSGEO4W home is") != -1:
+    		    gisbase = out.strip().split('\n')[1]
+        else:
+    		    gisbase = out.strip('\n')
+        os.environ['GRASS_SH'] = os.path.join(gisbase, 'msys', 'bin', 'sh.exe')
 
 # Set GISBASE environment variable
 os.environ['GISBASE'] = gisbase
-# the following not needed with trunk
-os.environ['PATH'] += os.pathsep + os.path.join(gisbase, 'extrabin')
-# add path to GRASS addons
-home = os.path.expanduser("~")
-os.environ['PATH'] += os.pathsep + os.path.join(home, '.grass7', 'addons', 'scripts')
+#os.environ['PATH'] += os.pathsep + os.path.join(gisbase, 'extrabin') # not needed with trunk
+os.environ['PATH'] += os.pathsep + os.path.join(os.getenv('HOME'), '.grass7', 'addons', 'scripts')
 
 # define GRASS-Python environment
 gpydir = os.path.join(gisbase, "etc", "python")
 sys.path.append(gpydir)
 
-########### DATA
+########
+# define GRASS DATABASE
+if sys.platform.startswith('win'):
+    gisdb = os.path.join(os.getenv('APPDATA'), 'grassdata')
+else:
+    gisdb = os.path.join(os.getenv('HOME'), 'grassdata')
+
+if os.path.isdir(location_path):
+    pass
+else:
+    #  from georeferenced data file
+    startcmd = grass7bin + ' -c ' + DEM_input + ' -e ' + location_path
+    p = subprocess.Popen(startcmd, shell=True, 
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if p.returncode != 0:
+        print >>sys.stderr, 'ERROR: %s' % err
+        print >>sys.stderr, 'ERROR: Cannot generate location (%s)' % startcmd
+        sys.exit(-1)
+    else:
+        print 'Created location %s' % location_path
+
 # Set GISDBASE environment variable
 os.environ['GISDBASE'] = gisdb
- 
+
+# Linux: Set path to GRASS libs (TODO: NEEDED?)
+# THE ISSUE LIES HERE!!!!!!
+path = os.getenv('LD_LIBRARY_PATH')
+dir  = os.path.join(gisbase, 'lib')
+if path:
+    path = dir + os.pathsep + path
+else:
+    path = dir
+os.environ['LD_LIBRARY_PATH'] = path
+
+# language
+os.environ['LANG'] = 'en_US'
+os.environ['LOCALE'] = 'C'
+
 # import GRASS Python bindings (see also pygrass)
-import grass.script as gscript
 import grass.script.setup as gsetup
  
 ###########
@@ -111,7 +147,6 @@ import grass.script.setup as gsetup
 gsetup.init(gisbase,
             gisdb, location, mapset)
 
-    
 # GRASS
 from grass.pygrass.modules.shortcuts import general as g
 from grass.pygrass.modules.shortcuts import raster as r
