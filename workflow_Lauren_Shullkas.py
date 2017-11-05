@@ -55,32 +55,6 @@ basin_mask          = 'basin_mask'            # Mask out non-study-basin cells
 pour_point          = 'pour_point'            # Outlet pour point
 bc_cell             = 'bc_cell'               # Grid cell for MODFLOW b.c.
 
-DEM_orig=DEM_orig
-DEM=DEM
-DEM_coarse=DEM_coarse # MODFLOW resolution
-accumulation=accumulation_tmp
-streams=streams_tmp
-streams_MODFLOW=streams_MODFLOW
-streams_onebasin=${streams}_onebasin
-basins=basins_tmp
-basins_onebasin=${basins}_onebasin
-segments=segments_tmp
-reaches=reaches_tmp
-threshold=1000000 #m2 - drainage area
-grid_res=500 #150 #1000 #m2 - for MODFLOW
-grid=grid_tmp
-slope=slope_tmp
-aspect=aspect_tmp
-HRUs=HRUs_tmp
-gravity_reservoirs=gravity_reservoirs_tmp
-basin_mask=basin_mask_tmp
-basin_mask_out=basin_mask
-pour_point=pp_tmp
-bc_cell=bc_cell
-icalc=1 # how to compute hydraulic geometry
-x_outlet=482452.076604
-y_outlet=8672978.0598
-
 # Import DEM if required
 # And perform the standard starting tasks.
 # These take time, so skip if not needed
