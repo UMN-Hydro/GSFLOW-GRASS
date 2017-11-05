@@ -23,7 +23,8 @@ config = SafeConfigParser()
 config.read('settings.ini')
 
 # Global input variables
-project_name = config.get('settings', 'proj_name')
+#project_name = config.get('settings', 'proj_name')
+GIS_output_roootdir = config.get('settings', 'gsflow_simdir') + '/GIS'
 DEM_input = config.get('GRASS', 'DEM_file_path_to_import')
 A_threshold = config.get('GRASS', 'threshold_drainage_area_meters2')
 MODFLOW_grid_resolution = config.get('GRASS', 'MODFLOW_grid_resolution_meters')
@@ -115,12 +116,12 @@ v.gsflow_gravres(hru_input=HRUs, grid_input=MODFLOW_grid, output=gravity_reservo
 # Export DEM with MODFLOW resolution
 # Also export basin mask -- 1s where basin exists and 0 where it doesn't
 # And make sure it is in an appropriate folder
-if os.path.split(os.getcwd())[-1] != project_name:
+if os.getcwd() != GIS_output_rootdir:
     try:
-        os.mkdir(project_name)
+        os.makedirs(GIS_output_rootdir)
     except:
         pass
-os.chdir(project_name)
+os.chdir(GIS_output_rootdir)
 g.region(raster=DEM_MODFLOW)
 r.out_ascii(input=DEM_MODFLOW, output='DEM.asc', null_value=0, overwrite=True)
 r.out_ascii(input=basin_mask, output=basin_mask+'.asc', null_value=0, overwrite=True)
@@ -140,3 +141,21 @@ v.gsflow_export(reaches_input=reaches,
                 pour_point_boundary_output=pour_point,
                 overwrite=True)
                 
+# Export shapefiles of all vector files
+try:
+    os.mkdir('shapefiles')
+except:
+    pass
+os.chdir('shapefiles')
+for _vector_file in [basins_inbasin, HRUs, gravity_reservoirs, ]:
+    v.out_ogr(input=_vector_file, output=_vector_file, type='area', quiet=True, overwrite=True)
+for _vector_file in [streams_inbasin, segments, reaches]:
+    v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
+for _vector_file in [pour_point, bc_cell]:
+    v.out_ogr(input=_vector_file, output=_vector_file, type='point', quiet=True, overwrite=True)
+os.chdir('..')
+os.chdir('..')
+
+print ""
+print "Done."
+print ""
