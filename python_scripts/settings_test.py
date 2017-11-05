@@ -33,8 +33,8 @@ parser.read(input_file)
 PROJ_NAME = parser.get('settings', 'proj_name')
 
 # command-line executable for GSFLOW (just used to print message)
-GSFLOW_exe = parser.get('settings', 'gsflow_exe') + slashstr + 'gsflow'
-DEM = parser.get('settings', 'DEM') # name of file w/ topography data (in GIS data directory)
+GSFLOW_exe = parser.get('settings', 'gsflow_exe')
+#DEM = parser.get('settings', 'DEM') # name of file w/ topography data (in GIS data directory)
 GISinput_dir = parser.get('settings', 'GISinput_dir')
 climate_data_file = parser.get('settings', 'climate_data_file')
 

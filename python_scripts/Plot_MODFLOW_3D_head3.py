@@ -19,16 +19,16 @@ else:
 
 # ***Select which option:
 # (1: head, 2: water table depth, 3: change in head per print-time increment)
-sw_head_WTD_dhead = 3
+sw_head_WTD_dhead = 2
 
 
 #%% from Settings file
 head_file = settings_test.MODFLOWoutput_dir + slashstr + settings_test.PROJ_CODE + '_head.bhd'  # head data
-surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
+surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
 
 print '\n******************************************'
 print 'Plotting results from: ', head_file
-print ' (WTD calculated using topo data in: ' + surfz_fil + ')'
+print ' (WTD=TOP-HEAD calculated using topo data in: ' + surfz_fil + ')'
 print '******************************************\n'
 
 #%% In general: don't change below here
@@ -164,7 +164,8 @@ fid.close()
 data_head_all = data_head_all[:,:,:ii]
 time_info = time_info[:,:ii]
 lay_info = lay_info[:,:ii]
-ntimes = ii
+ntimeslay = ii # ntimes x nlay
+ntimes = ntimeslay / NLAY
 
 NLAY = np.max(lay_info)
 
@@ -174,22 +175,26 @@ X, Y = np.meshgrid(x,y)
 
 
 data_head_all_NaN = data_head_all
-data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan
-data_head_all_NaN[data_head_all_NaN <= 999] = np.nan
+data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan # dry cell
+data_head_all_NaN[data_head_all_NaN <= -999] = np.nan
 
 
 # use this to plot WTD:
-TOP2 = np.tile(TOP[:,:,np.newaxis], (1,1,ntimes))
+TOP2 = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay))
 WTD_all = TOP2 - data_head_all_NaN
 
 # use this to plot change in head:        
-dhead_all = np.zeros((NROW,NCOL,ntimes))
+dhead_all = np.zeros((NROW,NCOL,ntimeslay))
 dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
 
-
+# mask with just outline (outer boundary) of watershed
+outline = np.ones((NROW,NCOL))*np.nan
+outline2 = outline[1:-1,1:-1]
+outline2[ind_bound_out] = 1
+outline[1:-1,1:-1] = outline2
 
 # head plot movie
-plt.figure()
+fig = plt.figure()
 ctr = 0
 for ii in range(ntimes):
     for lay_i in range(NLAY):
@@ -200,7 +205,7 @@ for ii in range(ntimes):
             data_all = data_head_all_NaN
         elif sw_head_WTD_dhead == 2:        
             # WTD:
-            ti = 'WTD [m], '
+            ti = 'WTD=TOP-HEAD [m], '
             data_all = WTD_all
         elif sw_head_WTD_dhead == 3:
             # change in head:
@@ -211,35 +216,48 @@ for ii in range(ntimes):
         data = data_all[:,:,ctr]    
         
         if ii == 0:
-#            if lay_i == 0:
-#                pv = []
-#                
-#            pv.append(plt.subplot(2,2,lay_info[0,ii]))
-#            pv[lay_i] = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
-#            pv[lay_i.set_cmap(plt.cm.hsv)
-##            plt.colorbar(pv[lay_i])
+            print ii
+            if lay_i == 0:
+                av = []
+                pv = []
+                
+            av.append(plt.subplot(2,2,lay_info[0,ctr]))
+            pv.append(av[lay_i].imshow(data, interpolation='none'))
+            pv[lay_i].set_cmap(plt.cm.cool)
+            plt.colorbar(pv[lay_i])
+#            plt.clim()
+            x = data_all[:,:,lay_i::2]
+            x = x[~np.isnan(x)]
+            pv[lay_i].set_clim(vmin=np.min(x), vmax=np.max(x))
+        
+#            plt.subplot(2,2,lay_info[0,ii])
+#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+#            p.set_cmap(plt.cm.hsv)
+#            plt.colorbar(p)
 ##            plt.clim()
 #            x = data_all[~np.isnan(data_all)]
-#            pv[lay_i].set_clim(vmin=np.min(x), vmax=np.max(x))
-            plt.subplot(2,2,lay_info[0,ii])
-            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
-            p.set_cmap(plt.cm.hsv)
-            plt.colorbar(p)
-#            plt.clim()
-            x = data_all[~np.isnan(data_all)]
-            p.set_clim(vmin=np.min(x), vmax=np.max(x))
-            plt.xlabel('[m]', fontsize=16)
-            plt.ylabel('[m]', fontsize=16)
+#            p.set_clim(vmin=np.min(x), vmax=np.max(x))
+#            plt.xlabel('[m]', fontsize=16)
+#            plt.ylabel('[m]', fontsize=16)
+            av[lay_i].set_xlabel('[m]', fontsize=16)
+            av[lay_i].set_ylabel('[m]', fontsize=16)
         else:
-            p.set_data(data)        
-#            pv[lay_i].set_data(data)        
-            str0 = ti + str(time_info[0,ii]) + ', lay ' + str(int(lay_info[0,ii]))
-            plt.title(str0)
+#            p.set_data(data)        
+            pv[lay_i].set_data(data)        
+        str0 = ti + str(time_info[0,ctr]) + 'd, lay ' + str(int(lay_info[0,ctr]))
+#            plt.title(str0)
+        av[lay_i].set_title(str0)
         plt.tight_layout()
+
+        im2 = av[lay_i].imshow(outline, interpolation='none')
+#        im2 = plt.imshow(outline, interpolation='none')
+        im2.set_clim(0, 1)
+        cmap = plt.get_cmap('binary',2)
+        im2.set_cmap(cmap)   
                       
-    #    plt.show()
-        plt.pause(0.5)
         ctr = ctr + 1
+    #    plt.show()
+    plt.pause(0.5)
             
     #plt.savefig("myplot.png", dpi = 300)
 

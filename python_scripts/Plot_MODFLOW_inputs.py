@@ -26,6 +26,8 @@ dis_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + 
 ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
 flo_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.upw'
 
+# *** Set flag_print=1 to print figures to files
+fl_print = 0
 
 #%%
 f = open(dis_fil, 'r')
@@ -113,7 +115,8 @@ im = ax.imshow(IBOUND, interpolation='none',cmap=cmap)
 im.set_clim(np.min(IBOUND)-0.5, np.max(IBOUND)+0.5)
 fig.colorbar(im, orientation='horizontal')
 plt.title('IBOUND (active cells)')
-plt.savefig("ActiveCells.png", dpi = 300)    
+if fl_print == 1:
+    plt.savefig("ActiveCells.png", dpi = 300)    
 
 
 # -- plot domain discretization [DIS]
@@ -125,42 +128,54 @@ BOTM_to_plot[BOTM <= 0] == np.nan
 min_to_plot = np.min(BOTM_to_plot)
 max_to_plot = np.max(TOP_to_plot)
 
+# mask with just outline (outer boundary) of watershed
+y = np.ones((NROW,NCOL))*np.nan
+y2 = y[1:-1,1:-1]
+y2[ind_bound_out] = 1
+y[1:-1,1:-1] = y2
+
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(2,2,1)
-x = np.copy(TOP_to_plot)
-x2 = x[1:-1,1:-1]
-x2[ind_bound_out] = 0
-x[1:-1,1:-1] = x2
+x = TOP_to_plot
 im = ax.imshow(x, interpolation='none')
 im.set_clim(min_to_plot, max_to_plot)
 im.set_cmap(plt.cm.terrain)
+im2 = ax.imshow(y, interpolation='none')
+im2.set_clim(0, 1)
+cmap = plt.get_cmap('binary',2)
+im2.set_cmap(cmap)
+
 # use im.get_clim() to get the limits and generalize
 fig.colorbar(im, orientation='horizontal')
 plt.title('TOP')
 for ilay in range(NLAY):
-    x = np.copy(BOTM_to_plot[:,:,ilay])
-    x2 = x[1:-1,1:-1]
-    x2[ind_bound_out] = 0
-    x[1:-1,1:-1] = x2
+    x = BOTM_to_plot[:,:,ilay]
     plt.subplot(2,2,2+ilay)
     im = plt.imshow(x, interpolation='none')
     im.set_clim(min_to_plot, max_to_plot)
     fig.colorbar(im, orientation='horizontal')
     plt.set_cmap(plt.cm.terrain)
     plt.title('BOTM lay' + str(ilay+1));
-plt.savefig("Elev.png", dpi = 300)    
+    im2 = plt.imshow(y, interpolation='none')
+    im2.set_clim(0, 1)
+    cmap = plt.get_cmap('binary',2)
+    im2.set_cmap(cmap)
+if fl_print == 1:    
+    plt.savefig("Elev.png", dpi = 300)    
 
 # -- Hydraulic conductivity [UPW]   
 fig = plt.figure(figsize=(12,12))
 for ilay in range(NLAY):
-    x = np.copy(HY[:,:,ilay])
-    x2 = x[1:-1,1:-1]
-    x2[ind_bound_out] = 0
-    x[1:-1,1:-1] = x2   
+    x = HY[:,:,ilay]
     plt.subplot(2,2,ilay+1)
     im = plt.imshow(x, interpolation='none')
     plt.set_cmap(plt.cm.cool)
 #    im.set_clim(3800, 6200)
     fig.colorbar(im, orientation='horizontal')
     plt.title('HydCond in lay' + str(ilay+1));   
-plt.savefig("HydCond.png", dpi = 300)
+    im2 = plt.imshow(y, interpolation='none')
+    im2.set_clim(0, 1)
+    cmap = plt.get_cmap('binary',2)
+    im2.set_cmap(cmap)
+if fl_print == 1:
+    plt.savefig("HydCond.png", dpi = 300)

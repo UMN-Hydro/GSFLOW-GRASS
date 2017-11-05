@@ -51,7 +51,7 @@ if settings_test.sw_1spinup_2restart == 2:
     fil_res_in = settings_test.restart_MODfil
 
 # for various files: ba6, dis, uzf, lpf
-surfz_fil = GIS_indir + settings_test.DEM + '.asc'
+surfz_fil = GIS_indir + 'DEM.asc'
 # surfz_fil = GIS_indir + 'SRTM_new_20161208.asc'
 # for various files: ba6, uzf
 mask_fil = GIS_indir + 'basin_mask.asc'

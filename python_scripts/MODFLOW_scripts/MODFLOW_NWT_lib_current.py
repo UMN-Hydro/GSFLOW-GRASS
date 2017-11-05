@@ -326,14 +326,28 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
     NCOL = sdata['cols']
     IBOUND = np.genfromtxt(mask_fil, skip_header=6, skip_footer=0, delimiter=' ', dtype=float)
 
+#    f = open(dischargept_fil, 'r')
+#    last_line = f.readlines()
+#    last_line = last_line[-1].rstrip()
+#    f.close()    
+#    value1, value2 = last_line.split(': ')
+#    value2 = value2.split(' ')
+#    dischargePt_rowi = int(value2[1])
+#    dischargePt_coli = int(value2[3])
+
     f = open(dischargept_fil, 'r')
-    last_line = f.readlines()
-    last_line = last_line[-1].rstrip()
+    for ii in range(2):
+        line = f.readline()
+        line = line[-1].rstrip()
+        value1, value2 = line.split(': ')
+        value2 = value2.split(' ')
+        if ii == 0:
+            dischargePt_rowi = int(value2[1])
+            dischargePt_coli = int(value2[3])
+        else:
+            DowngradPt_rowi = int(value2[1])
+            DowngradPt_coli = int(value2[3])            
     f.close()    
-    value1, value2 = last_line.split(': ')
-    value2 = value2.split(' ')
-    dischargePt_rowi = int(value2[1])
-    dischargePt_coli = int(value2[3])
       
     # - force some cells to be active to correspond to stream reaches
 #    print "Warning!!  Hard-coded to set some IBOUND values to be active!! Check Andy's GIS algorithm..."
@@ -403,7 +417,7 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #        if (dischargePt_rowi < NROW):
 #            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
 
-    # *** SPECIFIC TO SHULLCAS
+#    # *** SPECIFIC TO SHULLCAS
 #    print "setting constant head downgradient of outlet - Shullcas"
 #    if (dischargePt_coli > 1):
 #        IBOUND[dischargePt_rowi-1,dischargePt_coli-2] = -2 # downgrad of discharge pt
@@ -411,21 +425,24 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #            IBOUND[dischargePt_rowi-2,dischargePt_coli-2] = -1 # neighbor points
 #        if (dischargePt_rowi < NROW):
 #            IBOUND[dischargePt_rowi,dischargePt_coli-2] = -1
-#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
-#    # active cells below stream reaches!
+#    
+    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
+    IBOUND[DowngradPt_rowi-1,DowngradPt_coli-1] = -1 # constant head in cell downgrad of discharge pt
+    # active cells below stream reaches!
     
-    print "setting constant head downgradient of outlet - Santa Rosa"
-    if (dischargePt_rowi < NROW):
-        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
-    if (dischargePt_coli < NCOL):
-        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -1 # downgrad of discharge pt
-        if (dischargePt_rowi > 1):
-            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
-        if (dischargePt_rowi < NROW):
-            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
-    # hard-code to have active cells below streams 10/2/17 (Santa Rosa)
-    IBOUND[11-1,51-1] = 1
+    # *** SPECIFIC TO Santa Rosa
+#    print "setting constant head downgradient of outlet - Santa Rosa"
+#    if (dischargePt_rowi < NROW):
+#        IBOUND[dischargePt_rowi,dischargePt_coli-1] = -1
+#    if (dischargePt_coli < NCOL):
+#        IBOUND[dischargePt_rowi-1,dischargePt_coli] = -1 # downgrad of discharge pt
+#        if (dischargePt_rowi > 1):
+#            IBOUND[dischargePt_rowi-2,dischargePt_coli] = -1 # neighbor points
+#        if (dischargePt_rowi < NROW):
+#            IBOUND[dischargePt_rowi,dischargePt_coli] = -1
+#    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # discharge pt
+#    # hard-code to have active cells below streams 10/2/17 (Santa Rosa)
+#    IBOUND[11-1,51-1] = 1
     
     print "To do for IBOUND: check if neighboring cells to discharge point are stream cells"
     
@@ -945,7 +962,7 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     # You need the following inputs (with corresponding structures)
     
     # the followings are used to write item 1
-    fl_nstrm = -1  # flag for stream reaches, <0: include unsaturated zone below (sagehen: >0)
+    fl_nstrm = -1  # flag for stream reaches, <0: include unsaturated zone below (sagehen: >0, but uses "REACHINPUT" keyword, which is same effect as nstrm<0)
     nsfrpar = 0  #Always Zero
     nparseg = 0    #Always Zero
     const = 86400.  #Conversion factor used in calculating depth for a stream reach (86400 in sagehen example)
@@ -1426,6 +1443,8 @@ def make_uzf3_f_2(GSFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil)
     # Ok to have following parameters as SCALAR (constant for all gridcells) or as ARRAY (NROWxNCOL)
     eps = 3.5  #Brooks-Corey epsilon of the unsaturated zone.
     thts = np.copy(iuzfbnd) * 0.35    #Saturated water content of the unsaturated zone
+#    eps = 4  #Brooks-Corey epsilon of the unsaturated zone.
+#    thts = np.copy(iuzfbnd) * 0.18    #Saturated water content of the unsaturated zone
     if NUZGAG > 0:
         print 'Input scripts only set up for UZGAG = 0! Exiting...'
         quit()        

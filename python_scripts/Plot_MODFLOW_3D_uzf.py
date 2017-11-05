@@ -34,7 +34,7 @@ clim = [0, 250]
 
 # *** Change file names as needed
 uzf_file = settings_test.MODFLOWoutput_dir + slashstr + settings_test.PROJ_CODE + '_uzf.dat'  # head data
-surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
+surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
 ba6_fil = settings_test.MODFLOWinput_dir + slashstr + settings_test.PROJ_CODE + '.ba6'
 
 print '\n******************************************'
@@ -250,6 +250,12 @@ X, Y = np.meshgrid(x,y)
 #data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan
 #data_head_all_NaN[data_head_all_NaN <= 999] = np.nan
 
+# mask with just outline (outer boundary) of watershed
+outline = np.ones((NROW,NCOL))*np.nan
+outline2 = outline[1:-1,1:-1]
+outline2[ind_bound_out] = 1
+outline[1:-1,1:-1] = outline2
+
 lay_i0 = 0
 
 # head plot movie
@@ -274,7 +280,8 @@ for ii in range(ntimes):
         
         if ii == 0:
             plt.subplot(2,2,1)
-            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+            p = plt.imshow(data, interpolation='none')
             p.set_cmap(plt.cm.rainbow)
             plt.colorbar(p)
 #            plt.clim()
@@ -296,9 +303,14 @@ for ii in range(ntimes):
             str0 = ti + ' ' + str(int(time_info[0,ii])) 
             plt.title(str0)
         plt.tight_layout()
-                      
+        im2 = plt.imshow(outline, interpolation='none')
+#        im2 = plt.imshow(outline, interpolation='none')
+        im2.set_clim(0, 1)
+        cmap = plt.get_cmap('binary',2)
+        im2.set_cmap(cmap)   
+           
     #    plt.show()
-        plt.pause(1)
+        plt.pause(0.5)
             
     #plt.savefig("myplot.png", dpi = 300)
 

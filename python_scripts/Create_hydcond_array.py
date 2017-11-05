@@ -49,7 +49,7 @@ except ValueError:
    hydcond_fil = settings_test.hydcond0
 
 
-surfz_fil = settings_test.GISinput_dir + slashstr + settings_test.DEM + '.asc'
+surfz_fil = settings_test.GISinput_dir + slashstr + 'DEM.asc'
 NLAY = settings_test.NLAY
 
 
@@ -84,9 +84,7 @@ if fl_runscript == 1:
     # ----- Based on elevation -----
     
     if sw_scheme == 1 or sw_scheme == 3:
-    
-        print 'WARNING!!  Create_hydcond_array.py, sw_scheme=1 for elevation-based K: hard-coded for Shullcas elevations!'    
-        
+            
         # - domain dimensions, maybe already in surfz_fil and botm_fil{}?
         # NLAY = 2;
         # surfz_fil = '/home/gcng/workspace/ProjectFiles/AndesWaterResources/Data/GIS/topo.asc';
