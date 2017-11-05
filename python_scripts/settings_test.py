@@ -40,7 +40,8 @@ climate_data_file = parser.get('settings', 'climate_data_file')
 
 PROJ_CODE=PROJ_NAME.replace(" ", "") # remove blank spaces
 
-gsflow_simdir = parser.get('settings', 'gsflow_simdir')
+gsflow_path_simdir = parser.get('settings', 'gsflow_path_simdir')
+gsflow_simdir = gsflow_path_simdir + slashstr + PROJ_CODE
 
 # 1: for spinup (starts with steady-state run), 2: for restart (run AFTER spinup)
 sw_1spinup_2restart = int(parser.get('settings', 'sw_1spinup_2restart'))
