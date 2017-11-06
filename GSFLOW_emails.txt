@@ -1,0 +1,12 @@
+12/25/16 to Leila
+(original sending of files to Leila)
+
+Email chain with Leila, subject: "Laptop/Comptuer"
+- issue of compiling GSFLOW on Ubuntu
+- GSFLOW versions 1.2.0 and 1.2.1
+- maybe something accidentally over-written in 30yr control file script?
+
+Email chain with Leila, subject: MODFLOW-NWT
+
+
+

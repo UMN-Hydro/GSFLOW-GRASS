@@ -1,0 +1,68 @@
+90c90
+< def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr):
+---
+> def write_dis_MOD2_f(GSFLOW_indir, infile_pre, surfz_fil, NLAY, DZ, perlen_tr, sw_spinup_restart):
+116a117
+>     sw_spinup_restart = 1 # 1: spinup (2 periods: steady-state and transient), 2: restart (1 period: transient)
+158c159
+<     NPER = 1; # 1 SS then 1 transient
+---
+>     NPER = 2; # 1 SS then 1 transient
+161c162
+<     SsTr_flag = ['tr']
+---
+>     SsTr_flag = ['ss', 'tr']
+889,891c890,891
+<     NPER = 1 # 1 SS then 1 transient
+< #    PERLEN = [1, int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
+<     PERLEN = [int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
+---
+>     NPER = 2 # 1 SS then 1 transient
+>     PERLEN = [1, int(perlen_tr)]  # 2 periods: 1-day steady-state and multi-day transient
+990c990
+<     NPER = 1       # used for item 3
+---
+>     NPER = 2       # used for item 3
+1340c1340
+<     fobj.close() # end make_sfr2_f_Mannings
+---
+>     fobj.close()
+1419,1420c1419,1420
+<     NPER = 1
+<     # **** ASSUMES PER 1 IS TR ****
+---
+>     NPER = 2
+>     # **** ASSUMES PER 1 IS SS, PER 2 IS TR ****
+1456,1458c1456,1457
+< #    NUZF1 = np.array([[1], 
+< #             -1*np.ones((NPER-1,1))]) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
+<     NUZF1 = -1*np.ones((NPER,1)) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
+---
+>     NUZF1 = np.array([[1], 
+>              -1*np.ones((NPER-1,1))]) # infiltration can ONLY specified for (initial) SS stress periods (o.w. calculated by PRMS)
+1544,1545c1543
+< #        NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
+<         NUZF3 = -1*np.ones((NPER-1,1)) # only specify extdp for first stress periods
+---
+>         NUZF3 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extdp for first stress periods
+1547,1548c1545
+< #        NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
+<         NUZF4 = -1*np.ones((NPER-1,1)) # only specify extwc for first stress periods
+---
+>         NUZF4 = np.array([[1], -1*np.ones((NPER-1,1))]) # only specify extwc for first stress periods
+1611,1616c1608,1611
+<     # Only if starts with transient stress period
+<     if NPER == 1:
+<         comment = '#THTI--INITIAL WATER CONTENT'
+<         data = thti
+<         data_type = 'REAL'
+<         MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment)    
+---
+> #    comment = '#THTI--INITIAL WATER CONTENT'
+> #    data = thti
+> #    data_type = 'REAL'
+> #    MOD_data_write2file(fobj, LOCAT, CNSTNT, IPRN, data_type, data, comment)    
+1625c1620
+<     # write items 9-16   
+---
+>     # write items 9-16
