@@ -1,5 +1,13 @@
 # GSFLOW-GRASS
 
+***Python toolkit using GRASS GIS to generate inputs for the USGS hydrologic model "GSFLOW".***
+
+GSFLOW is the US Geological Survey's combined groundater (MODFLOW) and surface water (PRMS) model. GSFLOW-GRASS builds a stream network and its "hydrologic response units" -- here, watershed sub-basins -- that combine to form a surface-water hydrologic network (PRMS). It then links these to a regular finite difference grid to compute groundwater flow using MODFLOW.
+
+These instructions are meant to take an user familiar with computers but new to (or a beginner with) GSFLOW and GRASS GIS through the basics of how to get GSFLOW-GRASS to work. *Please leave a message if you have trouble working with GSFLOW-GRASS; your comments could assist both you and the more general improvement of this documentation.*
+
+When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be noted here as soon as the paper is made available.
+
 ## Quick Start
 
 This Quick Start guide allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts.  Additional customization can be implemented through the input file builder scripts described in the Full Users Manual.
