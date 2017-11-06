@@ -1,4 +1,3 @@
-# GSFLOW_pre-processor
 # GSFLOW-GRASS
 
 ## Quick Start
@@ -131,7 +130,7 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 
 Settings File, *fl_print_climate_hru*=0: **RESUME HERE**
 
-#### Step 3. Running GRASS GIS and generating output
+#### Step 4. Running GRASS GIS and generating output
 
 ##### Download and install GRASS GIS 7.3+
 
@@ -164,15 +163,15 @@ CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
 --with-netcdf=/usr/bin/nc-config
 ```
 
-#### Step 4. Running GSFLOW
+#### Step 5. Running GSFLOW
 Before running GSFLOW, the user should:
 
 
 
 
-#### Step 5. Visualization
+#### Step 6. Visualization
 
-#### Step 6. Advanced Customization
+#### Step 7. Advanced Customization
 
 ## More Details
 
