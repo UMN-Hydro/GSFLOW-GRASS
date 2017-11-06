@@ -1,3 +1,5 @@
+#! /bin/sh
+
 g.extension v.gsflow.export
 g.extension v.gsflow.gravres
 g.extension v.gsflow.grid
