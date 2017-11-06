@@ -10,6 +10,7 @@ import struct
 import numpy as np
 from matplotlib import pyplot as plt
 from readSettings import Settings
+import matplotlib.animation as manimation
 
 # Set input file
 if len(sys.argv) < 2:
@@ -30,8 +31,10 @@ else:
 # (1: head, 2: water table depth, 3: change in head per print-time increment)
 sw_head_WTD_dhead = 2
 
+# ***Saves movie to following file
+moviefile_name = 'head.mp4'
 
-#%% from Settings file
+#%% from Settings file, change to plot something else
 head_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_head.bhd'  # head data
 surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
 ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
@@ -233,70 +236,77 @@ outline[1:-1,1:-1] = outline2
 
 # head plot movie
 fig = plt.figure()
-ctr = 0
-for ii in range(ntimes):
-    for lay_i in range(NLAY):
-        
-        if sw_head_WTD_dhead == 1:
-            # head:
-            ti = 'head [m], '
-            data_all = data_head_all_NaN
-        elif sw_head_WTD_dhead == 2:        
-            # WTD:
-            ti = 'WTD=TOP-HEAD [m], '
-            data_all = WTD_all
-        elif sw_head_WTD_dhead == 3:
-            # change in head:
-            ti = 'Change in head [m], '
-            data_all = dhead_all
-               
-#        data = data_all[:,:,ii]    
-        data = data_all[:,:,ctr]    
-        
-        if ii == 0:
-            print ii
-            if lay_i == 0:
-                av = []
-                pv = []
-                
-            av.append(plt.subplot(2,2,lay_info[0,ctr]))
-            pv.append(av[lay_i].imshow(data, interpolation='nearest'))
-            pv[lay_i].set_cmap(plt.cm.cool)
-            plt.colorbar(pv[lay_i])
-#            plt.clim()
-            x = data_all[:,:,lay_i::2]
-            x = x[~np.isnan(x)]
-            pv[lay_i].set_clim(vmin=np.min(x), vmax=np.max(x))
-        
-#            plt.subplot(2,2,lay_info[0,ii])
-#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
-#            p.set_cmap(plt.cm.hsv)
-#            plt.colorbar(p)
-##            plt.clim()
-#            x = data_all[~np.isnan(data_all)]
-#            p.set_clim(vmin=np.min(x), vmax=np.max(x))
-#            plt.xlabel('[m]', fontsize=16)
-#            plt.ylabel('[m]', fontsize=16)
-            av[lay_i].set_xlabel('[m]', fontsize=16)
-            av[lay_i].set_ylabel('[m]', fontsize=16)
-        else:
-#            p.set_data(data)        
-            pv[lay_i].set_data(data)        
-        str0 = ti + str(time_info[0,ctr]) + 'd, lay ' + str(int(lay_info[0,ctr]))
-#            plt.title(str0)
-        av[lay_i].set_title(str0)
-        plt.tight_layout()
+FFMpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title='GSFLOW Movie', artist='Matplotlib',
+                comment='Movie support!')
+writer = FFMpegWriter(fps=10, metadata=metadata)
+with writer.saving(fig, moviefile_name, 100):
 
-        im2 = av[lay_i].imshow(outline, interpolation='nearest')
-#        im2 = plt.imshow(outline, interpolation='none')
-        im2.set_clim(0, 1)
-        cmap = plt.get_cmap('binary',2)
-        im2.set_cmap(cmap)   
-                      
-        ctr = ctr + 1
-    #    plt.show()
-    plt.pause(0.5)
+    ctr = 0
+    for ii in range(ntimes):
+        for lay_i in range(NLAY):
             
-    #plt.savefig("myplot.png", dpi = 300)
-
-
+            if sw_head_WTD_dhead == 1:
+                # head:
+                ti = 'head [m], '
+                data_all = data_head_all_NaN
+            elif sw_head_WTD_dhead == 2:        
+                # WTD:
+                ti = 'WTD=TOP-HEAD [m], '
+                data_all = WTD_all
+            elif sw_head_WTD_dhead == 3:
+                # change in head:
+                ti = 'Change in head [m], '
+                data_all = dhead_all
+                   
+    #        data = data_all[:,:,ii]    
+            data = data_all[:,:,ctr]    
+            
+            if ii == 0:
+                print ii
+                if lay_i == 0:
+                    av = []
+                    pv = []
+                    
+                av.append(plt.subplot(2,2,lay_info[0,ctr]))
+                pv.append(av[lay_i].imshow(data, interpolation='nearest'))
+                pv[lay_i].set_cmap(plt.cm.cool)
+                plt.colorbar(pv[lay_i])
+    #            plt.clim()
+                _x = data_all[:,:,lay_i::2]
+                _x = _x[~np.isnan(_x)]
+                pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
+            
+    #            plt.subplot(2,2,lay_info[0,ii])
+    #            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='none')
+    #            p.set_cmap(plt.cm.hsv)
+    #            plt.colorbar(p)
+    ##            plt.clim()
+    #            x = data_all[~np.isnan(data_all)]
+    #            p.set_clim(vmin=np.min(x), vmax=np.max(x))
+    #            plt.xlabel('[m]', fontsize=16)
+    #            plt.ylabel('[m]', fontsize=16)
+                av[lay_i].set_xlabel('[m]', fontsize=16)
+                av[lay_i].set_ylabel('[m]', fontsize=16)
+            else:
+    #            p.set_data(data)        
+                pv[lay_i].set_data(data)        
+            str0 = ti + str(time_info[0,ctr]) + 'd, lay ' + str(int(lay_info[0,ctr]))
+    #            plt.title(str0)
+            av[lay_i].set_title(str0)
+            plt.tight_layout()
+    
+            im2 = av[lay_i].imshow(outline, interpolation='nearest')
+    #        im2 = plt.imshow(outline, interpolation='none')
+            im2.set_clim(0, 1)
+            cmap = plt.get_cmap('binary',2)
+            im2.set_cmap(cmap)   
+                          
+            ctr = ctr + 1
+        #    plt.show()
+        plt.pause(0.5)
+        writer.grab_frame()
+                
+        #plt.savefig("myplot.png", dpi = 300)
+    
+    

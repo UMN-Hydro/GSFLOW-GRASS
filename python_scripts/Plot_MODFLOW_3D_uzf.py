@@ -10,6 +10,7 @@ import struct
 import numpy as np
 from matplotlib import pyplot as plt
 from readSettings import Settings
+import matplotlib.animation as manimation
 
 # Set input file
 if len(sys.argv) < 2:
@@ -37,6 +38,10 @@ sw_PlotVar = 0
 # ***Optional: set plot variable limits, set to empty list for default of min / max values
 clim = [0, 250]
 #clim = [] # empty list for default min, max plot limits
+
+
+# ***Saves movie to following file
+moviefile_name = 'uz.mp4'
 
 
 #%% from Settings file 
@@ -269,63 +274,71 @@ lay_i0 = 0
 
 # head plot movie
 ti = all_label[sw_PlotVar]
-plt.figure()
-for ii in range(ntimes):
-#for ii in range(2):
-    for lay_i in [lay_i0]:
-#    for lay_i in range(ilay):
-        
-#        if nread == 0:              
-#            data = data_all[:,:,ii]    
-#        elif nread == 1:
-        data = data_all[:,:,lay_i,ii]   
-#            data = dd[:,:,ii]   
-        
-        # only show active domain, with outline around it
-        data[IBOUND == 0] = np.nan
-        data2 = data[1:-1,1:-1]
-        data2[ind_bound_out] = 0
-        data[1:-1,1:-1] = data2
-        
-        if ii == 0:
-            plt.subplot(2,2,1)
-#            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='nearest')
-            p = plt.imshow(data, interpolation='nearest')
-            p.set_cmap(plt.cm.rainbow)
-            plt.colorbar(p)
-#            plt.clim()
-            x = data_all[~np.isnan(data_all)]
-#            if len(clim) == 0:
-#                p.set_clim(vmin=np.min(x), vmax=np.max(x))
-#            else:
-#                p.set_clim(vmin=clim[0], vmax=clim[1])
-            try:
-                clim
-                p.set_clim(vmin=clim[0], vmax=clim[1])
-                del clim                
-            except NameError:
-                p.set_clim(vmin=np.min(x), vmax=np.max(x))
-            plt.xlabel('[m]', fontsize=16)
-            plt.ylabel('[m]', fontsize=16)
-        else:
-            p.set_data(data)        
-            str0 = ti + ' ' + str(int(time_info[0,ii])) 
-            plt.title(str0)
-        plt.tight_layout()
-        im2 = plt.imshow(outline, interpolation='nearest')
-#        im2 = plt.imshow(outline, interpolation='none')
-        im2.set_clim(0, 1)
-        cmap = plt.get_cmap('binary',2)
-        im2.set_cmap(cmap)   
-           
-    #    plt.show()
-        plt.pause(0.5)
+fig = plt.figure()
+#if fl_record_movie == 1:
+FFMpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title='GSFLOW Movie', artist='Matplotlib',
+                comment='Movie support!')
+writer = FFMpegWriter(fps=10, metadata=metadata)
+with writer.saving(fig, moviefile_name, 100):
+
+    for ii in range(ntimes):
+    #for ii in range(2):
+        for lay_i in [lay_i0]:
+    #    for lay_i in range(ilay):
             
-    #plt.savefig("myplot.png", dpi = 300)
-
-#try:
-#    clim
-#    clim = None # set for next run
-#except:
-#    
-
+    #        if nread == 0:              
+    #            data = data_all[:,:,ii]    
+    #        elif nread == 1:
+            data = data_all[:,:,lay_i,ii]   
+    #            data = dd[:,:,ii]   
+            
+            # only show active domain, with outline around it
+            data[IBOUND == 0] = np.nan
+            data2 = data[1:-1,1:-1]
+            data2[ind_bound_out] = 0
+            data[1:-1,1:-1] = data2
+            
+            if ii == 0:
+                plt.subplot(2,2,1)
+    #            p = plt.imshow(data, extent=[x.min(), x.max(), y.min(), y.max()], aspect='auto', interpolation='nearest')
+                p = plt.imshow(data, interpolation='nearest')
+                p.set_cmap(plt.cm.rainbow)
+                plt.colorbar(p)
+    #            plt.clim()
+                x = data_all[~np.isnan(data_all)]
+    #            if len(clim) == 0:
+    #                p.set_clim(vmin=np.min(x), vmax=np.max(x))
+    #            else:
+    #                p.set_clim(vmin=clim[0], vmax=clim[1])
+                try:
+                    clim
+                    p.set_clim(vmin=clim[0], vmax=clim[1])
+                    del clim                
+                except NameError:
+                    p.set_clim(vmin=np.min(x), vmax=np.max(x))
+                plt.xlabel('[m]', fontsize=16)
+                plt.ylabel('[m]', fontsize=16)
+            else:
+                p.set_data(data)        
+                str0 = ti + ' ' + str(int(time_info[0,ii])) 
+                plt.title(str0)
+            plt.tight_layout()
+            im2 = plt.imshow(outline, interpolation='nearest')
+    #        im2 = plt.imshow(outline, interpolation='none')
+            im2.set_clim(0, 1)
+            cmap = plt.get_cmap('binary',2)
+            im2.set_cmap(cmap)   
+               
+        #    plt.show()
+            plt.pause(0.5)
+            writer.grab_frame()
+                
+        #plt.savefig("myplot.png", dpi = 300)
+    
+    #try:
+    #    clim
+    #    clim = None # set for next run
+    #except:
+    #    
+    

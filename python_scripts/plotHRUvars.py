@@ -6,18 +6,70 @@ import pandas as pd
 import matplotlib.gridspec as gridspec
 import matplotlib as mpl
 import matplotlib.animation as manimation
+from readSettings import Settings
+import platform
+import sys
+import re
 
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
+
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+#%% User-specified settings here:
+
+# *** Enter PRMS variable name to plot (must be specified under 'aniOutVar_names' in control file, 
+# see GSFLOW manual Table A1-2 for list of output variable names)
+plotting_variable = 'hru_ppt'
+
+# *** Save movie to following file
 moviefile_name = 'testmovie_HRUs.mp4'
-projdir_GIS = '/home/awickert/dataanalysis/GRASS-fluvial-profiler/Shullcas_2lay/'
 
-HRU_outputs = pd.read_csv('/home/awickert/Downloads/Shullcas_spinup/outputs/PRMS_GSFLOW/Shullcas.ani.nhru.corrected', comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[11])
 
-_shapefile = ogr.Open(projdir_GIS + "shapefiles/HRUs/HRUs.shp")
+#%% from Settings file, change to plot something else
+HRUout_fil = Settings.PRMSoutput_dir + slashstr + Settings.PROJ_CODE + '.ani.nhru'
+projdir_GIS = Settings.GISinput_dir
+HRUshp_fil = projdir_GIS + slashstr + "shapefiles/HRUs/HRUs.shp"
+
+print '\n******************************************'
+print 'Plotting results from: ', HRUout_fil
+print ' (HRU shapefile: ' + HRUshp_fil + ')'
+print '******************************************\n'
+
+#%% In general: don't change below here
+
+
+for filename in [HRUout_fil]:
+    infile = file(filename, 'r')
+    outfile = file(filename + '.corrected', 'w')
+    for line in infile:
+        if line[:2] == '  ':
+            p = re.compile("\-[0-9]{2}\-")
+            for m in p.finditer(line):
+                if m.start():
+                    break
+            _start = m.start() - 4 # space for the year
+            outfile.write(line[_start:])
+        else:
+            outfile.write(line)
+
+HRUout_fil2 = HRUout_fil + '.corrected'
+HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[11])
+
+_shapefile = ogr.Open(HRUshp_fil)
 _shape = _shapefile.GetLayer(0)
 
 dates = sorted(list(set(list(HRU_outputs.timestamp))))
 
-plotting_variable = 'sat_recharge'
 
 _min = np.min(HRU_outputs[plotting_variable])
 _max = np.max(HRU_outputs[plotting_variable])
@@ -71,5 +123,5 @@ with writer.saving(fig, moviefile_name, 100):
         ax.set_ylabel('N [km]', fontsize=16)
         #plt.tight_layout()
         writer.grab_frame()
-        #plt.pause(0.1)
+        plt.pause(0.1)
     

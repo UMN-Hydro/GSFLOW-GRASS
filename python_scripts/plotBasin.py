@@ -4,9 +4,38 @@ from matplotlib import cm
 import numpy as np
 import pandas as pd
 import matplotlib.gridspec as gridspec
+from readSettings import Settings
+import platform
+import sys
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+Settings = Settings(settings_input_file)
 
-projdir = '/home/awickert/dataanalysis/GRASS-fluvial-profiler/Shullcas_2lay/'
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+#%% User-specified settings here:
+
+# *** Enter list of HRU numbers to identify byhighlighting in plot
 hru_to_ID = np.array([1, 23])
+
+#%% from Settings file, change to plot something else
+projdir_GIS = Settings.GISinput_dir
+HRUshp_fil = projdir_GIS + slashstr + "shapefiles/HRUs/HRUs.shp"
+segshp_fil = projdir_GIS + slashstr + "shapefiles/segments/segments.shp"
+
+print '\n******************************************'
+print 'Plotting from HRU shapefile: ' + HRUshp_fil
+print '******************************************\n'
+
+
+#%%
 
 plt.ion()
 
@@ -15,7 +44,7 @@ ax = plt.subplot(111)
 ax.set_xlabel('E [km]', fontsize=16)
 ax.set_ylabel('N [km]', fontsize=16)
 
-_shapefile = ogr.Open(projdir + "shapefiles/HRUs/HRUs.shp")
+_shapefile = ogr.Open(HRUshp_fil)
 _shape = _shapefile.GetLayer(0)
 #first feature of the shapefile
 for i in range(_shape.GetFeatureCount()):
@@ -30,8 +59,14 @@ for i in range(_shape.GetFeatureCount()):
         plt.fill(_x, _y, facecolor='.8')
     else:
         plt.plot(_x, _y, 'k-')
+ti = 'HRU '
+for ii in hru_to_ID:
+    ti = ti + str(ii)
+    if ii != hru_to_ID[-1]:
+        ti = ti + ', '
+plt.title(ti)
 
-_shapefile = ogr.Open(projdir + "shapefiles/segments/segments.shp")
+_shapefile = ogr.Open(segshp_fil)
 _shape = _shapefile.GetLayer(0)
 for i in range(_shape.GetFeatureCount()):
     _feature = _shape.GetFeature(i)
