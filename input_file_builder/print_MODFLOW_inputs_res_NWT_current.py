@@ -9,7 +9,7 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 
 # print_MODFLOW_inputs
 
-from MODFLOW_scripts import MODFLOW_NWT_lib_current as mf # functions to write individual MODFLOW files
+import MODFLOW_NWT_lib_current as mf # functions to write individual MODFLOW files
 import datetime as dt
 from readSettings import Settings
 import platform
