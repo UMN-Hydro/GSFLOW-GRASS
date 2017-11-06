@@ -8,18 +8,16 @@ These instructions are meant to take an user familiar with computers but new to 
 
 When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be noted here as soon as the paper is made available.
 
-## Quick Start
+This manual is written in the style of a quick(-ish) start guide that allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts. Additional customization is possible by more advanced users by editing our GRASS GIS and input file building scripts to extend the set of parameters incorporated **\todo{Andy: make section on adding GRASS parameters; perhaps just a small part at the end with appropriate links}**.
 
-This Quick Start guide allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts.  Additional customization can be implemented through the input file builder scripts described in the Full Users Manual.
-
-### Required Software
+## Required Software
 
 * **GSFLOW 1.2**
 * **GRASS GIS 7.3+** and extensions (described below)
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
-### Directory Structure:
+## Directory Structure:
 \todo{This isn't actual directory structure now.  Change after finalizing.  Will need to make sure everything still runs, i.e., can find dependent files etc}
 
 * `GSFLOW-GRASS -> domain_builder` GRASS GIS Python scripts to build the watershed and MODFLOW geometries
@@ -46,13 +44,15 @@ This Quick Start guide allows users to get GSFLOW up and running for their targe
   * `Shullcas`
   * `Santa Rosa` **\todo{space here?}**
 
-### Pre-Processing
+## Pre-Processing
 
-#### Step 1: Customize the Settings File
+### Step 1: Customize the Settings File
 
 Use `settings_template.ini` as a template for creating your own Settings File, which can have any name. **Boldface** options are required. This files includes:
 
-##### "settings" section
+**\todo{MAKE EVERYTHING REQUIRED BOLD}**
+
+#### "settings" section
 
 | Option             | Description
 | ------------------ | ---------
@@ -66,7 +66,7 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 | restart_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
 | restart_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
 
-##### "custom_params" section
+#### "custom_params" section
 
 | Option             | Description
 | ------------------ | ---------
@@ -74,7 +74,7 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 | hydcond            | For uniform hydraulic conductivity within each layer in the saturated domain<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
 | finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values, enter file name<br>containing array of values (in [m/d]).  May need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
-##### "domain" section
+#### "domain" section
 
 | Option             | Description
 | ------------------ | ---------
@@ -83,7 +83,7 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 | **NLAY**           | Integer number of vertical layers
 | **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.
 
-##### GRASS section
+#### GRASS section
 
 | Option             | Description
 | ------------------ | ---------
@@ -99,7 +99,7 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 
 \todo{how to run GRASS module? From Pre-Processing + Run File? Or separately?}
 
-#### Step 2: Customize the Go-GSFLOW File
+### Step 2: Customize the Go-GSFLOW File
 \todo{increment list number if need separate step for GRASS module}
 
 The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is executed for pre-processing and running GSFLOW.
@@ -121,7 +121,7 @@ The rest of the file will execute pre-processor scripts to set up certain inputs
 * `python2.7* \${preproc_dir}print_MODFLOW_inputs_res_NWT_current.py`: This script creates all the MODFLOW input files.  This line generally should be included, but it may be commented out if the user has already run the script previously and will be using the same files in their same location.
 * `python2.7* \${preproc_dir}run_GSFLOW.py`: This script executes the GSFLOW model.  This line generally should be included, but it may be commented out if the user only wishes to create the input files without running the model.
 
-#### Step 3. Optional steps
+### Step 3. Optional steps
 
 For the default implementation, the user can proceed to Step 3.  However, extra steps are needed if the user has specified any of the following:
 
@@ -138,9 +138,9 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 
 Settings File, *fl_print_climate_hru*=0: **RESUME HERE**
 
-#### Step 4. Running GRASS GIS and generating output
+### Step 4. Running GRASS GIS and generating output
 
-##### Download and install GRASS GIS 7.3+
+#### Download and install GRASS GIS 7.3+
 
 Two options:
 * Cross-platform binaries:
@@ -171,17 +171,20 @@ CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
 --with-netcdf=/usr/bin/nc-config
 ```
 
-#### Step 5. Running GSFLOW
+## Running GSFLOW
 Before running GSFLOW, the user should:
 
 
 
 
-#### Step 6. Visualization
+## Visualization
 
-#### Step 7. Advanced Customization
+## Advanced Customization
 
-## More Details
+**\todo{Andy, this is where to put ways to customize GRASS GIS code; mostly links should be OK}**
+**\todo{Also link this to Crystal's code}**
+
+## More Details **Delete??**
 
 ### Pre-processing
 
@@ -200,3 +203,5 @@ Before running GSFLOW, the user should:
 #### Visualization Tool for Model Inputs
 
 #### Visualization Tool for Model Outputs
+
+###
