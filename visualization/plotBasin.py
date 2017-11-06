@@ -4,9 +4,19 @@ from matplotlib import cm
 import numpy as np
 import pandas as pd
 import matplotlib.gridspec as gridspec
-from readSettings import Settings
 import platform
 import sys
+
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+# add path containing readSettings.py
+sys.path.append('..' + slashstr + 'Run')
+
+# Read in user-specified settings
+from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -16,10 +26,6 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
 #%% User-specified settings here:
 
 # *** Enter list of HRU numbers to identify byhighlighting in plot

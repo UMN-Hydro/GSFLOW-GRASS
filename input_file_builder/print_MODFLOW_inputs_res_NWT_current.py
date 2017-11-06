@@ -8,13 +8,21 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 """
 
 # print_MODFLOW_inputs
-
 import MODFLOW_NWT_lib_current as mf # functions to write individual MODFLOW files
 import datetime as dt
-from readSettings import Settings
 import platform
 import sys
 
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+# add path containing readSettings.py
+sys.path.append('..' + slashstr + 'Run')
+
+# Read in user-specified settings
+from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -24,10 +32,6 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
 
 
 # - directories

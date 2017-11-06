@@ -42,10 +42,19 @@ Converting from GSFLOW_print_controlfile4_gcng_melt30yr.m
 import datetime as dt
 import numpy as np # matlab core
 import os  # os functions
-from readSettings import Settings
 import platform
 import sys
 
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+# add path containing readSettings.py
+sys.path.append('..' + slashstr + 'Run')
+
+# Read in user-specified settings
+from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -63,11 +72,6 @@ def datetime_to_list(datetime):
             dt_timetuple.tm_mday, dt_timetuple.tm_hour,
             dt_timetuple.tm_min, dt_timetuple.tm_sec]
 
-
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
 
 # - choose one:
 # model_mode = 'WRITE_CLIMATE'; # creates pre-processed climate_hru files

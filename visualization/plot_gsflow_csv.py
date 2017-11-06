@@ -18,8 +18,17 @@ import pandas as pd
 import datetime as dt
 import matplotlib.dates as mdates
 import gsflow_csv_table as gvar  # all variable names, units, and descriptions
-from readSettings import Settings
 
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+# add path containing readSettings.py
+sys.path.append('..' + slashstr + 'Run')
+
+# Read in user-specified settings
+from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -29,12 +38,7 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
- 
-# *** SPECIFY PLOT-VARIABLES HERE
+#%% *** SPECIFY PLOT-VARIABLES HERE *******************************************
  
 # -- variables to plot (see list in gsflow_csv_table.py):
 PlotVar = []

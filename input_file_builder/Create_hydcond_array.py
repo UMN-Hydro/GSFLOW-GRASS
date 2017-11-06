@@ -10,10 +10,19 @@ Created on Sat Oct  7 18:33:11 2017
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt # matlab-like plots
-from readSettings import Settings
 import platform
 import sys
 
+if platform.system() == 'Linux':
+    slashstr = '/'
+else:
+    slashstr = '\\'
+
+# add path containing readSettings.py
+sys.path.append('..' + slashstr + 'Run')
+
+# Read in user-specified settings
+from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -22,11 +31,6 @@ else:
     settings_input_file = sys.argv[1]
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
-
-if platform.system() == 'Linux':
-    slashstr = '/'
-else:
-    slashstr = '\\'
 
 
 # ***SET FOLLOWING BASED ON SITE **********************************************
