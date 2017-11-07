@@ -10,6 +10,7 @@
 from ConfigParser import SafeConfigParser
 import platform
 import os
+import shutil
 import sys # to read in command line arguments
 
 class Settings(object):
@@ -49,7 +50,7 @@ class Settings(object):
         if self.fl_print_climate_hru == 1:        
             self.climate_data_file = parser.get('settings', 'climate_data_file')
         else:
-            self.climate_hru_dir = parser.get('settings', 'climate_hru_dir')
+            self.climate_hru_dir = parser.get('settings', 'climate_hru_dir')            
             print "STILL NEED TO WRITE CODE TO MOVE EXISTING CLIMATE\_HRU FILES TO INPUT DIRECTORY!"
 
 
@@ -91,7 +92,11 @@ class Settings(object):
         if not os.path.isdir(self.MODFLOWoutput_dir):
             os.makedirs(self.MODFLOWoutput_dir)
 
-            
+        if self.fl_print_climate_hru == 0:
+            climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
+            for item in climatehru_fils:
+                source_fil = self.limate_hru_dir + slashstr + item
+                shutil.copy2(source_fil, self.PRMSinput_dir)                  
 
         # -- problem-specifc variables
 
