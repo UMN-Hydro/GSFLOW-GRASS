@@ -24,7 +24,7 @@ config.read('settings.ini')
 
 # Global input variables
 #project_name = config.get('settings', 'proj_name')
-GIS_output_roootdir = config.get('settings', 'gsflow_simdir') + '/GIS'
+GIS_output_rootdir = config.get('settings', 'gsflow_simdir') + '/GIS'
 DEM_input = config.get('GRASS', 'DEM_file_path_to_import')
 A_threshold = config.get('GRASS', 'threshold_drainage_area_meters2')
 MODFLOW_grid_resolution = config.get('GRASS', 'MODFLOW_grid_resolution_meters')
@@ -61,7 +61,7 @@ bc_cell             = 'bc_cell'               # Grid cell for MODFLOW b.c.
 # These take time, so skip if not needed
 if DEM_input != '':
     # Import DEM and set region
-    r.in_gdal(input=DEM_input, output=DEM_original_import)
+    r.in_gdal(input=DEM_input, output=DEM_original_import, overwrite=True)
     g.region(raster=DEM_original_import)
     # Build flow accumulation with only fully on-map flow
     # Cell areas
