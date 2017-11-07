@@ -212,7 +212,7 @@ Use `settings_template.ini` as a template for creating your own **Settings** Fil
 | version | Optional: GRASS GIS version number without any "." characters.<br>We used **73**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
 
 
-### Step 2. Running GRASS GIS and generating output
+### Step 2. Running GRASS GIS to build the model domain
 
 #### Launch GRASS GIS and create your location
 
@@ -279,13 +279,13 @@ python ~/models/GSFLOW-GRASS/domain_builder/workflow_GRASS.sh
 
 Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
 
-Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder that contains the outputs of your work here. This will be read in during the next step.
+Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder that contains the outputs of your work here. The files there will be automatically read in during Step 4.
 
 Pat yourself on the back! The GRASS portion is complete.
 
-### Step 3: Customize the Go-GSFLOW File
+### Step 3: Customize the Go-GSFLOW File to set input-file-builder options
 
-The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is executed for pre-processing and running GSFLOW.
+The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is for pre-processing and running GSFLOW.
 
 **\todo{Crystal: change file name; currently `run_Python_GSFLOW_current.sh.`  Lauren/Crystal: update Windows batch file}**
 
@@ -294,7 +294,7 @@ At the top of the file, the user should customize:
 * `toolkit_dir` full pathname for location of GSFLOWGRASS_toolkit
 * `settings_file` Full pathname for Settings File (customized in Step 1).
 
-The rest of the file will execute pre-processor scripts to: (1) set up certain inputs (climate forcing data and hydraulic conductivity) according to the Settings File, (2) create GSFLOW input files (control file, PRMS parameter file, and MODFLOW input files), and (3) run GSFLOW.  In the default implementation, the user does not need to change the bottom part of the file with Python scripts.  However, certain lines may be commented out or changed, as described in the following:
+The rest of the file will execute scripts to: (1) set up certain model inputs (climate forcing data and hydraulic conductivity) according to the *Settings* File, (2) create GSFLOW input files (GSFLOW control file, PRMS parameter file, and MODFLOW input files), and (3) run GSFLOW.  In the default implementation, the user does not need to change the bottom part of the file with Python scripts.  However, certain lines may be commented out or changed, as described in the following:
 
 * `Create_hydcond_array.py`: If *fl_create_hydcond*=1 in Settings File, this script creates spatially distributed hydraulic conductivity values; see top of this script to select from options.  This line may be changed to a different script name if the user writes their own script for creating spatially distributed hydraulic conductivity. If *fl_create_hydcond*=0, this line may be left in; nothing will be done in the script.
 * `GSFLOW_print_data_climatehru_files1_metric.py` If *fl_print_climate_hru*=1 in Settings File, this script creates climate_hru files with spatially uniform conditions, based on data from *climate_data_file* in the Settings File.  This line may be changed to a different script name if the user writes their own script for creating spatially distributed climate inputs. If *fl_print_climate*=0, this line may be left in; nothing will be done in the script.
@@ -303,7 +303,7 @@ The rest of the file will execute pre-processor scripts to: (1) set up certain i
 * `print_MODFLOW_inputs_res_NWT_current.py`: This script creates all the MODFLOW input files.  This line generally should be included, but it may be commented out if the user has already run the script previously and will be using the same files in their same location.
 * `run_GSFLOW.py`: This script executes the GSFLOW model.  This line generally should be included, but it may be commented out if the user only wishes to create the input files without running the model.
 
-Note that the above Python scripts can also be run independently using Python, outside of the Go-GSFLOW File; just be sure to include the Settings File name as an argument.  
+Note that the above Python scripts can also be run independently using Python, outside of the Go-GSFLOW File; just be sure to include the *Settings File* name as an argument.  
 
 ### Step 4. Optional steps
 
@@ -316,17 +316,21 @@ For the default implementation, the user can proceed to Step 3.  However, extra 
   * line 3: `tmin` for daily minimum temperature, `1` for number of weather stations
   * line 4: `precip` for daily precipitation, `1` for number of weather stations
   * line 5: `####################################` to indicate start of data
-  * line 6: `YYYY Month Day 0 0 0 (value for tmax) (value for tmin) (value for precip)`, etc. for all dates in daily time series
-
+  * line 6: `YYYY Month Day 0 0 0 (tmax value) (tmin value) (precip value)`, etc. for all dates in daily time series
 All temperature data in this file are assumed to be in [&deg;C], and precipitation data in [mm/d] (these are eventually converted to [&deg;C] and [in/d] for the PRMS model component).  This file can be expanded to include relative humidity (in [%]) (used if Penman-Monteith option is selected for the potential ET module) and solar radiation (in [MJ/m<sup>2</sup>]) if available.  Other steps may be needed if the user replaces this script with their own to create spatially distributed hydraulic conductivity fields.
 * **Settings File, fl_print_climate_hru=0**: Make sure climate_hru_dir is directory with pre-existing climate_hru data files containing HRU-distributed climate inputs: **tmin.day**, **tmax.day**, **precip.day**, and **empty.day**. See GSFLOW manual or example files in example cases (e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.
 
-### Step 4. Running GSFLOW
+*Changing other input parameters*: Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include: 
+* `GSFLOW_print_controlfile_current.py`: Builds GSFLOW control file, which controls model options.  See commented Section headings to make changes.    
+* `GSFLOW_print_PRMSparamfile_current.py`: Builds PRMS parameter file, which contains all (non-stream) surface properties in "Section 2: Parameters."  While any of these may be customized, those of particular interest are commented with "# *** CHANGE FOR SPECIFIC SITE"  
+* `MODFLOW_NWT_lib_current.py`: Library of functions to build the various MODFLOW input files (used in `print_MODFLOW_inputs_res_NWT_current.py.`  See individual functions to change input parameters for the different corresponding MODFLOW packages.  
+
+### Step 5. Running GSFLOW
 The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
 * Linux prompt: ./go-GSFLOW.sh
 * Windows command prompt: .\go-GSFLOW.bat
 
-### Step 5. Visualization
+### Step 6. Visualization
 Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console:
 
 ```bash
