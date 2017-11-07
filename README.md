@@ -324,8 +324,17 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 
 ### Step 5. Running GSFLOW
 The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
-* Linux prompt: ./go-GSFLOW.sh
+* Linux prompt: ./go-GSFLOW.sh (user needs to press Enter at the end, to return to command prompt)
 * Windows command prompt: .\go-GSFLOW.bat
+
+Output files will be located in the gsflow_simdir (specified in Step 1 in the *Settings File*) -> *outputs*.
+
+After running GSFLOW, the user should check the following:
+* Model ran to completion: GSFLOW will print "Normal termination of simulation".  For Windows, this will print to the screen.  For Linux, this will appear at the end of *out.txt* created in the directory where go-GSFLOW.sh is executed (all output to screen is redirected to out.txt).
+* Model converged: Check gsflow_simdir -> *control* -> *gsflow.log*.  This will summarize convergence performance.
+* Model ran with good water balance: Check gsflow_simdir -> *outputs* -> *PRMS_GSFLOW* -> *gsflow.out*.  This will report instances when there are large water balance discrepancies (indicated with "WARNING...")
+* MODFLOW component ran smoothly: Check gsflow_simdir -> *outputs* -> *MODFLOW_NWT* -> *test.lst*.  This will include convergence and run details specific to MODFLOW, which are only summarized in *gsflow.log*. 
+
 
 ### Step 6. Visualization
 Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console: *TODO: Andy - checking my wording, do you "run at a Python console"?*
@@ -334,7 +343,7 @@ Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for gra
 run (visualization_script).py (Settings File)
 ```
 
-By default, the visualization scripts will plot output files located in directory locations specified in *Settings File*, which facilitates visualizing results directly after running GSFLOW with this toolkit.  However, the user can over-ride these file locations in the section `*** CHANGE FILE NAMES AS NEEDED` in order to plot arbitrary output files (not based on *Settings File*.  Note, however, that our visualization scripts do that the output file format corresponds to those generated using our toolkit and are not guaranteed to work for GSFLOW output files generated outside of this toolkit.    
+By default, the visualization scripts will plot output files in directories specified by *Settings File*; this facilitates visualizing results directly after running GSFLOW with this toolkit.  However, the user can over-ride these file locations in the section `*** CHANGE FILE NAMES AS NEEDED` in order to plot arbitrary output files (not based on *Settings File*).  However, our visualization scripts assume certain output file formats and are not guaranteed to work with GSFLOW output files generated outside of this toolkit.    
  
 For other main plotting options, the user should use the section at the top of each visualization script indicated with `*** SET THE FOLLOWING:...`.  Other more detailed customizations (e.g., figure formatting etc) can be manually made in the rest of the script.  
 
