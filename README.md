@@ -18,6 +18,20 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 * **GSFLOW-GRASS Toolkit** (this software)
 
 ## Directory Structure:
+
+**GSFLOW-GRASS** has four main directories:
+
+* **domain_builder** holds GRASS GIS commands and associated code to turn a DEM into an input domain of Hydrologic Response Units (HRUs) and stream segments.
+* **input_file_builder** holds code that turns the outputs from **domain_builder** and user-specified parameters in the **settings** file (see Step 1, below) into the set of input files that are required by GSFLOW
+* **Run** runs GSFLOW from these inputs
+* **visualization** holds scripts to build plots and movies based on the outputs from both GSFLOW and the GRASS GIS domain builder
+
+In addition, the "figures" directory holds images used for this README.
+
+<!---
+
+This seems like a lot of work to maintain when they could just look at the actual directory structure.
+
 \todo{This isn't actual directory structure now.  Change after finalizing.  Will need to make sure everything still runs, i.e., can find dependent files etc}
 
 * `GSFLOW-GRASS -> domain_builder` GRASS GIS Python scripts to build the watershed and MODFLOW geometries
@@ -43,10 +57,14 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 * `GSFLOW-GRASS -> examples`
   * `Shullcas`
   * `Santa Rosa` **\todo{space here?}**
+-->
 
-## Pre-Processing
+## Pre-processing
+***Generating inputs to GSFLOW using Python and GRASS***
 
 ### Step 1: Customize the Settings File
+
+The **settings** file holds user-defined information that defines how GSFLOW is set up and will run.
 
 Use `settings_template.ini` as a template for creating your own Settings File, which can have any name. **Boldface** options are required. This files includes:
 
@@ -97,9 +115,111 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 | version | Optional: GRASS GIS version number without any "." characters.<br>We used **73**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
 
 
-\todo{how to run GRASS module? From Pre-Processing + Run File? Or separately?}
+### Step 2. Running GRASS GIS and generating output
 
-### Step 2: Customize the Go-GSFLOW File
+#### Download and install GRASS GIS 7.3+
+
+Two options:
+* Cross-platform binaries:
+https://grass.osgeo.org/download/software/
+* Instructions to build from source:
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
+
+If you choose to compile GRASS GIS from source, A. Wickert has used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
+
+```configure
+CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
+--enable-largefile=yes \
+--with-nls \
+--with-cxx \
+--with-readline \
+--with-pthread \
+--with-proj-share=/usr/share/proj \
+--with-geos=/usr/bin/geos-config \
+--with-wxwidgets \
+--with-cairo \
+--with-opengl-libs=/usr/include/GL \
+--with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
+--with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
+--with-sqlite=yes \
+--with-mysql=yes --with-mysql-includes="/usr/include/mysql" \
+--with-odbc=no \
+--with-netcdf=/usr/bin/nc-config
+```
+
+#### Launch GRASS GIS and create your location
+
+1. Launch GRASS GIS
+2. Create a folder to hold your GRASS locations. This is typically called **"grassdata"** and placed in your home directory.
+3. Click on "New", and follow the prompts.
+  * We recommend naming the **"Project Location"** the same as **"proj_name"**.
+  * No "Location Title" is needed.
+  * We suggest that you **"Read projection and datum terms from a georeferenced data file"** to set the coordinate system. Each GRASS GIS location has only one coordinate system. Your DEM **must be in a projected coordinate system**: we do not test our codes using geographic (lat/lon) coordinate systems.
+
+![GRASS GIS start-up screen](figures/GRASS_startup_screen.png)
+
+##### Choosing pour points (if needed)
+
+If you need to choose your pour point manually, we recommend that either you (a) import the DEM and find it now using GRASS, or (b) use another program like QGIS to find this location. You should still keep the path of the DEM in **DEM_file_path_to_import** until you have finished the first run of the code. Keeping this in during later runs will not cause problems; it will just take extra time as the DEM is re-imported and re-corrected.
+
+#### Start GRASS GIS session in your location
+
+With your location selected, click **"Start GRASS session"**.
+
+#### Install required GRASS GIS extensions
+
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run the contents of `install_extensions.sh`.
+
+On Linux, cd to the proper directory and
+```sh
+sh install_extensions.sh
+```
+
+Or, and perhaps more easily, on either operating system, just copy and paste the contents of `install_extensions.sh` into the terminal or GRASS GIS console. We have also pasted these here for convenience.
+```sh
+# GRASS GIS extensions
+
+# From us
+g.extension v.gsflow.export
+g.extension v.gsflow.gravres
+g.extension v.gsflow.grid
+g.extension v.gsflow.hruparams
+g.extension v.gsflow.reaches
+g.extension v.gsflow.segments
+g.extension r.gsflow.hydrodem
+g.extension v.stream.inbasin
+g.extension v.stream.network
+
+# From others
+g.extension r.stream.extract
+g.extension r.stream.basins
+g.extension r.hydrodem
+```
+
+#### Install required Python packages?
+
+**TO DO???? AND ALSO BASIC PYTHON INSTALL? TAKE FROM GFLEX README?**
+
+#### Create the GSFLOW inputs
+
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run `workflow_GRASS.py`. For example, if GSFLOW-GRASS is in your "models" folder:
+
+**TO DO: MUST INTEGRATE THIS WITH CRYSTAL'S PYTHON SETTINGS.INI READER, SO DON'T HAVE TO BE IN THE SAME LOCATION (ADDPATH)**
+
+```sh
+python ~/models/GSFLOW-GRASS/domain_builder/workflow_GRASS.sh
+```
+
+**TO DO: how to manage flow to the ocean with null cells? see v.gsflow.grid**
+
+Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
+
+Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder that contains the outputs of your work here. This will be read in during the next step.
+
+Pat yourself on the back! The GRASS portion is complete.
+
+### Step 3: Customize the Go-GSFLOW File
 \todo{increment list number if need separate step for GRASS module}
 
 The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is executed for pre-processing and running GSFLOW.
@@ -121,7 +241,7 @@ The rest of the file will execute pre-processor scripts to set up certain inputs
 * `python2.7* \${preproc_dir}print_MODFLOW_inputs_res_NWT_current.py`: This script creates all the MODFLOW input files.  This line generally should be included, but it may be commented out if the user has already run the script previously and will be using the same files in their same location.
 * `python2.7* \${preproc_dir}run_GSFLOW.py`: This script executes the GSFLOW model.  This line generally should be included, but it may be commented out if the user only wishes to create the input files without running the model.
 
-### Step 3. Optional steps
+### Step 4. Optional steps
 
 For the default implementation, the user can proceed to Step 3.  However, extra steps are needed if the user has specified any of the following:
 
