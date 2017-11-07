@@ -38,18 +38,20 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-#%% *** SPECIFY PLOT-VARIABLES HERE *******************************************
+#%% *** SET THE FOLLOWING *****************************************************
  
-# -- variables to plot (see list in gsflow_csv_table.py):
+# *** enter variables to plot (see list in gsflow_csv_table.py):
 PlotVar = []
 PlotVar.append('basinppt')
 PlotVar.append('basinactet')
 
-# -- data files
+# *** save figure to this file
+savefigfile = 'fig.png'
+
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 gsflow_csv_fil = Settings.PRMSoutput_dir + slashstr + 'gsflow.csv'  # gsflow time series data
 
-# -- save figure to this file
-savefigfile = 'fig.png'
 
 #%%
 

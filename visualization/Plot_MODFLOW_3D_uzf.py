@@ -50,9 +50,8 @@ clim = [0, 250]
 moviefile_name = 'uz.mp4'
 
 
-#%% from Settings file 
-
-# *** Change file names as needed
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 uzf_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_uzf.dat'  # head data
 surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
 ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'

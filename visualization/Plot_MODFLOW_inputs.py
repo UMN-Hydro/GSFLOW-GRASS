@@ -34,14 +34,18 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-
-# *** Change file names as needed
-dis_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.dis'
-ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
-flo_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.upw'
+#%% *** SET THE FOLLOWING *****************************************************
 
 # *** Set flag_print=1 to print figures to files
 fl_print = 0
+
+
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
+
+dis_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.dis'
+ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
+flo_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.upw'
 
 #%%
 f = open(dis_fil, 'r')

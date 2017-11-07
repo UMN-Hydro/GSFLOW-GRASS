@@ -120,9 +120,9 @@ par_num = [] # number of parameter values
 par_type = [] # parameter number type 1=int, 2=single prec, 3=double prec, 4=char str
 par_value = [] # array of parameter values
 
-# ********************
-# *    Dimensions    *
-# ********************
+# ******************************
+# *  Section 1:  Dimensions    *
+# ******************************
 # -- Fixed Dimensions (generally, do not change) --
 dim_name.append('ndays') # max num days in year
 dim_value.append(366)
@@ -214,9 +214,9 @@ dim_value.append(dim_value[ind] * 11) # do not change
 NumDims = len(dim_name)
 #%% +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# ********************
-# *   Parameters    *
-# ********************
+# ******************************
+# *   Section 2: Parameters    *
+# ******************************
 
 # -- Basic Computational Attributes --
 par_name.append('elev_units')

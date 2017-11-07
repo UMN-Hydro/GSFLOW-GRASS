@@ -26,12 +26,13 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-#%% User-specified settings here:
+#%% *** SET THE FOLLOWING *****************************************************
 
 # *** Enter list of HRU numbers to identify byhighlighting in plot
 hru_to_ID = np.array([1, 23])
 
-#%% from Settings file, change to plot something else
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 projdir_GIS = Settings.GISinput_dir
 HRUshp_fil = projdir_GIS + slashstr + "shapefiles/HRUs/HRUs.shp"
 segshp_fil = projdir_GIS + slashstr + "shapefiles/segments/segments.shp"

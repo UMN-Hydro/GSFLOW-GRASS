@@ -29,7 +29,7 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-#%% User-specified settings here:
+#%% *** SET THE FOLLOWING *****************************************************
 
 # *** Enter PRMS variable name to plot (must be specified under 'aniOutVar_names' in control file, 
 # see GSFLOW manual Table A1-2 for list of output variable names)
@@ -39,7 +39,8 @@ plotting_variable = 'hru_ppt'
 moviefile_name = 'testmovie_HRUs.mp4'
 
 
-#%% from Settings file, change to plot something else
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 HRUout_fil = Settings.PRMSoutput_dir + slashstr + Settings.PROJ_CODE + '.ani.nhru'
 projdir_GIS = Settings.GISinput_dir
 HRUshp_fil = projdir_GIS + slashstr + "shapefiles/HRUs/HRUs.shp"

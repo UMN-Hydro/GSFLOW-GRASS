@@ -29,14 +29,14 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-#%% User-specified settings here:
-
+#%% *** SET THE FOLLOWING *****************************************************
 
 # *** Save movie to following file
 moviefile_name = 'testmovie_strmseg.mp4'
 
 
-#%% from Settings file, change to plot something else
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 segout_fil = Settings.PRMSoutput_dir + slashstr + Settings.PROJ_CODE + '.ani.nsegment'
 projdir_GIS = Settings.GISinput_dir
 segshp_fil = projdir_GIS + slashstr + "shapefiles/segments/segments.shp"

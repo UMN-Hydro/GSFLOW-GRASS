@@ -30,18 +30,21 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
+#%% *** SET THE FOLLOWING *****************************************************
 
-# ***Select which option:
+# *** Select which option:
 # (1: head, 2: water table depth, 3: change in head per print-time increment)
 sw_head_WTD_dhead = 2
 
-# ***Saves movie to following file
+# *** Save movie to following file
 moviefile_name = 'head.mp4'
 
-#%% from Settings file, change to plot something else
+#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+# (default is to use entries from Settings File) 
 head_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_head.bhd'  # head data
 surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
 ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
+
 
 print '\n******************************************'
 print 'Plotting results from: ', head_file
