@@ -265,7 +265,7 @@ g.extension r.stream.basins
 g.extension r.hydrodem
 ```
 
-#### Create the GSFLOW inputs
+#### Create the domain inputs for input-file-builder scripts
 
 Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run `workflow_GRASS.py`. For example, if GSFLOW-GRASS is in your "models" folder:
 
@@ -294,7 +294,7 @@ At the top of the file, the user should customize:
 * `toolkit_dir` full pathname for location of GSFLOWGRASS_toolkit
 * `settings_file` Full pathname for Settings File (customized in Step 1).
 
-The rest of the file will execute pre-processor scripts to: (1) set up certain inputs (climate forcing data and hydraulic conductivity) according to the Settings File, (2) create GSFLOW input files (control file, PRMS parameter file, and MODFLOW input files), and then (3) run GSFLOW.  In the default implementation, the user does not need to change the bottom part of the file with Python scripts.  However, certain lines may be commented out or changed, as described in the following:
+The rest of the file will execute pre-processor scripts to: (1) set up certain inputs (climate forcing data and hydraulic conductivity) according to the Settings File, (2) create GSFLOW input files (control file, PRMS parameter file, and MODFLOW input files), and (3) run GSFLOW.  In the default implementation, the user does not need to change the bottom part of the file with Python scripts.  However, certain lines may be commented out or changed, as described in the following:
 
 * `Create_hydcond_array.py`: If *fl_create_hydcond*=1 in Settings File, this script creates spatially distributed hydraulic conductivity values; see top of this script to select from options.  This line may be changed to a different script name if the user writes their own script for creating spatially distributed hydraulic conductivity. If *fl_create_hydcond*=0, this line may be left in; nothing will be done in the script.
 * `GSFLOW_print_data_climatehru_files1_metric.py` If *fl_print_climate_hru*=1 in Settings File, this script creates climate_hru files with spatially uniform conditions, based on data from *climate_data_file* in the Settings File.  This line may be changed to a different script name if the user writes their own script for creating spatially distributed climate inputs. If *fl_print_climate*=0, this line may be left in; nothing will be done in the script.
@@ -322,35 +322,32 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 * **Settings File, fl_print_climate_hru=0**: Make sure climate_hru_dir is directory with pre-existing climate_hru data files containing HRU-distributed climate inputs: **tmin.day**, **tmax.day**, **precip.day**, and **empty.day**. See GSFLOW manual or example files in example cases (e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.
 
 ### Step 4. Running GSFLOW
+The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
+* Linux prompt: ./go-GSFLOW.sh
+* Windows command prompt: .\go-GSFLOW.bat
 
+### Step 5. Visualization
+Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console:
 
+```bash
+run (visualization_script).py (Settings File)
+``
 
+We anticipate that plot settings will be highly problem-specific: the user can enter main options at the top of each script under `*** SET THE FOLLOWING:...`; other changes can be manually made in the rest of the script.  
 
-## Visualization
+* Visualization scripts for plotting GSFLOW inputs (created by our toolkit):
+  * plotBasin.py
+  * Plot_MODFLOW_inputs.py
+* Visualization scripts for plotting GSFLOW outputs:
+  * plotHRUvars.py
+  * plotSegmentDischarge.py
+  * Plot_MODFLOW_3D_head3.py
+  * Plot_MODFLOW_3D_uzf.py
+  * plot_gsflow_csv.py
+
 
 ## Advanced Customization
 
 **\todo{Andy, this is where to put ways to customize GRASS GIS code; mostly links should be OK}**
 **\todo{Also link this to Crystal's code}**
 
-## More Details **Delete??**
-
-### Pre-processing
-
-#### GRASS domain-builder
-
-#### Settings File
-
-#### GSFLOW Control File builder
-
-#### PRMS Parameter File builder
-
-#### MODFLW Input Files builder
-
-### Visualization Tools
-
-#### Visualization Tool for Model Inputs
-
-#### Visualization Tool for Model Outputs
-
-###
