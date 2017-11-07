@@ -17,13 +17,110 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
-## Directory Structure:
+### Installing GSFLOW
+
+***Download and install GSFLOW 1.2.0 or 1.2.2***
+
+Obtain the source code from:
+https://github.com/UMN-Hydro/GSFLOW-1.2.0
+and compile and install it.
+
+***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!***
+
+### Installing GRASS GIS
+
+***Download and install GRASS GIS 7.3+***
+
+Two options:
+* Cross-platform binaries:
+https://grass.osgeo.org/download/software/
+* Instructions to build from source:
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
+
+If you choose to compile GRASS GIS from source, we have used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
+
+```configure
+CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
+--enable-largefile=yes \
+--with-nls \
+--with-cxx \
+--with-readline \
+--with-pthread \
+--with-proj-share=/usr/share/proj \
+--with-geos=/usr/bin/geos-config \
+--with-wxwidgets \
+--with-cairo \
+--with-opengl-libs=/usr/include/GL \
+--with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
+--with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
+--with-sqlite=yes \
+--with-mysql=yes --with-mysql-includes="/usr/include/mysql" \
+--with-odbc=no \
+--with-netcdf=/usr/bin/nc-config
+```
+
+### Installing Python
+
+GSFLOW-GRASS has been tested on **Python 2.7**, and should work (with a few possible changes) on future versions of Python 2.X. It has not been tested on Python 3.X.
+
+In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.3 or greater, above):
+* `numpy`
+* `matplotlib`
+* `pandas`
+* `osgeo` (also listed under `gdal`)
+
+*For users who are new to Python, follow these directions to install the Python interpreters onto your computer.*
+
+##### Linux
+
+Use your package manager to download and install the required Python packages. For Debian/Ubuntu, it will be something like:
+
+```bash
+# Basic packages
+sudo apt-get install \
+python python-numpy python-scipy \
+python-setuptools python-matplotlib \
+python-gdal
+
+# pip (recommended for automatic installs via setuptools)
+sudo apt-get install python-pip
+
+# iPython console -- very useful (optional)
+sudo apt-get install ipython
+
+# Sypder IDE (I don't personally use it but many others like it: optional)
+sudo apt-get install spyder
+```
+
+##### Windows and Mac
+
+We recommend **Anaconda**, which comes with most of the Python modules that you might need. Additional modules may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager), for example:
+
+```bash
+# Anaconda
+conda install python-numpy
+# Pip
+pip install numpy
+```
+
+### Installing FFMPEG
+
+(Optional)
+
+In order to make movies, you need an active copy of ffmpeg on your computer. For Linux, this is simple:
+```sh
+sudo apt-get install ffmpeg
+```
+For Windows or Mac, download and install via https://www.ffmpeg.org/download.html
+
+## Directory Structure
 
 **GSFLOW-GRASS** has four main directories:
 
 * **domain_builder** holds GRASS GIS commands and associated code to turn a DEM into an input domain of Hydrologic Response Units (HRUs) and stream segments.
 * **input_file_builder** holds code that turns the outputs from **domain_builder** and user-specified parameters in the **settings** file (see Step 1, below) into the set of input files that are required by GSFLOW
-* **Run** holds the files to run GSFLOW using these inputs
+*  **Run** holds the files to run GSFLOW using these inputs
 * **visualization** holds scripts to build plots and movies based on the outputs from both GSFLOW and the GRASS GIS domain builder
 
 In addition, the "figures" directory holds images used for this README.
@@ -117,37 +214,6 @@ Use `settings_template.ini` as a template for creating your own **Settings** Fil
 
 ### Step 2. Running GRASS GIS and generating output
 
-#### Download and install GRASS GIS 7.3+
-
-Two options:
-* Cross-platform binaries:
-https://grass.osgeo.org/download/software/
-* Instructions to build from source:
-  * https://grasswiki.osgeo.org/wiki/Compile_and_Install
-  * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
-
-If you choose to compile GRASS GIS from source, A. Wickert has used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
-
-```configure
-CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
---enable-largefile=yes \
---with-nls \
---with-cxx \
---with-readline \
---with-pthread \
---with-proj-share=/usr/share/proj \
---with-geos=/usr/bin/geos-config \
---with-wxwidgets \
---with-cairo \
---with-opengl-libs=/usr/include/GL \
---with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
---with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
---with-sqlite=yes \
---with-mysql=yes --with-mysql-includes="/usr/include/mysql" \
---with-odbc=no \
---with-netcdf=/usr/bin/nc-config
-```
-
 #### Launch GRASS GIS and create your location
 
 1. Launch GRASS GIS
@@ -168,6 +234,8 @@ If you need to choose your pour point manually, we recommend that either you (a)
 With your location selected, click **"Start GRASS session"**.
 
 #### Install required GRASS GIS extensions
+
+***First time running GRASS GIS only, or after GRASS extension updates***
 
 Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run the contents of `install_extensions.sh`.
 
@@ -196,10 +264,6 @@ g.extension r.stream.extract
 g.extension r.stream.basins
 g.extension r.hydrodem
 ```
-
-#### Install required Python packages?
-
-**TO DO???? AND ALSO BASIC PYTHON INSTALL? TAKE FROM GFLEX README?**
 
 #### Create the GSFLOW inputs
 
@@ -324,4 +388,3 @@ Before running GSFLOW, the user should:
 #### Visualization Tool for Model Outputs
 
 ###
-
