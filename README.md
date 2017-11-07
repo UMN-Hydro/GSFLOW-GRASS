@@ -17,110 +17,13 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
-### Installing GSFLOW
-
-***Download and install GSFLOW 1.2.0 or 1.2.2***
-
-Obtain the source code from:
-https://github.com/UMN-Hydro/GSFLOW-1.2.0
-and compile and install it.
-
-***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!***
-
-### Installing GRASS GIS
-
-***Download and install GRASS GIS 7.3+***
-
-Two options:
-* Cross-platform binaries:
-https://grass.osgeo.org/download/software/
-* Instructions to build from source:
-  * https://grasswiki.osgeo.org/wiki/Compile_and_Install
-  * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
-
-If you choose to compile GRASS GIS from source, we have used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
-
-```configure
-CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
---enable-largefile=yes \
---with-nls \
---with-cxx \
---with-readline \
---with-pthread \
---with-proj-share=/usr/share/proj \
---with-geos=/usr/bin/geos-config \
---with-wxwidgets \
---with-cairo \
---with-opengl-libs=/usr/include/GL \
---with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
---with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
---with-sqlite=yes \
---with-mysql=yes --with-mysql-includes="/usr/include/mysql" \
---with-odbc=no \
---with-netcdf=/usr/bin/nc-config
-```
-
-### Installing Python
-
-GSFLOW-GRASS has been tested on **Python 2.7**, and should work (with a few possible changes) on future versions of Python 2.X. It has not been tested on Python 3.X.
-
-In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.3 or greater, above):
-* `numpy`
-* `matplotlib`
-* `pandas`
-* `osgeo` (also listed under `gdal`)
-
-*For users who are new to Python, follow these directions to install the Python interpreters onto your computer.*
-
-##### Linux
-
-Use your package manager to download and install the required Python packages. For Debian/Ubuntu, it will be something like:
-
-```bash
-# Basic packages
-sudo apt-get install \
-python python-numpy python-scipy \
-python-setuptools python-matplotlib \
-python-gdal
-
-# pip (recommended for automatic installs via setuptools)
-sudo apt-get install python-pip
-
-# iPython console -- very useful (optional)
-sudo apt-get install ipython
-
-# Sypder IDE (I don't personally use it but many others like it: optional)
-sudo apt-get install spyder
-```
-
-##### Windows and Mac
-
-We recommend **Anaconda**, which comes with most of the Python modules that you might need. Additional modules may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager), for example:
-
-```bash
-# Anaconda
-conda install python-numpy
-# Pip
-pip install numpy
-```
-
-### Installing FFMPEG
-
-(Optional)
-
-In order to make movies, you need an active copy of ffmpeg on your computer. For Linux, this is simple:
-```sh
-sudo apt-get install ffmpeg
-```
-For Windows or Mac, download and install via https://www.ffmpeg.org/download.html
-
 ## Directory Structure:
 
 **GSFLOW-GRASS** has four main directories:
 
 * **domain_builder** holds GRASS GIS commands and associated code to turn a DEM into an input domain of Hydrologic Response Units (HRUs) and stream segments.
 * **input_file_builder** holds code that turns the outputs from **domain_builder** and user-specified parameters in the **settings** file (see Step 1, below) into the set of input files that are required by GSFLOW
-* **Run** runs GSFLOW from these inputs
+* **Run** holds the files to run GSFLOW using these inputs
 * **visualization** holds scripts to build plots and movies based on the outputs from both GSFLOW and the GRASS GIS domain builder
 
 In addition, the "figures" directory holds images used for this README.
@@ -161,9 +64,9 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 ### Step 1: Customize the Settings File
 
-The **settings** file holds user-defined information that defines how GSFLOW is set up and will run.
+The **Settings** file holds user-defined information that defines how GSFLOW is set up and will run.
 
-Use `settings_template.ini` as a template for creating your own Settings File, which can have any name. **Boldface** options are required. This files includes:
+Use `settings_template.ini` as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required. This files includes:
 
 **\todo{MAKE EVERYTHING REQUIRED BOLD}**
 
@@ -175,8 +78,8 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 | **gsflow_exe**     | Full pathname for GSFLOW executable
 | **gsflow_path_simdir** | Full pathname for location where GSFLOW simulation<br>directory should go.
 | **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
-| climate_data_file  | Only for *fl_print_climate_hru*=1:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>**\todo{create Settings file parser so that it doesn't use this in unless fl_print_climate_hru=1}**
-| climate_hru_dir    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>**\todo{create Settings file parser so that it doesn't use this in unless fl_print_climate_hru=1.  Add something to Settings parser file to copy over climate_hru files to input directory.**
+| climate_data_file  | Only for *fl_print_climate_hru*=1:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>**\todo{Crystal: change GSFLOW_print_data_climatehru*py so that it doesn't create files unless fl_print_climate_hru=1}**
+| climate_hru_dir    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>**\todo{Crystal: in print_params or readSettings file, copy over these files to inputdir}**
 | **sw_1spinup_2restart** | **1** for spin-up run starting from steady-state MODFLOW period<br>**2** for restart run starting from states saved in the below files
 | restart_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
 | restart_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
@@ -185,9 +88,9 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 
 | Option             | Description
 | ------------------ | ---------
-| fl_create_hydcond  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>Otherwise, use values or pre-existing file entered in *hydcond*<br>**\todo{implement this in Create_hydcond.py}**
-| hydcond            | For uniform hydraulic conductivity within each layer in the saturated domain<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
-| finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values, enter file name<br>containing array of values (in [m/d]).  May need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
+| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>Otherwise, use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
+| **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
+| finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
 #### "domain" section
 
@@ -213,6 +116,37 @@ Use `settings_template.ini` as a template for creating your own Settings File, w
 
 
 ### Step 2. Running GRASS GIS and generating output
+
+#### Download and install GRASS GIS 7.3+
+
+Two options:
+* Cross-platform binaries:
+https://grass.osgeo.org/download/software/
+* Instructions to build from source:
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install
+  * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
+
+If you choose to compile GRASS GIS from source, A. Wickert has used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
+
+```configure
+CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
+--enable-largefile=yes \
+--with-nls \
+--with-cxx \
+--with-readline \
+--with-pthread \
+--with-proj-share=/usr/share/proj \
+--with-geos=/usr/bin/geos-config \
+--with-wxwidgets \
+--with-cairo \
+--with-opengl-libs=/usr/include/GL \
+--with-freetype=yes --with-freetype-includes="/usr/include/freetype2/" \
+--with-postgres=yes --with-postgres-includes="/usr/include/postgresql" \
+--with-sqlite=yes \
+--with-mysql=yes --with-mysql-includes="/usr/include/mysql" \
+--with-odbc=no \
+--with-netcdf=/usr/bin/nc-config
+```
 
 #### Launch GRASS GIS and create your location
 
@@ -286,11 +220,10 @@ Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder t
 Pat yourself on the back! The GRASS portion is complete.
 
 ### Step 3: Customize the Go-GSFLOW File
-\todo{increment list number if need separate step for GRASS module}
 
 The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is executed for pre-processing and running GSFLOW.
 
-\todo{change file name; currently `run_Python_GSFLOW_current.sh.'  Also, update Windows batch file}
+**\todo{Crystal: change file name; currently `run_Python_GSFLOW_current.sh.'  Lauren/Crystal: update Windows batch file}**
 
 At the top of the file, the user should customize:
 
@@ -391,3 +324,4 @@ Before running GSFLOW, the user should:
 #### Visualization Tool for Model Outputs
 
 ###
+
