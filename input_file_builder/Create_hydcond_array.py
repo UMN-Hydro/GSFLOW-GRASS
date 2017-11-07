@@ -33,7 +33,7 @@ else:
 Settings = Settings(settings_input_file)
 
 
-# ***SET FOLLOWING BASED ON SITE **********************************************
+#%% ***SET THE FOLLOWING ******************************************************
 
 sw_scheme = 2 # 1: based on elev, 2: based on streams, 3: based on both
 

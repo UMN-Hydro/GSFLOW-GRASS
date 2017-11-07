@@ -31,6 +31,8 @@ else:
 Settings = Settings(settings_input_file)
 
 
+#%% ***SET THE FOLLOWING ******************************************************
+
 # ***Select which variable to plot:
 # 0: 'UZF RECHARGE'
 # 1: 'SURFACE LEAKAGE' (negative)
