@@ -320,10 +320,7 @@ For the default implementation, the user can proceed to Step 3.  However, extra 
 All temperature data in this file are assumed to be in [&deg;C], and precipitation data in [mm/d] (these are eventually converted to [&deg;C] and [in/d] for the PRMS model component).  This file can be expanded to include relative humidity (in [%]) (used if Penman-Monteith option is selected for the potential ET module) and solar radiation (in [MJ/m<sup>2</sup>]) if available.  Other steps may be needed if the user replaces this script with their own to create spatially distributed hydraulic conductivity fields.
 * **Settings File, fl_print_climate_hru=0**: Make sure climate_hru_dir is directory with pre-existing climate_hru data files containing HRU-distributed climate inputs: **tmin.day**, **tmax.day**, **precip.day**, and **empty.day**. See GSFLOW manual or example files in example cases (e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.
 
-*Changing other input parameters*: Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include: 
-* `GSFLOW_print_controlfile_current.py`: Builds GSFLOW control file, which controls model options.  See commented Section headings to make changes.    
-* `GSFLOW_print_PRMSparamfile_current.py`: Builds PRMS parameter file, which contains all (non-stream) surface properties in "Section 2: Parameters."  While any of these may be customized, those of particular interest are commented with "# *** CHANGE FOR SPECIFIC SITE"  
-* `MODFLOW_NWT_lib_current.py`: Library of functions to build the various MODFLOW input files (used in `print_MODFLOW_inputs_res_NWT_current.py.`  See individual functions to change input parameters for the different corresponding MODFLOW packages.  
+*Changing other input parameters*: See "Advanced Customization" below.  
 
 ### Step 5. Running GSFLOW
 The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
@@ -331,27 +328,35 @@ The pre-processing and GSFLOW model execution can be carried out by entering the
 * Windows command prompt: .\go-GSFLOW.bat
 
 ### Step 6. Visualization
-Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console:
+Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console: *TODO: Andy - checking my wording, do you "run at a Python console"?*
 
 ```bash
 run (visualization_script).py (Settings File)
-``
+```
 
-We anticipate that plot settings will be highly problem-specific: the user can enter main options at the top of each script under `*** SET THE FOLLOWING:...`; other changes can be manually made in the rest of the script.  
+By default, the visualization scripts will plot output files located in directory locations specified in *Settings File*, which facilitates visualizing results directly after running GSFLOW with this toolkit.  However, the user can over-ride these file locations in the section `*** CHANGE FILE NAMES AS NEEDED` in order to plot arbitrary output files (not based on *Settings File*.  Note, however, that our visualization scripts do that the output file format corresponds to those generated using our toolkit and are not guaranteed to work for GSFLOW output files generated outside of this toolkit.    
+ 
+For other main plotting options, the user should use the section at the top of each visualization script indicated with `*** SET THE FOLLOWING:...`.  Other more detailed customizations (e.g., figure formatting etc) can be manually made in the rest of the script.  
 
-* Visualization scripts for plotting GSFLOW inputs (created by our toolkit):
-  * plotBasin.py
-  * Plot_MODFLOW_inputs.py
+The visualization scripts in the toolkit include the following:
+
+* Visualization scripts for plotting GSFLOW inputs (inputs that are created by our toolkit):
+  * `plotBasin.py`: Creates figure showing HRU and stream discretization.  User specifies HRU id's to be highlighted. 
+  * `Plot_MODFLOW_inputs.py`: Creates various figures showing spatially discretized MODFLOW inputs: active grid cells, top elevation of each layer, bottom elevation of each layer, and hydraulic conductivity for each layer.
 * Visualization scripts for plotting GSFLOW outputs:
-  * plotHRUvars.py
-  * plotSegmentDischarge.py
-  * Plot_MODFLOW_3D_head3.py
-  * Plot_MODFLOW_3D_uzf.py
-  * plot_gsflow_csv.py
-
+  * `plotHRUvars.py`: Creates movie of HRU-discretized output variables. 
+  * `plotSegmentDischarge.py`: Creates movie of stream segment-discretized discharge values. 
+  * `Plot_MODFLOW_3D_head3.py`: Creates movie of spatially discretized hydraulic head.  Also options to show water table depth and change-in-head over print time steps. 
+  * `Plot_MODFLOW_3D_uzf.py`: Creates movie of spatially discretized unsaturated-zone outputs, such as recharge from the unsaturated to the saturated zone.
+  * `plot_gsflow_csv.py`: Creates a time series figure with basin-total variables. 
 
 ## Advanced Customization
 
 **\todo{Andy, this is where to put ways to customize GRASS GIS code; mostly links should be OK}**
-**\todo{Also link this to Crystal's code}**
+
+**Changing other parameters in GSFLOW input files:**
+Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include: 
+* `GSFLOW_print_controlfile_current.py`: Builds GSFLOW control file, which controls model options.  See commented Section headings to make changes.    
+* `GSFLOW_print_PRMSparamfile_current.py`: Builds PRMS parameter file, which contains all (non-stream) surface properties in "Section 2: Parameters."  While any of these may be customized, those of particular interest are commented with "# *** CHANGE FOR SPECIFIC SITE"  
+* `MODFLOW_NWT_lib_current.py`: Library of functions to build the various MODFLOW input files (used in `print_MODFLOW_inputs_res_NWT_current.py.`  See individual functions to change input parameters for the different corresponding MODFLOW packages.  
 
