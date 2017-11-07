@@ -26,6 +26,7 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 * **Run** runs GSFLOW from these inputs
 * **visualization** holds scripts to build plots and movies based on the outputs from both GSFLOW and the GRASS GIS domain builder
 
+In addition, the "figures" directory holds images used for this README.
 
 <!---
 
@@ -168,11 +169,37 @@ With your location selected, click **"Start GRASS session"**.
 
 #### Install required GRASS GIS extensions
 
-**TO DO**
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run the contents of `install_extensions.sh`.
+
+On Linux, cd to the proper directory and
+```sh
+sh install_extensions.sh
+```
+
+Or, and perhaps more easily, on either operating system, just copy and paste the contents of `install_extensions.sh` into the terminal or GRASS GIS console. We have also pasted these here for convenience.
+```sh
+# GRASS GIS extensions
+
+# From us
+g.extension v.gsflow.export
+g.extension v.gsflow.gravres
+g.extension v.gsflow.grid
+g.extension v.gsflow.hruparams
+g.extension v.gsflow.reaches
+g.extension v.gsflow.segments
+g.extension r.gsflow.hydrodem
+g.extension v.stream.inbasin
+g.extension v.stream.network
+
+# From others
+g.extension r.stream.extract
+g.extension r.stream.basins
+g.extension r.hydrodem
+```
 
 #### Install required Python packages?
 
-**TO DO????**
+**TO DO???? AND ALSO BASIC PYTHON INSTALL? TAKE FROM GFLEX README?**
 
 #### Create the GSFLOW inputs
 
