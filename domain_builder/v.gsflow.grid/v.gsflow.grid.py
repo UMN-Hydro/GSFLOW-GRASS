@@ -213,7 +213,10 @@ def main():
         # May not work with dx != dy!
         v.to_rast(input=pp, output='tmp', use='val', value=1, overwrite=True)
         r.buffer(input='tmp', output='tmp', distances=float(dx)*1.5, overwrite=True)
-        r.mapcalc('tmp = (tmp == 2) * '+raster_input, overwrite=True)
+        #r.mapcalc('tmp = (tmp == 2) * '+raster_input, overwrite=True)
+        r.mapcalc('tmp = if(isnull('+raster_input+',0,(tmp == 2)))', overwrite=True)
+        #g.region(rast='tmp')
+        #r.null(map=raster_input,
         r.drain(input=raster_input, start_points=pp, output='tmp2', overwrite=True)
         r.mapcalc('tmp = tmp2 * tmp', overwrite=True)
         r.null(map='tmp', setnull=0)
