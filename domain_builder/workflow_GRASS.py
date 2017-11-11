@@ -101,7 +101,7 @@ v.gsflow_segments(input=streams_inbasin, output=segments, icalc=icalc, overwrite
 v.gsflow_grid(basin=basins_inbasin, pour_point=pour_point, raster_input=DEM, dx=MODFLOW_grid_resolution, dy=MODFLOW_grid_resolution, output=MODFLOW_grid, mask_output=basin_mask, bc_cell=bc_cell, overwrite=True)
 
 # Hydrologically-correct DEM for MODFLOW
-r.gsflow_hydrodem(dem=DEM, grid=MODFLOW_grid, streams=streams_all, resolution=MODFLOW_grid_resolution, streams_modflow=streams_MODFLOW, dem_modflow=DEM_MODFLOW, overwrite=True)
+r.gsflow_hydrodem(dem=DEM, grid=MODFLOW_grid, streams=streams_all, streams_modflow=streams_MODFLOW, dem_modflow=DEM_MODFLOW, overwrite=True)
 
 # GSFLOW reaches: intersection of segments and grid
 v.gsflow_reaches(segment_input=segments, grid_input=MODFLOW_grid, elevation=DEM, output=reaches, overwrite=True)
