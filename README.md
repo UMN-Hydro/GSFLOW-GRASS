@@ -244,8 +244,6 @@ sh install_extensions.sh
 
 Or, and perhaps more easily, on either operating system, just copy and paste the contents of `install_extensions.sh` into the terminal or GRASS GIS console. We have also pasted these here for convenience.
 ```sh
-# GRASS GIS extensions
-
 # From us
 g.extension v.gsflow.export
 g.extension v.gsflow.gravres
@@ -256,9 +254,9 @@ g.extension v.gsflow.segments
 g.extension r.gsflow.hydrodem
 g.extension v.stream.inbasin
 g.extension v.stream.network
+g.extension r.cell.area
 
 # From others
-g.extension r.stream.extract
 g.extension r.stream.basins
 g.extension r.hydrodem
 ```
