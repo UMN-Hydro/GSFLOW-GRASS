@@ -68,14 +68,15 @@ def main():
         if not grass.overwrite():
             grass.fatal("Raster map '" + options['output'] + 
                         "' already exists. Use '--o' to overwrite.")
-
+  
+    projunits = str(projinfo['units']) # Unicode to str
     # Then compute
-    if projinfo['units'] == 'meters':
+    if (projunits == 'meters') or (projunits == 'Meters'):
         if units == 'm2':
             grass.mapcalc(output+' = nsres() * ewres()')
         elif units == 'km2':
             grass.mapcalc(output+' = nsres() * ewres() / 10.^6')
-    elif projinfo['units'] == 'degrees':
+    elif (projunits == 'degrees') or (projunits == 'Degrees'):
         if units == 'm2':
             grass.mapcalc(output+' = ( 111195. * nsres() ) * \
                           ( ewres() * '+str(np.pi/180.)+' * 6371000. * cos(y()) )')
@@ -83,7 +84,7 @@ def main():
             grass.mapcalc(output+' = ( 111.195 * nsres() ) * \
                           ( ewres() * '+str(np.pi/180.)+' * 6371. * cos(y()) )')
     else:
-        print 'Units: ', + projinfo['units'] + ' not currently supported'
+        print 'Units: ', projunits, ' not currently supported'
     
 if __name__ == "__main__":
     main()
