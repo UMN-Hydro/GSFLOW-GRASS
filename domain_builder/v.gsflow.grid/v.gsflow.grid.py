@@ -123,6 +123,11 @@ def main():
     if _lena0 + _lenb0 == 1:
         grass.fatal("You must set both raster input and output, or neither.")
     """
+    
+    # Fatal if bc_cell set but mask and grid are false
+    if bc_cell != '':
+        if (mask == '') or (pp == ''):
+            grass.fatal('Mask and pour point must be set to define b.c. cell')
         
     # Create grid -- overlaps DEM, one cell of padding
     gscript.use_temp_region()
@@ -190,6 +195,9 @@ def main():
         g.region(w=str(_w), e=str(_e), s=str(_s), n=str(_n), nsres=str(grid_ratio_ns*reg['nsres']), ewres=str(grid_ratio_ew*reg['ewres']))
         r.resamp_stats(input=mask, output=mask, method='sum', overwrite=True, quiet=True)
         r.mapcalc(mask+' = '+mask+' > 0', overwrite=True, quiet=True)
+        # Add mask location (1 vs 0) in the MODFLOW grid
+        v.db_addcolumn(map=grid, columns='basinmask', quiet=True)
+        v.what_rast(map=grid, type=centroid, raster=mask, column='basinmask')
 
     """
     # Resampled raster
@@ -205,6 +213,8 @@ def main():
         v.what_vect(map=pp, query_map=grid, column='col', query_column='col', quiet=True)
 
     # Next point downstream of the pour point
+    # Requires pp (always) and mask (sometimes)
+    # Dependency set above w/ grass.fatal
     if len(bc_cell) > 0:
         ########## NEED TO USE TRUE TEMPORARY FILE ##########
         # May not work with dx != dy!
@@ -225,6 +235,52 @@ def main():
                     query_column='row', quiet=True)
         v.what_vect(map=bc_cell, query_map=grid, column='col', \
                     query_column='col', quiet=True)
+        
+        # Find out if this is diagonal: finite difference works only N-S, W-E
+        colNames = np.array(gscript.vector_db_select(pp, layer=1)['columns'])
+        colValues = np.array(gscript.vector_db_select(pp, layer=1)['values'].values())
+        pp_row = colValues[:,colNames == 'row'].astype(int).squeeze()[0]
+        pp_col = colValues[:,colNames == 'col'].astype(int).squeeze()[0]
+        colNames = np.array(gscript.vector_db_select(bc_cell, layer=1)['columns'])
+        colValues = np.array(gscript.vector_db_select(bc_cell, layer=1)['values'].values())
+        bc_row = colValues[:,colNames == 'row'].astype(int).squeeze()[0]
+        bc_col = colValues[:,colNames == 'col'].astype(int).squeeze()[0]
+        # Check if diagonal
+        if (bc_row != pp_row) and (bc_col != pp_col):
+            # If not diagonal, two possible locations that are adjacent
+            # to the pour point
+            x1, y1 = bc_col, pp_row
+            x2, y2 = pp_col, bc_row
+            # Check if either of these is covered by the basin mask
+            _ismask_1 = grass.vector_db_select(grid, layer=1, where='(row == '+pp_row+') AND (col =='+pp_col+')', column='basinmask')
+            ...
+            
+            # If both covered by mask, error
+            if 
+                grass.fatal
+            # Otherwise, those that keep those that are not covered by basin
+            # mask and set ...
+            # ... wait, do we want the point that touches as few interior
+            # cells as possible?
+            # maybe just try setting both and seeing what happens for now!
+            else:
+                # Build tool to handle multiple b.c. cells?
+                bcvect = vector.Vector(bc_cell)
+                bcvect.open('a'?
+                if not _ismask_1:
+                    ... see below key on how to build 
+                if not _ismask_2:
+                    ...
+            
+            # From pour points; use as template for adding more points here
+            tmp.open('w', tab_name='tmp', tab_cols=_cols)
+            point0 = Point(x_outlet,y_outlet)
+            tmp.write(point0, cat=1, attrs=(str(x_outlet), str(y_outlet), 0), )
+            tmp.table.conn.commit()
+            tmp.build()
+            tmp.close()
+
+
         
     g.region(n=reg['n'], s=reg['s'], w=reg['w'], e=reg['e'], nsres=reg['nsres'], ewres=reg['ewres'])
 
