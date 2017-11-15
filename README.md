@@ -13,7 +13,7 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 ## Required Software
 
 * **GSFLOW 1.2**
-* **GRASS GIS 7.3+** and extensions (described below)
+* **GRASS GIS 7.3+** and extensions (described below); **7.4** is the stable version at the time of writing
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
