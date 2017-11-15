@@ -235,14 +235,21 @@ With your location selected, click **"Start GRASS session"**.
 
 ***First time running GRASS GIS only, or after GRASS extension updates***
 
-Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run the contents of `install_extensions.sh`.
+Either using the terminal or clicking on the "Console" tab in the GRASS GIS Layer Manager, run install all of the necessary extensions for GSFLOW-GRASS.
 
-On Linux, cd to the proper directory and
+In the terminal, this may be done as follows:
+
+On Linux, cd `GSFLOW-GRASS/domain-builder` and type:
 ```sh
 sh install_extensions.sh
 ```
 
-Or, and perhaps more easily, on either operating system, just copy and paste the contents of `install_extensions.sh` into the terminal or GRASS GIS console. We have also pasted these here for convenience.
+On Windows, likewise cd to `GSFLOW-GRASS\domain-builder` and type:
+```bat
+install_extensions
+```
+
+Perhaps more easily, on either operating system, just copy and paste the contents of `install_extensions.sh` into the terminal or GRASS GIS console. We have also pasted these here for convenience.
 ```sh
 # From us
 g.extension v.gsflow.export
