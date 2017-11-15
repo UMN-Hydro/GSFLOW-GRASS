@@ -3,7 +3,6 @@
 ##################
 # PYTHON
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 from ConfigParser import SafeConfigParser
 # GRASS
