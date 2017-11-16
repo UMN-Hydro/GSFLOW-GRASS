@@ -71,7 +71,8 @@ if DEM_input != '':
     r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='m', overwrite=True)
     r.mapcalc(accumulation_onmap+' = '+accumulation+' * ('+accumulation+' > 0)', overwrite=True)
     r.null(map=accumulation_onmap, setnull=0)
-    r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
+    r.mapcalc('tmp'+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
+    g.copy(raster=('tmp',DEM), overwrite=True)
     # Ensure that null cells are shared
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
     # Repeat is sometimes needed
