@@ -2,9 +2,9 @@
 
 ***Python toolkit using GRASS GIS to generate inputs for the USGS hydrologic model "GSFLOW".***
 
-GSFLOW is the US Geological Survey's combined groundater (MODFLOW) and surface water (PRMS) model. GSFLOW-GRASS builds a stream network and its "hydrologic response units" -- here, watershed sub-basins -- that combine to form a surface-water hydrologic network (PRMS). It then links these to a regular finite difference grid to compute groundwater flow using MODFLOW.
+GSFLOW is the US Geological Survey's combined groundwater (MODFLOW) and surface water (PRMS) model. GSFLOW-GRASS builds a stream network and its "hydrologic response units" -- here, watershed sub-basins -- that combine to form a surface-water hydrologic network (PRMS). It then links these to a regular finite difference grid to compute groundwater flow using MODFLOW.
 
-These instructions are meant to take an user familiar with computers but new to (or a beginner with) GSFLOW and GRASS GIS through the basics of how to get GSFLOW-GRASS to work. *Please leave a message if you have trouble working with GSFLOW-GRASS; your comments could assist both you and the more general improvement of this documentation.*
+These instructions are meant to take a user familiar with computers but new to (or a beginner with) GSFLOW and GRASS GIS through the basics of how to get GSFLOW-GRASS to work. *Please leave a message if you have trouble working with GSFLOW-GRASS; your comments could assist both you and the more general improvement of this documentation.*
 
 When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be noted here as soon as the paper is made available.
 
@@ -23,9 +23,10 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 Obtain the source code from:
 https://github.com/UMN-Hydro/GSFLOW-1.2.0
-and compile and install it.
+compile and install it. For windows, you can also download the executable file already compiled from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads.
 
-***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!***
+***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions! 
+May need tp remove link to USGS website if 1.2.2 is not available and we don't want to point people towards 1.2.1***
 
 ### Installing GRASS GIS
 
@@ -95,7 +96,7 @@ sudo apt-get install spyder
 
 #### Windows and Mac
 
-We recommend **Anaconda**, which comes with most of the Python modules that you might need. Additional modules may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager), for example:
+We recommend using **Anaconda**, which comes with most of the Python modules that you might need for the execusion of the GSFLOW-GRASS codes (including numpy, matplotlib and pandas but not including osgeo). Additional modules may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager), for example:
 
 ```bash
 # Anaconda
@@ -103,6 +104,14 @@ conda install python-numpy
 # Pip
 pip install numpy
 ```
+For Windows, you need to use conda through the Anaconda Prompt (After installing Anaconda, go to the windows start menu, search programs and files for "Anaconda Prompt"), it will not work through the regular command prompt. Installing osgeo/gdal may also downgrade certain packages that you can re-upgrade afterwords. For example (in the Anaconda prompt):
+
+```bash
+# In the Anaconda Prompt
+conda install gdal
+conda upgrade numpy
+```
+Anaconda also comes with the Spyder development environment which is useful if you want to individually run or edit the python codes.
 
 ### Installing FFMPEG
 
@@ -112,7 +121,7 @@ In order to make movies, you need an active copy of ffmpeg on your computer. For
 ```sh
 sudo apt-get install ffmpeg
 ```
-For Windows or Mac, download and install via https://www.ffmpeg.org/download.html
+For Windows or Mac, download via https://www.ffmpeg.org/download.html. You can select the correct version for your operating system under “More downloading options” and “Get the packages” and follow the links therein. Ffmpeg is installed by adding the executable file to your system's or user path variable. Windows installation instructions can be found here https://www.wikihow.com/Install-FFmpeg-on-Windows.
 
 ## Directory Structure
 
@@ -163,7 +172,7 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 The **Settings** file holds user-defined information that defines how GSFLOW is set up and will run.
 
-Use `settings_template.ini` as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required. This files includes:
+Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required. This files includes:
 
 #### "settings" section
 
@@ -183,7 +192,7 @@ Use `settings_template.ini` as a template for creating your own **Settings** Fil
 
 | Option             | Description
 | ------------------ | ---------
-| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>Otherwise, use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
+| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
 | **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
 | finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
@@ -201,8 +210,8 @@ Use `settings_template.ini` as a template for creating your own **Settings** Fil
 | Option             | Description
 | ------------------ | ---------
 | **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
-| **threshold_drainage_area_meters2** | Threshold drainage area at which flow is considered to create<br>a channel
-| **MODFLOW_grid_resolution_meters** | Target cell side length for MODFLOW grid; side lengths will not be<br>exactly this long, as the nearest value to create an integer number<br>of cells in the domain will be chosen.
+| **threshold_drainage_area_meters2** | Threshold drainage area in square meters at which flow is considered to create<br>a channel
+| **MODFLOW_grid_resolution_meters** | Target cell side length in meters for MODFLOW grid; side lengths will not be<br>exactly this long, as the nearest value to create an integer number<br>of cells in the domain will be chosen.
 | **outlet_point_x** | Pour point approximate x (Easting) position; the nearest stream<br>segment to this point is chosen as the true pour point.
 | **outlet_point_y** | Pour point approximate y (Northing) position; the nearest stream<br>segment to this point is chosen as the true pour point.
 | **icalc** | Method selector for hydraulic geometry computation<br>**0:** Constant<br>**1:** Manning's equation with the wide channel assumption.<br>**2:** Manning's Equation.<br>**3:** Power-law relationship between width, depth, velocity,<br/>and discharge, per Leopold and Maddock (1953)
@@ -288,9 +297,9 @@ Pat yourself on the back! The GRASS portion is complete.
 
 ### Step 3: Customize the Go-GSFLOW File to set input-file-builder options
 
-The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) is for pre-processing and running GSFLOW.
+The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) in the 'Run' folder, is for pre-processing and running GSFLOW.
 
-**\todo{Crystal: change file name; currently `run_Python_GSFLOW_current.sh.`  Lauren/Crystal: update Windows batch file}**
+**\todo{Crystal: change file name; currently `run_Python_GSFLOW_current.sh.`}**
 
 At the top of the file, the user should customize:
 
@@ -310,7 +319,7 @@ Note that the above Python scripts can also be run independently using Python, o
 
 ### Step 4. Optional steps
 
-For the default implementation, the user can proceed to Step 3.  However, extra steps are needed if the user has specified any of the following:
+For the default implementation, the user can proceed to Step 5.  However, extra steps are needed if the user has specified any of the following:
 
 * **Settings File, fl_create_hydcond=1**: Set options at the top of the `Create_hydcond_array.py` input-file-builder script for different spatial distribution configurations.  Other steps may be needed if the user replaces this script with their own to create spatially distributed hydraulic conductivity fields.
 * **Settings File, fl_print_climate=1**: Create the file specified in climate_data_file, which should have climate data time series from one weather station for daily minimum temperature, maximum temperature, and precipitation.  See example problems for the file format (e.g., in `Shullcas -> UserData ->` ), which has the following format:
@@ -328,7 +337,7 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 ### Step 5. Running GSFLOW
 The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
 * Linux prompt: ./go-GSFLOW.sh (user needs to press Enter at the end, to return to command prompt)
-* Windows command prompt: .\go-GSFLOW.bat
+* Windows command prompt: .\go-GSFLOW.bat (or by double clicking on the .bat file in windows explorer)
 
 Output files will be located in the gsflow_simdir (specified in Step 1 in the *Settings File*) -> *outputs*.
 
@@ -343,7 +352,7 @@ After running GSFLOW, the user should check the following:
 Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console: *TODO: Andy - checking my wording, do you "run at a Python console"?*
 
 ```bash
-run (visualization_script).py (Settings File)
+run (visualization_script).py (Settings File full path)
 ```
 
 By default, the visualization scripts will plot output files in directories specified by *Settings File*; this facilitates visualizing results directly after running GSFLOW with this toolkit.  However, the user can over-ride these file locations in the section `*** CHANGE FILE NAMES AS NEEDED` in order to plot arbitrary output files (not based on *Settings File*).  However, our visualization scripts assume certain output file formats and are not guaranteed to work with GSFLOW output files generated outside of this toolkit.
