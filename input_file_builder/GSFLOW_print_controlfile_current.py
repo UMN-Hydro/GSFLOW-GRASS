@@ -127,6 +127,10 @@ if model_mode != 'MODFLOW':
     end_date = dt.datetime.strptime(Settings.END_DATE, "%Y-%m-%d")       
     ymdhms_v = np.array([datetime_to_list(start_date),
                          datetime_to_list(end_date)])                     
+
+    if Settings.sw_1spinup_2restart == 2:
+        init_start_date = dt.datetime.strptime(Settings.INIT_START_DATE, "%Y-%m-%d")
+        ymdhms_init = datetime_to_list(init_start_date)
                          
     con_par_name.append('start_time')
     con_par_type.append(1)
@@ -147,7 +151,11 @@ if model_mode != 'MODFLOW':
         #First MODFLOW initial stress period (can be earlier than model start date;
         # useful when using load_init_file and modflow period represents longer 
         # period that started earlier).  
-        ymdhms_m = ymdhms_v[0]        
+        if Settings.sw_1spinup_2restart == 1:
+            ymdhms_m = ymdhms_v[0]        
+        else:
+            ymdhms_m = ymdhms_init
+
         con_par_name.append('modflow_time_zero')
         con_par_type.append(1)
         con_par_values.append(ymdhms_m) # year, month, day, hour, minute, second
@@ -241,6 +249,11 @@ if model_mode != 'MODFLOW':
         con_par_name.append('tmin_day') # file with precip data for each HRU
         con_par_type.append(4) 
         con_par_values.append(tmin_datafil) # file name
+        # manual says humidity data only needed for et_module=pet_pm, but seems 
+        # gsflow v1.2.1 and 1.2.2beta requires it for pet_pt; unused by 1.2.0
+        con_par_name.append('humidity_day')
+        con_par_type.append(4)
+        con_par_values.append(humidity_datafil) # file name
     
     con_par_name.append('solrad_module') # solar rad distribution method
     con_par_type.append(4) 
@@ -259,9 +272,9 @@ if model_mode != 'MODFLOW':
         con_par_type.append(4) 
         con_par_values.append(pet_datafil) # file name
     elif con_par_values[-1] == 'potet_pm':
-        con_par_name.append('humidity_day')
-        con_par_type.append(4)
-        con_par_values.append(humidity_datafil) # file name
+#        con_par_name.append('humidity_day')
+#        con_par_type.append(4)
+#        con_par_values.append(humidity_datafil) # file name
         con_par_name.append('wind_day')
         con_par_type.append(4)
         con_par_values.append(humidity_datafil) # file name
@@ -418,7 +431,7 @@ if model_mode != 'MODFLOW':
         elif Settings.sw_1spinup_2restart == 2:
             fl_load_init = 1 # 1 to load previously saved initial conditions
             # load initial conditions from this file
-            load_init_file = Settings.restart_PRMSfil
+            load_init_file = Settings.init_PRMSfil
    
 
     # (default is init_vars_from_file = 0, but still need to specify for GUI)

@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 import platform
 import sys
+import os
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -72,6 +73,9 @@ if Settings.fl_print_climate_hru == 1:
     #   [- swrad [langleys for F temp_units] ], currently unavailable at Chim
     #   - ymdhms_v
     
+    # weirdly: gsflow v1.2.1 and 1.2.2 beta require humidity.day, even when 
+    # not using et_module = pet_pm 
+    
     
     # daily data in input file:
     #tmax must be C (will be converted to F)
@@ -105,7 +109,8 @@ if Settings.fl_print_climate_hru == 1:
     solrad_datafil = PRMSinput_dir + slashstr + 'swrad.day'
     
     # - how many of above met variables to process (0 thru N)
-    N = 3
+    # (always need to include precip, tmin, tmax; gsflow 1.2.1 and 1.2.2beta also require humidity.day)
+    N = 4
     
     # - Write to data variable files
     print_fmt1 = ["%4d"] + ["%2d"] * 5
@@ -138,7 +143,10 @@ if Settings.fl_print_climate_hru == 1:
             label = ['tminf {}'.format(nhru)]
         elif ii==4: 
             outdatafil = hum_datafil
-            data = Data['tmax']/100.  # percent -> fraction
+            try:
+                data = Data['humidity']
+            except:
+                data = Data['tmax']*0 + 0.5  # fraction (humidity)
             label = ['humidity_hru {}'.format(nhru)]
         elif ii==5: 
             outdatafil = solrad_datafil
@@ -160,4 +168,15 @@ if Settings.fl_print_climate_hru == 1:
             np.savetxt(fid, data0, fmt=print_fmt1, delimiter=" ")
     
         fid.close()
+        
+else:
+    # Copy over climate_hru files from climate_hru_dir
+    if platform.system() == 'Linux':
+        cmd_str = 'cp -p ' + Settings.climate_hru_dir + slashstr + '* ' + Settings.PRMSinput_dir
+    elif platform.system() == 'Windows':
+        print "FINISH COPYING CLIMATE_HRU_DIR FOR WINDOWS!!"
+#        cmd_str = 'copyfile ' + Settings.climate_hru_dir + slashstr + '* ' + Settings.PRMSinput_dir
+    
+    os.system(cmd_str)
+
     

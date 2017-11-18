@@ -45,6 +45,7 @@ class Settings(object):
 
         # command-line executable for GSFLOW (just used to print message)
         self.GSFLOW_exe = parser.get('settings', 'gsflow_exe')
+        self.GSFLOW_ver = parser.get('settings', 'gsflow_exe_ver')
         
         self.fl_print_climate_hru = int(parser.get('settings', 'fl_print_climate_hru'))
         if self.fl_print_climate_hru == 1:        
@@ -62,8 +63,8 @@ class Settings(object):
         self.sw_1spinup_2restart = int(parser.get('settings', 'sw_1spinup_2restart'))
         if self.sw_1spinup_2restart == 2:
             # point to files created from spinup run
-            self.restart_PRMSfil = parser.get('settings', 'restart_PRMSfil')
-            self.restart_MODfil = parser.get('settings', 'restart_MODfil')
+            self.init_PRMSfil = parser.get('settings', 'init_PRMSfil')
+            self.init_MODfil = parser.get('settings', 'init_MODfil')
 
 
         # for relative pathname
@@ -108,6 +109,8 @@ class Settings(object):
 
         self.START_DATE = parser.get('domain', 'start_date')
         self.END_DATE = parser.get('domain', 'end_date')
+        if self.sw_1spinup_2restart == 2:
+            self.INIT_START_DATE = parser.get('domain', 'init_start_date')
 
         self.NLAY = int(parser.get('domain', 'NLAY'))
         DZ_str = parser.get('domain', 'DZ')  # for NLAY>1, this is comma-separated list (e.g., dz=50, 100), spaces don't matter

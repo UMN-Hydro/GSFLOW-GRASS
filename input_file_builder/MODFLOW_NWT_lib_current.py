@@ -949,7 +949,7 @@ def write_OC_PCG_MOD_f(GSFLOW_indir, infile_pre, perlen_tr):
 
 # based on make_sfr2_f_Mannings
 #
-def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all):
+def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all, gsflow_exe_ver):
 
 # Note: assume .dis file already created!! (reads in TOP for setting STRTOP)
 
@@ -1216,6 +1216,11 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     fobj.write(heading);
     fobj.write('# %s simulation \n' % (project_name));
     
+    if Settings.gsflow_ver == '1.2.1':
+        nstrm = abs(nstrm)
+        fobj.write('OPTIONS')
+        fobj.write('REACHINPUT')
+        fobj.write('END')
     
     # Item 1
     fobj.write('  %5d  %5d  %5d  %5d  %8.2f  %8.4f  %5d  %5d' 

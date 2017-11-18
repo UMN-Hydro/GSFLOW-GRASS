@@ -55,14 +55,14 @@ DZ = Settings.DZ
 start_date = dt.datetime.strptime(Settings.START_DATE, "%Y-%m-%d")
 end_date = dt.datetime.strptime(Settings.END_DATE, "%Y-%m-%d")
 delt = end_date - start_date
-perlen_tr = delt.days
+perlen_tr = delt.days + 1
 
 GIS_indir = Settings.GISinput_dir + slashstr
 
 # use restart file as initial cond (empty string to not use restart file)
 fil_res_in = '' # empty string to not use restart file
 if Settings.sw_1spinup_2restart == 2:
-    fil_res_in = Settings.restart_MODfil
+    fil_res_in = Settings.init_MODfil
 
 # for various files: ba6, dis, uzf, lpf
 surfz_fil = GIS_indir + 'DEM.asc'
@@ -93,7 +93,7 @@ elif sw_2005_NWT == 2:
 
 # unsat zone and streamflow input files
 uzf_fil = mf.make_uzf3_f_2(MODFLOW_indir, infile_pre, surfz_fil, dischargept_fil, ba6_fil); # list this below write_ba6_MOD3_2
-sfr_fil = mf.make_sfr2_f_Mannings(MODFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all); # list this below write_dis_MOD2_f
+sfr_fil = mf.make_sfr2_f_Mannings(MODFLOW_indir, infile_pre, reach_fil, dis_fil, segment_fil_all, Settings.gsflow_exe_ver); # list this below write_dis_MOD2_f
 
 # Write PCG file (only used for MODFLOW-2005, but this function also creates OC file)
 mf.write_OC_PCG_MOD_f(MODFLOW_indir, infile_pre, perlen_tr);
