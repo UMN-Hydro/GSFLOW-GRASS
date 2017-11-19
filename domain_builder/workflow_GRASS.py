@@ -1,11 +1,32 @@
+#####################
+# PARSE CONFIG FILE #
+#####################
+
+import sys
+import os
+from ConfigParser import SafeConfigParser # use this in the future
+
+sys.argv.append('../Run/settings_AW.ini')
+# Import parsed config file to read in user-specified settings
+sys.path.append(os.path.join('..', 'Run'))
+from readSettings import Settings
+# Set input file
+if len(sys.argv) < 2:
+    settings_input_file = 'settings.ini'
+    print 'Using default input file: ' + settings_input_file
+else:
+    settings_input_file = sys.argv[1]
+    print 'Using specified input file: ' + settings_input_file
+try:
+    Settings = Settings(settings_input_file)
+except:
+    sys.exit('Error opening or parsing input file: ' + settings_input_file)
+
 ##################
 # IMPORT MODULES #
 ##################
 # PYTHON
 import numpy as np
-import os
-import sys
-from ConfigParser import SafeConfigParser
 # GRASS
 from grass.pygrass.modules.shortcuts import general as g
 from grass.pygrass.modules.shortcuts import raster as r
@@ -18,23 +39,6 @@ from grass.pygrass.raster import RasterRow
 from grass.pygrass import utils
 from grass import script as gscript
 from grass.pygrass.vector.geometry import Point
-
-import numpy as np
-import os
-import sys
-from ConfigParser import SafeConfigParser
-sys.argv.append('../Run/settings_AW.ini')
-# Import parsed config file to read in user-specified settings
-sys.path.append(os.path.join('..', 'Run'))
-from readSettings import Settings
-# Set input file
-if len(sys.argv) < 2:
-    settings_input_file = 'settings.ini'
-    print 'Using default input file: ' + settings_input_file
-else:
-    settings_input_file = sys.argv[1]
-    print 'Using specified input file: ' + settings_input_file
-Settings = Settings(settings_input_file)
 
 # Internal variables: set names
 DEM_original_import = 'DEM_original_import'   # Raw DEM
