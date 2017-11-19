@@ -45,7 +45,7 @@ class Settings(object):
 
         # command-line executable for GSFLOW (just used to print message)
         self.GSFLOW_exe = parser.get('settings', 'gsflow_exe')
-        self.GSFLOW_ver = parser.get('settings', 'gsflow_exe_ver')
+        self.GSFLOW_ver = parser.get('settings', 'gsflow_ver')
         
         self.fl_print_climate_hru = int(parser.get('settings', 'fl_print_climate_hru'))
         if self.fl_print_climate_hru == 1:        
@@ -79,11 +79,19 @@ class Settings(object):
         self.MODFLOWinput_dir = self.gsflow_simdir + slashstr + self.MODFLOWinput_dir_rel
         self.PRMSoutput_dir = self.gsflow_simdir + slashstr + self.PRMSoutput_dir_rel
         self.MODFLOWoutput_dir = self.gsflow_simdir + slashstr + self.MODFLOWoutput_dir_rel
-
+        
+        # GRASS GIS variables
+        self.GIS_output_rootdir = self.gsflow_simdir + slashstr + 'GIS'
+        self.DEM_input = parser.get('GRASS', 'DEM_file_path_to_import')
+        self.drainage_area_threshold = parser.get('GRASS', 'threshold_drainage_area_meters2')
+        self.MODFLOW_grid_resolution = parser.get('GRASS', 'MODFLOW_grid_resolution_meters')
+        self.outlet_point_x = parser.get('GRASS', 'outlet_point_x')
+        self.outlet_point_y = parser.get('GRASS', 'outlet_point_y')
+        self.icalc = parser.get('GRASS', 'icalc')
 
         # create directories if they do not exist:
         if not os.path.isdir(self.control_dir):
-            os.makedirs(self.control_dir)   
+            os.makedirs(self.control_dir)
         if not os.path.isdir(self.PRMSinput_dir):
             os.makedirs(self.PRMSinput_dir)
         if not os.path.isdir(self.MODFLOWinput_dir):
@@ -97,7 +105,7 @@ class Settings(object):
             climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
             for item in climatehru_fils:
                 source_fil = self.limate_hru_dir + slashstr + item
-                shutil.copy2(source_fil, self.PRMSinput_dir)                  
+                shutil.copy2(source_fil, self.PRMSinput_dir)
 
         # -- problem-specifc variables
 
