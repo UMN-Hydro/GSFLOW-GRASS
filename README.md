@@ -10,12 +10,15 @@ When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be no
 
 This manual is written in the style of a quick(-ish) start guide that allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts. Additional customization is possible by more advanced users by editing our GRASS GIS and input file building scripts to extend the set of GSFLOW parameters that may be set through GSFLOW-GRASS.
 
-## Required Software
+## Required and Optional Software
 
+**Required:**
 * **GSFLOW 1.2**
 * **GRASS GIS 7.3+** and extensions (described below); **7.4** is the stable version at the time of writing
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
+**Optional:**
+* **ffmpeg** (for making movies)
 
 ### Installing GSFLOW
 
@@ -91,20 +94,53 @@ conda install gdal
 conda upgrade numpy
 ```
 
-Anaconda also comes with the Spyder development environment, which is a helpful graphical interface that can be used to individually run or edit the Python codes.
+Anaconda also comes with the *Spyder* development environment, which is a helpful graphical interface that can be used to individually run or edit the Python codes.
 
 ### Installing GRASS GIS
 
 ***Download and install GRASS GIS 7.3+***
 
-Two options:
-* Cross-platform binaries:
-https://grass.osgeo.org/download/software/
+#### Install precompiled binaries
+
+*("Precompiled binary " = the normal kind of software that you download and just works)*
+
+Go to https://grass.osgeo.org/download/software/ and download the appropriate version of GRASS GIS.
+
+##### Windows
+
+**Precompiled binary strongly recommended for Windows**
+
+At the time of writing, the new stable verison, GRASS GIS 7.4, is in the process of being released. Therefore, if you cannot find GRASS 7.3+ on the above website (GRASS GIS 7.3 is being phased out), go to the following to download a Windows binary of GRASS 7.4: https://wingrass.fsv.cvut.cz/grass74/x86_64/
+
+##### Mac
+
+Follow the instructions to install the "framework packages" after following the links from the main download page.
+
+##### Linux
+
+For Ubuntu:
+To obtain the old stable version and all dependencies:
+
+```bash
+sudo apt-get install grass
+```
+
+Then download and install the new binaries:
+https://grass.osgeo.org/grass74/binary/linux/snapshot/
+
+#### Compiling from source
+
 * Instructions to build from source:
   * https://grasswiki.osgeo.org/wiki/Compile_and_Install
   * https://grasswiki.osgeo.org/wiki/Compile_and_Install_Ubuntu
 
-If you choose to compile GRASS GIS from source, we have used these configuration flags many times on Ubuntu (`configure_ubuntu.sh`):
+Note that it can still help to obtain the dependencies via the package manager by installing the older version of GRASS:
+
+```bash
+sudo apt-get install grass
+```
+
+If you choose to compile GRASS GIS from source, we have used these configuration flags many times on Ubuntu Linux (`configure_ubuntu.sh`):
 
 ```configure
 CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
