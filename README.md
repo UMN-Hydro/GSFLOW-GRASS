@@ -28,6 +28,71 @@ compile and install it. For windows, you can also download the executable file a
 ***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!
 May need tp remove link to USGS website if 1.2.2 is not available and we don't want to point people towards 1.2.1***
 
+### Installing Python
+
+GSFLOW-GRASS has been tested on **Python 2.7**, and should work (with a few possible changes) on future versions of Python 2.X. It has not been tested on Python 3.X.
+
+In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.3 or greater, above):
+* `numpy`
+* `matplotlib`
+* `pandas`
+* `osgeo` (also listed under `gdal`)
+
+*For users who are new to Python, follow these directions to install the Python interpreters onto your computer.*
+
+#### Linux
+
+Use your package manager to download and install the required Python packages. For Debian/Ubuntu, it will be something like:
+
+```bash
+# Basic packages
+sudo apt-get install \
+python python-numpy python-scipy \
+python-setuptools python-matplotlib \
+python-gdal
+
+# pip (recommended for automatic installs via setuptools)
+sudo apt-get install python-pip
+
+# iPython console -- very useful (optional)
+sudo apt-get install ipython
+
+# Sypder IDE (I don't personally use it but many others like it: optional)
+sudo apt-get install spyder
+
+# OSGEO / GDAL
+sudo apt-get install python-gdal
+```
+
+#### Windows and Mac
+
+We recommend using **Anaconda**, which comes with most of the Python modules that one need for the execusion of the GSFLOW-GRASS codes: it includes numpy (computations and matrices), matplotlib (plotting), and pandas (database management), but does not include osgeo (geospatial libraries, labeled ``gdal'').
+
+Download Anaconda for Python 2.7+ from https://www.anaconda.com/download. When you install it, you are given the option to have it become your system-wide Python install in a set of two check boxes. We recommend that you do so (they are by default not checked), but GSFLOW-GRASS will still run fine if they are not. These boxes make your whole system recognize Anaconda as your Python install, rather than limiting it to its enclosed environment.
+
+Additional modules, such as OSGEO/GDAL may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager). For example, with numpy (already installed), you may type one of the following:
+
+```bash
+# Anaconda
+conda install python-numpy
+# Pip
+pip install numpy
+```
+
+We **recommend** that if you use Anaconda, that you use the **conda** comands to maintain a consistent Python environment.
+
+If you have installed Anaconda without ticking the system-wide install check box, you need to use "conda" through the Anaconda Prompt rather than the standard terminal: After installing Anaconda, go to the Windows start menu, and search programs and files for "Anaconda Prompt". If you have installed Ananconda system-wide, you may do this through either the Ananconda prompt or the standard DOS prompt (command line / terminal). Installing osgeo/gdal downgrades `numpy`, and therefore you will:
+
+```bash
+# In the Anaconda Prompt
+# Or in either this or the DOS prompt if you have installed
+# Anaconda system-wide
+conda install gdal
+conda upgrade numpy
+```
+
+Anaconda also comes with the Spyder development environment, which is a helpful graphical interface that can be used to individually run or edit the Python codes.
+
 ### Installing GRASS GIS
 
 ***Download and install GRASS GIS 7.3+***
@@ -60,58 +125,6 @@ CFLAGS="-O2 -Wall" LDFLAGS="-s" ./configure \
 --with-odbc=no \
 --with-netcdf=/usr/bin/nc-config
 ```
-
-### Installing Python
-
-GSFLOW-GRASS has been tested on **Python 2.7**, and should work (with a few possible changes) on future versions of Python 2.X. It has not been tested on Python 3.X.
-
-In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.3 or greater, above):
-* `numpy`
-* `matplotlib`
-* `pandas`
-* `osgeo` (also listed under `gdal`)
-
-*For users who are new to Python, follow these directions to install the Python interpreters onto your computer.*
-
-#### Linux
-
-Use your package manager to download and install the required Python packages. For Debian/Ubuntu, it will be something like:
-
-```bash
-# Basic packages
-sudo apt-get install \
-python python-numpy python-scipy \
-python-setuptools python-matplotlib \
-python-gdal
-
-# pip (recommended for automatic installs via setuptools)
-sudo apt-get install python-pip
-
-# iPython console -- very useful (optional)
-sudo apt-get install ipython
-
-# Sypder IDE (I don't personally use it but many others like it: optional)
-sudo apt-get install spyder
-```
-
-#### Windows and Mac
-
-We recommend using **Anaconda**, which comes with most of the Python modules that you might need for the execusion of the GSFLOW-GRASS codes (including numpy, matplotlib and pandas but not including osgeo). Additional modules may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager), for example:
-
-```bash
-# Anaconda
-conda install python-numpy
-# Pip
-pip install numpy
-```
-For Windows, you need to use conda through the Anaconda Prompt (After installing Anaconda, go to the windows start menu, search programs and files for "Anaconda Prompt"), it will not work through the regular command prompt. Installing osgeo/gdal may also downgrade certain packages that you can re-upgrade afterwords. For example (in the Anaconda prompt):
-
-```bash
-# In the Anaconda Prompt
-conda install gdal
-conda upgrade numpy
-```
-Anaconda also comes with the Spyder development environment which is useful if you want to individually run or edit the python codes.
 
 ### Installing FFMPEG
 
