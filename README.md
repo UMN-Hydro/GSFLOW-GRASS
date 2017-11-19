@@ -221,7 +221,7 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 The **Settings** file holds user-defined information that defines how GSFLOW is set up and will run.
 
-Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required. This files includes:
+Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required, and those that are ***Boldface and italic*** font is used to represent one of a set of options that must be given, dpeending on the value of a particular switch variable that is set. Each `*.ini` file includes:
 
 #### "settings" section
 
@@ -231,11 +231,11 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | **gsflow_exe**     | Full pathname for GSFLOW executable
 | **gsflow_path_simdir** | Full pathname for location where GSFLOW simulation<br>directory should go.
 | **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
-| climate_data_file  | Only for *fl_print_climate_hru*=1:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
-| climate_hru_dir    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
+| ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
+| ***climate_hru_dir***    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
 | **sw_1spinup_2restart** | **1** for spin-up run starting from steady-state MODFLOW period<br>**2** for restart run starting from states saved in the below files
-| restart_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
-| restart_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
+| ***init_PRMSfil*** | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
+| ***init_MODfil*** | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
 
 #### "custom_params" section
 
@@ -243,7 +243,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | ------------------ | ---------
 | **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
 | **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
-| finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
+| ***finf*** | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
 #### "domain" section
 
@@ -251,6 +251,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | ------------------ | ---------
 | **start_date**     | Start date of simulation, format: YYYY-MM-DD
 | **end_date**       | End date of simulation, format: YYYY-MM-DD
+| **init_start_date**| Set to the **start_date** of the spinup run used as initial conditions.<br>Note that **spinup_end_date** is assumed to be 1 day previous to **start_date**.<br>Format: YYYY-MM-DD
 | **NLAY**           | Integer number of vertical layers
 | **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.
 
@@ -265,7 +266,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | **outlet_point_y** | Pour point approximate y (Northing) position; the nearest stream<br>segment to this point is chosen as the true pour point.
 | **icalc** | Method selector for hydraulic geometry computation<br>**0:** Constant<br>**1:** Manning's equation with the wide channel assumption.<br>**2:** Manning's Equation.<br>**3:** Power-law relationship between width, depth, velocity,<br/>and discharge, per Leopold and Maddock (1953)
 | gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
-| version | Optional: GRASS GIS version number without any "." characters.<br>We used **73**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
+| version | Optional: GRASS GIS version number without any "." characters.<br>We used **73** or **74**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
 
 
 ### Step 2. Running GRASS GIS to build the model domain
