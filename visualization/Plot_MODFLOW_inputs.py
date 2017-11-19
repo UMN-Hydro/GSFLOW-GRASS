@@ -197,3 +197,5 @@ for ilay in range(NLAY):
     im2.set_cmap(cmap)
 if fl_print == 1:
     plt.savefig("HydCond.png", dpi = 300)
+
+plt.show()

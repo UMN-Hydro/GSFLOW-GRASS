@@ -94,6 +94,8 @@ for ii in range(len(PlotVar)):
 plt.legend(PlotVar)
 plt.title(Settings.PROJ_CODE)
 
+plt.show()
+
 plt.savefig(savefigfile, dpi = 300)
 
 

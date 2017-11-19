@@ -44,8 +44,6 @@ print '******************************************\n'
 
 #%%
 
-plt.ion()
-
 fig = plt.figure()
 ax = plt.subplot(111)
 ax.set_xlabel('E [km]', fontsize=16)
@@ -83,3 +81,5 @@ for i in range(_shape.GetFeatureCount()):
     _x = _line_points[:,0]/1000.
     _y = _line_points[:,1]/1000.
     plt.plot(_x, _y, 'b-', linewidth=2)
+
+plt.show()
