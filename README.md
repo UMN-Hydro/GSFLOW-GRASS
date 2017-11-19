@@ -94,6 +94,8 @@ conda install gdal
 conda upgrade numpy
 ```
 
+You may receive a message saying that you don't have the necessary permissions. If this happens, on-screen directions will tell you how to proceed. Follow them, and then enter the above commands.
+
 Anaconda also comes with the *Spyder* development environment, which is a helpful graphical interface that can be used to individually run or edit the Python codes.
 
 ### Installing GRASS GIS
