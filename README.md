@@ -386,8 +386,8 @@ All temperature data in this file are assumed to be in [&deg;C], and precipitati
 
 ### Step 5. Running GSFLOW
 The pre-processing and GSFLOW model execution can be carried out by entering the Go-GSFLOW at the command line:
-* Linux prompt: ./go-GSFLOW.sh (user needs to press Enter at the end, to return to command prompt)
-* Windows command prompt: .\go-GSFLOW.bat (or by double clicking on the .bat file in windows explorer)
+* **Linux** prompt: ./go-GSFLOW.sh (user needs to press Enter at the end, to return to command prompt)
+* **Windows** command prompt: `go-GSFLOW` in the directory containing `go-GSFLOW.bat`, or by double clicking on `go-GSFLOW.bat` file in Windows explorer
 
 Output files will be located in the gsflow_simdir (specified in Step 1 in the *Settings File*) -> *outputs*.
 
