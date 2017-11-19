@@ -8,7 +8,7 @@ These instructions are meant to take a user familiar with computers but new to (
 
 When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be noted here as soon as the paper is made available.
 
-This manual is written in the style of a quick(-ish) start guide that allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts. Additional customization is possible by more advanced users by editing our GRASS GIS and input file building scripts to extend the set of parameters incorporated **\todo{Andy: make section on adding GRASS parameters; perhaps just a small part at the end with appropriate links}**.
+This manual is written in the style of a quick(-ish) start guide that allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts. Additional customization is possible by more advanced users by editing our GRASS GIS and input file building scripts to extend the set of GSFLOW parameters that may be set through GSFLOW-GRASS.
 
 ## Required Software
 
@@ -25,7 +25,7 @@ Obtain the source code from:
 https://github.com/UMN-Hydro/GSFLOW-1.2.0
 compile and install it. For windows, you can also download the executable file already compiled from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads.
 
-***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions! 
+***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!
 May need tp remove link to USGS website if 1.2.2 is not available and we don't want to point people towards 1.2.1***
 
 ### Installing GRASS GIS
@@ -373,9 +373,9 @@ The visualization scripts in the toolkit include the following:
 
 ## Advanced Customization
 
-**Changing other parameters in GSFLOW input files:**
+#### Changing other parameters in GSFLOW input files:
 
-Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include: 
+Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include:
 * `GSFLOW_print_controlfile_current.py`: Builds GSFLOW control file, which controls model options.  See commented Section headings to make changes.
 * `GSFLOW_print_PRMSparamfile_current.py`: Builds PRMS parameter file, which contains all (non-stream) surface properties in "Section 2: Parameters."  While any of these may be customized, those of particular interest are commented with "# *** CHANGE FOR SPECIFIC SITE"
 * `MODFLOW_NWT_lib_current.py`: Library of functions to build the various MODFLOW input files (used in `print_MODFLOW_inputs_res_NWT_current.py.`  See individual functions to change input parameters for the different corresponding MODFLOW packages.
@@ -384,4 +384,14 @@ Our toolkit is set up to easily change hydraulic conductivity, climate, and infi
   2. Ensure that you have a C compiler installed (gcc)
   3. Run `make MODULE_TOPDIR=<PATH_TO_YOUR_GRASS_GIS_INSTALL>` to compile the updated GRASS GIS commands. See and/or `makeall.sh`, in which this path is provided by the user, for a simple way to recompile many commands.
 
-**If you make modifications, please contact us.** We would be happy to include your contributions in the main code base, and any changes to the GRASS GIS commands to the main GRASS GIS extensions (add-ons) repository: this will help future users!
+#### Customizing GRASS GIS commands
+
+Our GRASS GIS commands are open-source and may be edited; we expect that the most likely reason for users to do so would be to add additional GSFLOW options to the attribute tables for the HRUs and MODFLOW cells.
+
+To write the extensions, follow the advice given at the GRASS GIS wiki, https://grasswiki.osgeo.org/wiki/AddOns, and/or simply follow the pattern of the code in `GSFLOW-GRASS/domain_builder`.
+
+Our extensions are stored at both our GitHub repository and in the official GRASS GIS add-ons subversion (svn) repository. The latter requires write access from the GRASS GIS team. If you lack this write access, we suggest that you make pull requests to our GitHub repository and work with us to test your changes, and then we will add them to the official svn repository, from which your changes will be compiled and made available via the `g.extension` command.
+
+#### If you make modifications, please contact us.
+
+We would be happy to include your contributions in the main code base, and any changes to the GRASS GIS commands to the main GRASS GIS extensions (add-ons) repository: this will help future users!
