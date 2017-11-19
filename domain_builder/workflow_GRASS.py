@@ -79,7 +79,7 @@ if Settings.DEM_input != '':
     # Hydrologic correction
     r.hydrodem(input=DEM_original_import, output=DEM, flags='a', overwrite=True)
     # No offmap flow
-    r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='m', overwrite=True)
+    r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='s', overwrite=True)
     r.mapcalc(accumulation_onmap+' = '+accumulation+' * ('+accumulation+' > 0)', overwrite=True)
     r.null(map=accumulation_onmap, setnull=0)
     r.mapcalc('tmp'+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
