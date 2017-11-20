@@ -71,20 +71,20 @@ sudo apt-get install python-gdal
 
 We recommend using **Anaconda**, which comes with most of the Python modules that one need for the execusion of the GSFLOW-GRASS codes: it includes numpy (computations and matrices), matplotlib (plotting), and pandas (database management), but does not include osgeo (geospatial libraries, labeled ``gdal'').
 
-Download Anaconda for Python 2.7+ from https://www.anaconda.com/download. When you install it, you are given the option to have it become your system-wide Python install in a set of two check boxes. We recommend that you do so (they are by default not checked), but GSFLOW-GRASS will still run fine if they are not. These boxes make your whole system recognize Anaconda as your Python install, rather than limiting it to its enclosed environment.
+Download Anaconda for Python 2.7+ from https://www.anaconda.com/download. When you install it, you are given the option to have it become your system-wide Python install in a set of two check boxes. We recommend that you do so (they may be by default not checked), but GSFLOW-GRASS will still run fine if they are not. These boxes make your whole system recognize Anaconda as your Python install, rather than limiting it to its enclosed environment.
 
-Additional modules, such as OSGEO/GDAL may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager). For example, with numpy (already installed), you may type one of the following:
+Additional modules, such as OSGEO/GDAL may be installed with either "conda" (the Anaconda package manager) or "pip" (the Python package manager). For the sake of an example, with numpy (already installed), you may type one of the following:
 
 ```bash
 # Anaconda
-conda install python-numpy
+conda install numpy
 # Pip
 pip install numpy
 ```
 
 We **recommend** that if you use Anaconda, that you use the **conda** comands to maintain a consistent Python environment.
 
-If you have installed Anaconda without ticking the system-wide install check box, you need to use "conda" through the Anaconda Prompt rather than the standard terminal: After installing Anaconda, go to the Windows start menu, and search programs and files for "Anaconda Prompt". If you have installed Ananconda system-wide, you may do this through either the Ananconda prompt or the standard DOS prompt (command line / terminal). Installing osgeo/gdal downgrades `numpy`, and therefore you will:
+If you have installed Anaconda without ticking the system-wide install check box, you need to use "conda" through the Anaconda Prompt rather than the standard terminal: After installing Anaconda, go to the Windows start menu, and search programs and files for "Anaconda Prompt". If you have installed Ananconda system-wide, you may do this through either the Ananconda prompt or the standard DOS prompt (command line / terminal). Installing osgeo/gdal downgrades a few packages (e.g., HDF libraries), and requries that you reinstall numpy:
 
 ```bash
 # In the Anaconda Prompt
