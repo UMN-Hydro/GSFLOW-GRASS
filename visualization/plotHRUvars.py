@@ -57,7 +57,7 @@ for filename in [HRUout_fil]:
     infile = file(filename, 'r')
     outfile = file(filename + '.corrected', 'w')
     for line in infile:
-        if line[:2] == '  ':
+        if line[0] == ' ':
             p = re.compile("\-[0-9]{2}\-")
             for m in p.finditer(line):
                 if m.start():
@@ -106,8 +106,8 @@ with writer.saving(fig, moviefile_name, 100):
             try:
                 _values.append(float(_row[plotting_variable].values))
             except:
-                #_values.append(np.nan)
-                continue
+                _values.append(np.nan)
+                #continue
         _values = np.array(_values)
         # Floating colorbar
         #colors = cm.jet(plt.Normalize( min(_values), max(_values)) (_values) )
