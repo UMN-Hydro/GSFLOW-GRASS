@@ -51,11 +51,25 @@ print '******************************************\n'
 plotting_variable = 'streamflow_sfr'
 
 #for filename in [HRUout_fil, segment_filename]:
+#for filename in [segout_fil]:
+#    infile = file(filename, 'r')
+#    outfile = file(filename + '.corrected', 'w')
+#    for line in infile:
+#        if line[:2] == '  ':
+#            p = re.compile("\-[0-9]{2}\-")
+#            for m in p.finditer(line):
+#                if m.start():
+#                    break
+#            _start = m.start() - 4 # space for the year
+#            outfile.write(line[_start:])
+#        else:
+#            outfile.write(line)
+            
 for filename in [segout_fil]:
     infile = file(filename, 'r')
     outfile = file(filename + '.corrected', 'w')
     for line in infile:
-        if line[:2] == '  ':
+        if line[0] == ' ':
             p = re.compile("\-[0-9]{2}\-")
             for m in p.finditer(line):
                 if m.start():
@@ -63,7 +77,7 @@ for filename in [segout_fil]:
             _start = m.start() - 4 # space for the year
             outfile.write(line[_start:])
         else:
-            outfile.write(line)
+            outfile.write(line)            
 
 segout_fil2 = segout_fil + '.corrected'
 
