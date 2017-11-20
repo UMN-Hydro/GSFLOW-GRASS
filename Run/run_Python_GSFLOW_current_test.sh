@@ -4,7 +4,7 @@
 toolkit_dir="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS"
 
 # full pathname for Settings File
-Settings_file="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS/Run/settings_template_test_3cell_1117res.ini"
+Settings_file="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS/Run/settings_template_spinup_mni_1p2p0.ini"
 
 # ------------------------------------------------------------------------------
 # **For default implementation, user does not need to make changes to below lines**
