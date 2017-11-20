@@ -1218,9 +1218,9 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
     
     if Settings.GSFLOW_ver == '1.2.1':
         nstrm = abs(nstrm)
-        fobj.write('OPTIONS')
-        fobj.write('REACHINPUT')
-        fobj.write('END')
+        fobj.write('OPTIONS \n')
+        fobj.write('REACHINPUT \n')
+        fobj.write('END \n')
     
     # Item 1
     fobj.write('  %5d  %5d  %5d  %5d  %8.2f  %8.4f  %5d  %5d' 
