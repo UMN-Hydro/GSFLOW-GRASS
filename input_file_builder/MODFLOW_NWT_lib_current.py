@@ -348,7 +348,13 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #    value2 = value2.split(' ')
 #    dischargePt_rowi = int(value2[1])
 #    dischargePt_coli = int(value2[3])
-
+    
+    # DowngradPt is the grid cell downstream of the discharge point, this may 
+    # additionally include neighboring cells if the downstream grid is diagonal
+    # to the active waterbasin, b/c then it's not connected (finite difference
+    # stencil only includes vertically and horizontally adjacent cells) 
+    DowngradPt_rowi = []
+    DowngradPt_coli = []
     f = open(dischargept_fil, 'r')
     ctr = 0
     for line in f:
@@ -359,8 +365,8 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
             dischargePt_rowi = int(value2[1])
             dischargePt_coli = int(value2[3])
         else:
-            DowngradPt_rowi = int(value2[1])
-            DowngradPt_coli = int(value2[3])            
+            DowngradPt_rowi.append(int(value2[1]))
+            DowngradPt_coli.append(int(value2[3]))            
         ctr = ctr + 1
     f.close()    
       
@@ -441,8 +447,9 @@ def write_ba6_MOD3_2(GSFLOW_indir, infile_pre, mask_fil, dischargept_fil, dis_fi
 #        if (dischargePt_rowi < NROW):
 #            IBOUND[dischargePt_rowi,dischargePt_coli-2] = -1
 #    
-    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell below discharge pt 
-    IBOUND[DowngradPt_rowi-1,DowngradPt_coli-1] = -1 # constant head in cell downgrad of discharge pt
+    IBOUND[dischargePt_rowi-1,dischargePt_coli-1] = 1 # active cell with discharge pt
+    for _ii in range(len(DowngradPt_coli)):
+        IBOUND[DowngradPt_rowi[_ii]-1,DowngradPt_coli[_ii]-1] = -1 # constant head in cell(s) downgrad of discharge pt
     # active cells below stream reaches!
     
     # *** SPECIFIC TO Santa Rosa
