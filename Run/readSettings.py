@@ -104,7 +104,7 @@ class Settings(object):
         if self.fl_print_climate_hru == 0:
             climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
             for item in climatehru_fils:
-                source_fil = self.limate_hru_dir + slashstr + item
+                source_fil = self.climate_hru_dir + slashstr + item
                 shutil.copy2(source_fil, self.PRMSinput_dir)
 
         # -- problem-specifc variables
