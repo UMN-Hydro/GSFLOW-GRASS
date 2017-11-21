@@ -109,7 +109,12 @@ v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, output_stre
 v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc, overwrite=True)
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
+# Fill nulls in case of ocean
+# Any error-related NULL cells will not be part of the basin, and all cells
+# should have elevation > 0, so this hopefully will not cause any problems
+r.null(map=DEM, null=0)
 v.gsflow_grid(basin=basins_inbasin, pour_point=pour_point, raster_input=DEM, dx=Settings.MODFLOW_grid_resolution, dy=Settings.MODFLOW_grid_resolution, output=MODFLOW_grid, mask_output=basin_mask, bc_cell=bc_cell, overwrite=True)
+r.null(map=DEM, setnull=0)
 
 # Hydrologically-correct DEM for MODFLOW
 r.gsflow_hydrodem(dem=DEM, grid=MODFLOW_grid, streams=streams_all, streams_modflow=streams_MODFLOW, dem_modflow=DEM_MODFLOW, overwrite=True)
