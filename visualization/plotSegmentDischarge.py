@@ -41,10 +41,13 @@ segout_fil = Settings.PRMSoutput_dir + slashstr + Settings.PROJ_CODE + '.ani.nse
 projdir_GIS = Settings.GISinput_dir
 segshp_fil = projdir_GIS + slashstr + "shapefiles/segments/segments.shp"
 
-print '\n******************************************'
-print 'Plotting results from: ', segout_fil
-print ' (segments shapefile: ' + segshp_fil + ')'
-print '******************************************\n'
+print '\n**********************************************************************'
+print 'Plotting results from:'
+print segout_fil
+print '  (segments shapefile:'
+print '  ', segshp_fil + ')'
+print '************************************************************************'
+print
 
 #%% In general: don't change below here
 
@@ -65,6 +68,7 @@ plotting_variable = 'streamflow_sfr'
 #        else:
 #            outfile.write(line)
             
+# Correct the file with the streamflow data
 for filename in [segout_fil]:
     infile = file(filename, 'r')
     outfile = file(filename + '.corrected', 'w')
@@ -90,8 +94,8 @@ dates = sorted(list(set(list(segment_outputs.timestamp))))
 cmap = plt.get_cmap('RdYlBu')
 
 plotting_variable = 'streamflow_sfr'
-_min = np.min(segment_outputs[plotting_variable])
-_max = np.max(segment_outputs[plotting_variable])
+_min = np.min(segment_outputs[plotting_variable] * 0.0283168466)
+_max = np.max(segment_outputs[plotting_variable] * 0.0283168466)
 
 fig = plt.figure(figsize=(8,6))
 #plt.ion()
@@ -101,6 +105,8 @@ ax = plt.subplot(111)
 cax, _ = mpl.colorbar.make_axes(ax, location='right')
 cbar = mpl.colorbar.ColorbarBase(cax, cmap=cm.jet,
                norm=mpl.colors.Normalize(vmin=_min, vmax=_max))
+
+y_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
 
 FFMpegWriter = manimation.writers['ffmpeg']
 metadata = dict(title='Movie Test', artist='Matplotlib',
@@ -118,12 +124,13 @@ with writer.saving(fig, moviefile_name, 100):
             #print _nhru
             _row = _segment_outputs_on_date.loc[_segment_outputs_on_date['nsegment'] == _n]
             try:
+                # cfs to m3/s
                 _values.append(float(_row[plotting_variable].values))
             except:
                 _values.append(np.nan)
                 print _n
                 continue
-        _values = np.array(_values)
+        _values = np.array(_values) * 0.0283168466
         # Floating colorbar
         colors = cm.jet(plt.Normalize( _min, _max) (_values) )
         ax.cla()
@@ -135,10 +142,14 @@ with writer.saving(fig, moviefile_name, 100):
             _line_points = np.array(_geometry.GetLinearGeometry().GetPoints())
             _x = _line_points[:,0]/1000.
             _y = _line_points[:,1]/1000.
-            _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=_values[i]**.5+.25) )
-        ax.set_title(plotting_variable+': '+date)
+            _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=(_values[i]/0.0283168466)**.5+.25) )
+        #ax.set_title(plotting_variable+': '+date)
+        ax.set_title(date, fontsize=16, fontweight='bold')
+        cbar.set_label(r'Streamflow [m$^3$/s]', fontsize=16, fontweight='bold')
         ax.set_xlabel('E [km]', fontsize=16)
         ax.set_ylabel('N [km]', fontsize=16)
+        ax.yaxis.set_major_formatter(y_formatter)
+        ax.set_aspect('equal', 'datalim')
         #plt.tight_layout()
         writer.grab_frame()
         plt.pause(0.01)
