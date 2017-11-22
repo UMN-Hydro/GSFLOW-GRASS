@@ -55,6 +55,7 @@ streams_inbasin     = 'streams_inbasin'       # Streams in the study basin
 streams_MODFLOW     = 'streams_MODFLOW'       # Streams on MODFLOW grid
 basins_all          = 'basins_all'            # All watershed subbasins
 basins_inbasin      = 'basins_inbasin'        # Subbasins in the study basin
+basin               = 'basin'                 # The full study basin
 segments            = 'segments'              # Stream segments
 reaches             = 'reaches'               # Stream reaches (for MODFLOW)
 MODFLOW_grid        = 'grid'                  # MODFLOW grid vector
@@ -157,13 +158,17 @@ v.gsflow_export(reaches_input=reaches,
                 pour_point_boundary_output=pour_point,
                 overwrite=True)
                 
+# Generate a vector of the full basin area
+# "value" column is empty
+v.dissolve(input=basins_inbasin, output=basin, column='label', overwrite=True)
+
 # Export shapefiles of all vector files
 try:
     os.mkdir('shapefiles')
 except:
     pass
 os.chdir('shapefiles')
-for _vector_file in [HRUs, gravity_reservoirs, MODFLOW_grid]:
+for _vector_file in [HRUs, gravity_reservoirs, MODFLOW_grid, basin]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='area', quiet=True, overwrite=True)
 for _vector_file in [segments, reaches]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
