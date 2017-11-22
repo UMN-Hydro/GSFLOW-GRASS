@@ -163,9 +163,9 @@ try:
 except:
     pass
 os.chdir('shapefiles')
-for _vector_file in [basins_inbasin, HRUs, gravity_reservoirs, ]:
+for _vector_file in [HRUs, gravity_reservoirs, MODFLOW_grid]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='area', quiet=True, overwrite=True)
-for _vector_file in [streams_inbasin, segments, reaches]:
+for _vector_file in [segments, reaches]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
 for _vector_file in [pour_point, bc_cell]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='point', quiet=True, overwrite=True)
