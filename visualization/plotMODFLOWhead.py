@@ -3,6 +3,7 @@
 Created on Fri Oct 27 23:36:53 2017
 
 @author: gcng
+@author: awickert
 """
 import sys
 import platform
@@ -10,6 +11,41 @@ import struct
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.animation as manimation
+import argparse
+
+#########################
+## COMMAND-LINE PARSER ##
+#########################
+
+parser = argparse.ArgumentParser(description= \
+        'Plot animated time-series of groundwater conditions from GSFLOW.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+requiredArgs = parser.add_argument_group('required arguments')
+
+# REQUIRED
+requiredArgs.add_argument('-i', '--infile', type=str, default=argparse.SUPPRESS,
+                    help='input <settings>.ini fiile for GSFLOW',
+                    required = True)
+
+# OPTIONAL
+parser.add_argument('-p', '--plot', type=str, default='wtd',
+                    choices=['head', 'wtd', 'dhead'],
+                    help='Plot variable selector: head, water table depth, \
+                    or change in head')
+parser.add_argument('-o', '--outmovie', type=str, default='groundwater.mp4',
+                    help='Output file for movie')
+
+args = parser.parse_args()
+args = vars(args)
+
+settings_input_file = args['infile']
+sw_head_WTD_dhead = args['plot']
+moviefile_name = args['outmovie']
+
+##################
+## MAIN PROGRAM ##
+##################
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -21,23 +57,7 @@ sys.path.append('..' + slashstr + 'Run')
 
 # Read in user-specified settings
 from readSettings import Settings
-# Set input file
-if len(sys.argv) < 2:
-    settings_input_file = 'settings.ini'
-    print 'Using default input file: ' + settings_input_file
-else:
-    settings_input_file = sys.argv[1]
-    print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
-
-#%% *** SET THE FOLLOWING *****************************************************
-
-# *** Select which option:
-# (1: head, 2: water table depth, 3: change in head per print-time increment)
-sw_head_WTD_dhead = 2
-
-# *** Save movie to following file
-moviefile_name = 'head.mp4'
 
 #%% *** CHANGE FILE NAMES AS NEEDED *******************************************
 # (default is to use entries from Settings File) 
@@ -263,16 +283,16 @@ with writer.saving(fig, moviefile_name, 100):
     ctr = 0
     for ii in range(ntimes):
         for lay_i in range(NLAY):
-            if sw_head_WTD_dhead == 1:
+            if sw_head_WTD_dhead == 'head':
                 # head:
                 cbl = 'Hydraulic head [m]'
                 #ti = 'head [m], '
                 data_all = data_head_all_NaN
-            elif sw_head_WTD_dhead == 2:        
+            elif sw_head_WTD_dhead == 'wtd':        
                 # WTD:
                 cbl = 'Water table depth [m]'
-                #data_all = WTD_all
-            elif sw_head_WTD_dhead == 3:
+                data_all = WTD_all
+            elif sw_head_WTD_dhead == 'dhead':
                 # change in head:
                 cbl = 'Change in hydraulic head [m]'
                 data_all = dhead_all
@@ -291,7 +311,7 @@ with writer.saving(fig, moviefile_name, 100):
                 cv.append(plt.colorbar(pv[lay_i]))
                 _x = data_all[:,:,lay_i::2]
                 _x = _x[~np.isnan(_x)]
-                cv[lay_i].set_label(cbl)
+                cv[lay_i].set_label(cbl, fontsize=16)
                 pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
                 av[lay_i].set_aspect('equal', 'datalim')            
                 av[lay_i].set_xlabel('E [km]', fontsize=16)
@@ -300,8 +320,10 @@ with writer.saving(fig, moviefile_name, 100):
                 plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
             else:
                 pv[lay_i].set_data(data)        
-            str0 = str(time_info[0,ctr]) + ' days; layer ' + str(int(lay_info[0,ctr]))
-            av[lay_i].set_title(str0)
+            titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
+                           str(int(lay_info[0,ctr])) + \
+                           ',\nwith Topographic contours [m]'
+            av[lay_i].set_title(titlestr)
             im2 = av[lay_i].imshow(outline, interpolation='nearest')
             im2.set_clim(0, 1)
             cmap = plt.get_cmap('binary',2)
@@ -311,6 +333,7 @@ with writer.saving(fig, moviefile_name, 100):
         #    plt.show()
         #plt.tight_layout()
         plt.pause(0.5)
+        #if moviefile_name:
         writer.grab_frame()
         
         #for _axis in av:
