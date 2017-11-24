@@ -318,7 +318,6 @@ with writer.saving(fig, moviefile_name, 100):
                 av.append(plt.subplot(nrows, ncols, lay_info[0,ctr]))
                 pv.append(av[lay_i].imshow(data, interpolation='nearest', 
                                            extent=_extent))
-                #av[lay_i].set_aspect('equal', 'datalim')
                 pv[lay_i].set_cmap(plt.cm.cool)
                 cv.append(plt.colorbar(pv[lay_i]))
                 _x = data_all[:,:,lay_i::2]
@@ -332,19 +331,18 @@ with writer.saving(fig, moviefile_name, 100):
                 cs = av[lay_i].contour(TOP_in_basin, colors='k', 
                                        extent=_extent_countour)
                 plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
+                av[lay_i].set_aspect('equal', 'datalim')
             else:
                 pv[lay_i].set_data(data)        
             titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
                            str(int(lay_info[0,ctr])) + \
-                           ',\nwith Topographic contours [m]'
-            av[lay_i].set_title(titlestr)
+                           '\nwith topographic contours [m]'
+            av[lay_i].set_title(titlestr, fontsize=16)
             im2 = av[lay_i].imshow(outline, interpolation='nearest',
                                    extent=_extent)
             im2.set_clim(0, 1)
             cmap = plt.get_cmap('binary',2)
             im2.set_cmap(cmap)   
-
-            #av[lay_i].set_aspect('equal', 'datalim')
 
             ctr = ctr + 1
         #    plt.show()
