@@ -409,6 +409,8 @@ if model_mode != 'MODFLOW':
     con_par_type.append(4) 
     con_par_values.append(outdir_rel + '{}.ani'.format(Settings.PROJ_CODE))    
     
+    # See Table A1-2 in GSFLOW manual (Markstrom 2008) for select variables, see 
+    # complete list of 270 variables in gsflow/bin/gsflow.var_name with model executable distribution
     con_par_name.append('aniOutVar_names')
     con_par_type.append(4) 
     con_par_values.append(np.array(['hru_ppt',  # [in] Precipitation distributed to each HRU Rain
