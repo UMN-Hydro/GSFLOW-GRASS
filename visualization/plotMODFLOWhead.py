@@ -11,6 +11,7 @@ import struct
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.animation as manimation
+import matplotlib as mpl
 import argparse
 
 #########################
@@ -110,10 +111,6 @@ NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
 NROW = sdata['rows'] 
 NCOL = sdata['cols']
 
-# - space discretization
-DELR = (NSEW[2]-NSEW[3])/NCOL # width of column [m]
-DELC = (NSEW[0]-NSEW[1])/NROW # height of row [m]
-
 TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
 
 
@@ -210,15 +207,20 @@ ntimeslay = ii # ntimes x nlay
 NLAY = np.max(lay_info)
 ntimes = ntimeslay / NLAY
 
-x = np.arange(DELR/2., DELR*NCOL+DELR/2., DELR)
-y = np.arange(DELC/2., DELC*NROW+DELC/2., DELC)
-X, Y = np.meshgrid(x,y)
 
+# - space discretization
+_N, _S, _E, _W = NSEW[0], NSEW[1], NSEW[2], NSEW[3]
+
+dx = DELR = (NSEW[2]-NSEW[3])/NCOL # width of column [m]
+dy = DELC = (NSEW[0]-NSEW[1])/NROW # height of row [m]
+
+x = np.arange(_W + dx/2., _E, dx)
+y = np.arange(_S + dy/2., _N, dy)
+X, Y = np.meshgrid(x,y)
 
 data_head_all_NaN = data_head_all
 data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan # dry cell
 data_head_all_NaN[data_head_all_NaN <= -999] = np.nan
-
 
 # use this to plot WTD:
 TOP2 = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay))
@@ -265,6 +267,14 @@ outline2 = outline[1:-1,1:-1]
 outline2[ind_bound_out] = 1
 outline[1:-1,1:-1] = outline2
 
+# Axis labels without offsets
+y_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
+x_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
+
+# Plot extent
+_extent = (_W/1000., _E/1000., _S/1000., _N/1000.)
+_extent_countour = (_W/1000., _E/1000., _N/1000., _S/1000.)
+
 # Number of panels
 if NLAY < 2:
     nrows = 1
@@ -306,17 +316,21 @@ with writer.saving(fig, moviefile_name, 100):
                     pv = []
                     cv = []
                 av.append(plt.subplot(nrows, ncols, lay_info[0,ctr]))
-                pv.append(av[lay_i].imshow(data, interpolation='nearest'))
+                pv.append(av[lay_i].imshow(data, interpolation='nearest', 
+                                           extent=_extent))
+                #av[lay_i].set_aspect('equal', 'datalim')
                 pv[lay_i].set_cmap(plt.cm.cool)
                 cv.append(plt.colorbar(pv[lay_i]))
                 _x = data_all[:,:,lay_i::2]
                 _x = _x[~np.isnan(_x)]
                 cv[lay_i].set_label(cbl, fontsize=16)
                 pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
-                av[lay_i].set_aspect('equal', 'datalim')            
                 av[lay_i].set_xlabel('E [km]', fontsize=16)
                 av[lay_i].set_ylabel('N [km]', fontsize=16)
-                cs = av[lay_i].contour(TOP_in_basin, colors='k')
+                av[lay_i].yaxis.set_major_formatter(y_formatter)
+                av[lay_i].xaxis.set_major_formatter(x_formatter)
+                cs = av[lay_i].contour(TOP_in_basin, colors='k', 
+                                       extent=_extent_countour)
                 plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
             else:
                 pv[lay_i].set_data(data)        
@@ -324,10 +338,13 @@ with writer.saving(fig, moviefile_name, 100):
                            str(int(lay_info[0,ctr])) + \
                            ',\nwith Topographic contours [m]'
             av[lay_i].set_title(titlestr)
-            im2 = av[lay_i].imshow(outline, interpolation='nearest')
+            im2 = av[lay_i].imshow(outline, interpolation='nearest',
+                                   extent=_extent)
             im2.set_clim(0, 1)
             cmap = plt.get_cmap('binary',2)
             im2.set_cmap(cmap)   
+
+            #av[lay_i].set_aspect('equal', 'datalim')
 
             ctr = ctr + 1
         #    plt.show()
