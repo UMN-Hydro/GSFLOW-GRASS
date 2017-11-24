@@ -107,6 +107,7 @@ cbar = mpl.colorbar.ColorbarBase(cax, cmap=cm.jet,
                norm=mpl.colors.Normalize(vmin=_min, vmax=_max))
 
 y_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
+x_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
 
 FFMpegWriter = manimation.writers['ffmpeg']
 metadata = dict(title='Movie Test', artist='Matplotlib',
@@ -149,6 +150,7 @@ with writer.saving(fig, moviefile_name, 100):
         ax.set_xlabel('E [km]', fontsize=16)
         ax.set_ylabel('N [km]', fontsize=16)
         ax.yaxis.set_major_formatter(y_formatter)
+        ax.xaxis.set_major_formatter(x_formatter)
         ax.set_aspect('equal', 'datalim')
         #plt.tight_layout()
         writer.grab_frame()
