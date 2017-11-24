@@ -265,15 +265,16 @@ with writer.saving(fig, moviefile_name, 100):
         for lay_i in range(NLAY):
             if sw_head_WTD_dhead == 1:
                 # head:
-                ti = 'head [m], '
+                cbl = 'Hydraulic head [m]'
+                #ti = 'head [m], '
                 data_all = data_head_all_NaN
             elif sw_head_WTD_dhead == 2:        
                 # WTD:
-                ti = 'WTD=TOP-HEAD [m], '
-                data_all = WTD_all
+                cbl = 'Water table depth [m]'
+                #data_all = WTD_all
             elif sw_head_WTD_dhead == 3:
                 # change in head:
-                ti = 'Change in head [m], '
+                cbl = 'Change in hydraulic head [m]'
                 data_all = dhead_all
                    
             data = data_all[:,:,ctr]    
@@ -283,12 +284,14 @@ with writer.saving(fig, moviefile_name, 100):
                 if lay_i == 0:
                     av = []
                     pv = []
+                    cv = []
                 av.append(plt.subplot(nrows, ncols, lay_info[0,ctr]))
                 pv.append(av[lay_i].imshow(data, interpolation='nearest'))
                 pv[lay_i].set_cmap(plt.cm.cool)
-                plt.colorbar(pv[lay_i])
+                cv.append(plt.colorbar(pv[lay_i]))
                 _x = data_all[:,:,lay_i::2]
                 _x = _x[~np.isnan(_x)]
+                cv[lay_i].set_label(cbl)
                 pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
                 av[lay_i].set_aspect('equal', 'datalim')            
                 av[lay_i].set_xlabel('E [km]', fontsize=16)
@@ -297,7 +300,7 @@ with writer.saving(fig, moviefile_name, 100):
                 plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
             else:
                 pv[lay_i].set_data(data)        
-            str0 = ti + str(time_info[0,ctr]) + 'd, lay ' + str(int(lay_info[0,ctr]))
+            str0 = str(time_info[0,ctr]) + ' days; layer ' + str(int(lay_info[0,ctr]))
             av[lay_i].set_title(str0)
             im2 = av[lay_i].imshow(outline, interpolation='nearest')
             im2.set_clim(0, 1)
