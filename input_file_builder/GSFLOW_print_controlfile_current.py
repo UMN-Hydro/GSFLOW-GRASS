@@ -339,6 +339,71 @@ if model_mode != 'MODFLOW':
 
     #############
     # Section 3 #
+    # Initial condition files for restart
+
+    # initial condition files 
+    # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
+    # as example for how to stitch together many restarts using a shell script)
+    if model_mode == 'GSFLOW':
+        if Settings.sw_1spinup_2restart == 1:
+            fl_load_init = 0 # 1 to load previously saved initial conditions
+        elif Settings.sw_1spinup_2restart == 2:
+            fl_load_init = 1 # 1 to load previously saved initial conditions
+            # load initial conditions from this file
+            load_init_file = Settings.init_PRMSfil
+   
+
+    # (default is init_vars_from_file = 0, but still need to specify for GUI)
+    con_par_name.append('init_vars_from_file') # use IC from initial cond file
+    con_par_type.append(1) 
+    con_par_values.append(fl_load_init) # 0 for no, use default
+
+    if fl_load_init == 1:
+        con_par_name.append('var_init_file') # use IC from initial cond file
+        con_par_type.append(4) 
+        con_par_values.append(load_init_file) # 0 for no, use default
+    
+    fl_save_init = 1 # 1 to save outputs as initial conditions for restart runs
+    save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
+
+    # (default is save_vars_to_file = 0, but still need to specify for GUI)
+    con_par_name.append('save_vars_to_file') # save IC to output file
+    con_par_type.append(1) 
+    con_par_values.append(fl_save_init)
+    
+    if fl_save_init == 1:
+        con_par_name.append('var_save_file') # use IC from initial cond file
+        con_par_type.append(4) 
+        con_par_values.append(save_init_file) # 0 for no, use default
+
+    #############
+    # Section 4 #
+    # "Animation" output files (spatially distributed HRU data)
+    # See list in: (1) PRMS manual Table 1-5 pp.61-74 and (2) GSFLOW 
+    # Input Instructions manual Table A1-2 for variables you can print
+    con_par_name.append('aniOutON_OFF') # flag to create HRU-distributed output variables
+    con_par_type.append(1) 
+    con_par_values.append(1)
+#     con_par_values.append(0)
+
+    con_par_name.append('ani_output_file') # output file location, name
+    con_par_type.append(4) 
+    con_par_values.append(outdir_rel + '{}.ani'.format(Settings.PROJ_CODE))    
+    
+    # See Table A1-2 in GSFLOW manual (Markstrom 2008) for select variables, see 
+    # complete list of 270 variables in gsflow/bin/gsflow.var_name with model executable distribution
+    con_par_name.append('aniOutVar_names')
+    con_par_type.append(4) 
+    con_par_values.append(np.array(['hru_ppt',  # [in] Precipitation distributed to each HRU Rain
+    'hru_actet',  # [in] Actual ET for each HRU
+    'actet_tot_gwsz',  # [nhru] Total actual ET from each MODFLOW cell and PRMS soil zone [in]
+    'sat_recharge',  # [nhru] HRU total recharge to the saturated zone 
+    'streamflow_sfr']))  # [nsegment] Streamflow as computed by SFR for each segment 
+        
+
+
+    #############
+    # Section 5 #
     # Output file: Statistic Variables (statvar) Files
     # See list in GSFLOW manual Table A1-2 and PRMS manual Table 1-5 pp.61-74 
     # for variables you can print
@@ -395,69 +460,6 @@ if model_mode != 'MODFLOW':
     # add lines here to specify different variable indices other than 1
     con_par_values.append(ind)
     
-    #############
-    # Section 4 #
-    # "Animation" output files (spatially distributed HRU data)
-    # See list in: (1) PRMS manual Table 1-5 pp.61-74 and (2) GSFLOW 
-    # Input Instructions manual Table A1-2 for variables you can print
-    con_par_name.append('aniOutON_OFF') # flag to create HRU-distributed output variables
-    con_par_type.append(1) 
-    con_par_values.append(1)
-#     con_par_values.append(0)
-
-    con_par_name.append('ani_output_file') # output file location, name
-    con_par_type.append(4) 
-    con_par_values.append(outdir_rel + '{}.ani'.format(Settings.PROJ_CODE))    
-    
-    # See Table A1-2 in GSFLOW manual (Markstrom 2008) for select variables, see 
-    # complete list of 270 variables in gsflow/bin/gsflow.var_name with model executable distribution
-    con_par_name.append('aniOutVar_names')
-    con_par_type.append(4) 
-    con_par_values.append(np.array(['hru_ppt',  # [in] Precipitation distributed to each HRU Rain
-    'hru_actet',  # [in] Actual ET for each HRU
-    'actet_tot_gwsz',  # [nhru] Total actual ET from each MODFLOW cell and PRMS soil zone [in]
-    'sat_recharge',  # [nhru] HRU total recharge to the saturated zone 
-    'streamflow_sfr']))  # [nsegment] Streamflow as computed by SFR for each segment 
-        
-
-    #############
-    # Section 5 #
-    # Initial condition files for restart
-
-    # initial condition files 
-    # (see /home/gcng/workspace/Models/GSFLOW/GSFLOW_1.2.0/data/sagehen_restart
-    # as example for how to stitch together many restarts using a shell script)
-    if model_mode == 'GSFLOW':
-        if Settings.sw_1spinup_2restart == 1:
-            fl_load_init = 0 # 1 to load previously saved initial conditions
-        elif Settings.sw_1spinup_2restart == 2:
-            fl_load_init = 1 # 1 to load previously saved initial conditions
-            # load initial conditions from this file
-            load_init_file = Settings.init_PRMSfil
-   
-
-    # (default is init_vars_from_file = 0, but still need to specify for GUI)
-    con_par_name.append('init_vars_from_file') # use IC from initial cond file
-    con_par_type.append(1) 
-    con_par_values.append(fl_load_init) # 0 for no, use default
-
-    if fl_load_init == 1:
-        con_par_name.append('var_init_file') # use IC from initial cond file
-        con_par_type.append(4) 
-        con_par_values.append(load_init_file) # 0 for no, use default
-    
-    fl_save_init = 1 # 1 to save outputs as initial conditions for restart runs
-    save_init_file = outdir_rel + 'init_cond_outfile' # save new results as initial conditions in this file
-
-    # (default is save_vars_to_file = 0, but still need to specify for GUI)
-    con_par_name.append('save_vars_to_file') # save IC to output file
-    con_par_type.append(1) 
-    con_par_values.append(fl_save_init)
-    
-    if fl_save_init == 1:
-        con_par_name.append('var_save_file') # use IC from initial cond file
-        con_par_type.append(4) 
-        con_par_values.append(save_init_file) # 0 for no, use default
 
 
     #############
