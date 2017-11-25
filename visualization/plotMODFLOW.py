@@ -14,9 +14,13 @@ import matplotlib.animation as manimation
 import matplotlib as mpl
 import argparse
 
-###########################################
-## DUMMY CLASS TO DECIDE ON MOVIE MAKING ##
-###########################################
+###############
+## FUNCTIONS ##
+###############
+
+
+# DUMMY CLASS TO DECIDE ON MOVIE MAKING 
+#########################################
 
 # https://stackoverflow.com/questions/22226708/can-a-with-statement-be-used-conditionally
 
@@ -31,7 +35,36 @@ def datasink(writer, fig, moviefile_name=None):
         return writer.saving(fig, moviefile_name, 100)
     else:
         return Dummysink()
-        
+
+# function for parsing ASCII grid header in GIS data files
+############################################################
+
+def read_grid_file_header(fname):
+    f = open(fname, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
+
+    return sdata
+    
+# Truncate colormap
+#####################
+
+# https://stackoverflow.com/questions/18926031/how-to-extract-a-subset-of-a-colormap-as-a-new-colormap-in-matplotlib
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    new_cmap = mpl.colors.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
+
 
 #########################
 ## COMMAND-LINE PARSER ##
@@ -79,11 +112,14 @@ sys.path.append('..' + slashstr + 'Run')
 from readSettings import Settings
 Settings = Settings(settings_input_file)
 
-#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
-# (default is to use entries from Settings File) 
-head_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_head.bhd'  # head data
+# Entiries from Settings File
+###############################
+
+head_file = Settings.MODFLOWoutput_dir + slashstr + Settings.PROJ_CODE + '_head.bhd'
 surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
 ba6_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.ba6'
+dis_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.dis'
+flo_fil = Settings.MODFLOWinput_dir + slashstr + Settings.PROJ_CODE + '.upw'
 
 
 print '\n******************************************'
@@ -92,7 +128,24 @@ print ' (WTD=TOP-HEAD calculated using topo data in: ' + surfz_fil + ')'
 print ' (active cells info in: ' + ba6_fil + ')'
 print '******************************************\n'
 
-#%% In general: don't change below here
+# Information on domain
+#########################
+f = open(dis_fil, 'r')
+for i in range(3): # first 2 lines are comments
+    line = f.readline().rstrip()
+line = line.split()
+NLAY = int(line[0]) 
+NROW = int(line[1]) 
+NCOL = int(line[2]) 
+NPER = int(line[3]) 
+ITMUNI = int(line[4]) 
+LENUNI = int(line[5])    
+
+sdata = read_grid_file_header(surfz_fil)
+NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
+
+#NROW = sdata['rows'] 
+#NCOL = sdata['cols']
 
 # Only ONE can be 1, others 0
 if sys.platform[:3] == 'win':
@@ -105,33 +158,8 @@ elif platform.linux_distribution()[0][:3] == 'Red':
 else:
     sys.exit("You should add your OS binary formatting to this script!")
 
-
 # -- get surface elevations [m] (to plot WTD)
-# function for parsing ASCII grid header in GIS data files
-def read_grid_file_header(fname):
-    f = open(fname, 'r')
-    sdata = {}
-    for i in range(6):
-        line = f.readline()
-        line = line.rstrip() # remove newline characters
-        key, value = line.split(': ')
-        try:
-          value = int(value)
-        except:
-          value = float(value)
-        sdata[key] = value
-    f.close()
-
-    return sdata
-    
-sdata = read_grid_file_header(surfz_fil)
-    
-NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
-NROW = sdata['rows'] 
-NCOL = sdata['cols']
-
 TOP = np.genfromtxt(surfz_fil, skip_header=6, delimiter=' ', dtype=float)
-
 
 # =========================================================================
 
@@ -237,15 +265,15 @@ x = np.arange(_W + dx/2., _E, dx)
 y = np.arange(_S + dy/2., _N, dy)
 X, Y = np.meshgrid(x,y)
 
+# Head
 data_head_all_NaN = data_head_all
 data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan # dry cell
 data_head_all_NaN[data_head_all_NaN <= -999] = np.nan
 
-# use this to plot WTD:
-TOP2 = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay))
-WTD_all = TOP2 - data_head_all_NaN
+# WTD:
+WTD_all = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay)) - data_head_all_NaN
 
-# use this to plot change in head:        
+# change in head (i - (i-1)): 0's at first time
 dhead_all = np.zeros((NROW,NCOL,ntimeslay))
 dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
 
@@ -255,6 +283,7 @@ IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
 # Topography in basin only
 TOP_in_basin = TOP * (IBOUND == 1)
 TOP_in_basin[TOP_in_basin == 0] = np.nan
+
 
 # -- find boundary cells
 IBOUND0 = np.copy(IBOUND)
@@ -303,79 +332,112 @@ ncols = (NLAY+1)/2
 
 # head plot movie
 fig = plt.figure()
-FFMpegWriter = manimation.writers['ffmpeg']
-metadata = dict(title='GSFLOW Movie', artist='Matplotlib',
-                comment='Movie support!')
-writer = FFMpegWriter(fps=10, metadata=metadata)
 
-with datasink(writer=writer, fig=fig, moviefile_name=moviefile_name):
-    ctr = 0
-    for ii in range(ntimes):
-        for lay_i in range(NLAY):
-            if sw_head_WTD_dhead == 'head':
-                # head:
-                cbl = 'Hydraulic head [m]'
-                #ti = 'head [m], '
-                data_all = data_head_all_NaN
-            elif sw_head_WTD_dhead == 'wtd':        
-                # WTD:
-                cbl = 'Water table depth [m]'
-                data_all = WTD_all
-            elif sw_head_WTD_dhead == 'dhead':
-                # change in head:
-                cbl = 'Change in hydraulic head [m]'
-                data_all = dhead_all
-            elif sw_head_WTD_dhead == 'topo':
-                cbl = 'Topographic elevation [m]'
-                data_all = TOP_in_basin
-                   
-            data = data_all[:,:,ctr]    
-            
-            if ii == 0:
-                print ii
-                if lay_i == 0:
-                    av = []
-                    pv = []
-                    cv = []
-                av.append(plt.subplot(nrows, ncols, lay_info[0,ctr]))
-                pv.append(av[lay_i].imshow(data, interpolation='nearest', 
-                                           extent=_extent))
-                pv[lay_i].set_cmap(plt.cm.cool)
-                cv.append(plt.colorbar(pv[lay_i]))
-                _x = data_all[:,:,lay_i::2]
-                _x = _x[~np.isnan(_x)]
-                cv[lay_i].set_label(cbl, fontsize=16)
-                pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
-                av[lay_i].set_xlabel('E [km]', fontsize=16)
-                av[lay_i].set_ylabel('N [km]', fontsize=16)
-                av[lay_i].yaxis.set_major_formatter(y_formatter)
-                av[lay_i].xaxis.set_major_formatter(x_formatter)
-                cs = av[lay_i].contour(TOP_in_basin, colors='k', 
-                                       extent=_extent_countour)
-                plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
-                av[lay_i].set_aspect('equal', 'datalim')
-            else:
-                pv[lay_i].set_data(data)        
-            titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
-                           str(int(lay_info[0,ctr])) + \
-                           '\nwith topographic contours [m]'
-            av[lay_i].set_title(titlestr, fontsize=16)
-            im2 = av[lay_i].imshow(outline, interpolation='nearest',
-                                   extent=_extent)
-            im2.set_clim(0, 1)
-            cmap = plt.get_cmap('binary',2)
-            im2.set_cmap(cmap)   
+if moviefile_name:
+    FFMpegWriter = manimation.writers['ffmpeg']
+    metadata = dict(title='GSFLOW Movie', artist='Matplotlib',
+                    comment='Movie support!')
+    writer = FFMpegWriter(fps=10, metadata=metadata)
+else:
+    FFMpegWriter = None
+    metadata = None
+    writer = None
 
-            ctr = ctr + 1
-        #    plt.show()
-        #plt.tight_layout()
-        plt.pause(0.5)
-        if moviefile_name:
-            writer.grab_frame()
-        
-        #for _axis in av:
-        #    _axis.cla()
+if sw_head_WTD_dhead != 'topo':
+    with datasink(writer=writer, fig=fig, moviefile_name=moviefile_name):
+        ctr = 0
+        for ii in range(ntimes):
+            for lay_i in range(NLAY):
+                if sw_head_WTD_dhead == 'head':
+                    # head:
+                    cbl = 'Hydraulic head [m]'
+                    #ti = 'head [m], '
+                    data_all = data_head_all_NaN
+                elif sw_head_WTD_dhead == 'wtd':        
+                    # WTD:
+                    cbl = 'Water table depth [m]'
+                    data_all = WTD_all
+                elif sw_head_WTD_dhead == 'dhead':
+                    # change in head:
+                    cbl = 'Change in hydraulic head [m]'
+                    data_all = dhead_all
+
+                data = data_all[:,:,ctr]    
                 
-        #plt.savefig("myplot.png", dpi = 300)
-    
-    
+                if ii == 0:
+                    print ii
+                    if lay_i == 0:
+                        av = []
+                        pv = []
+                        cv = []
+                    av.append(plt.subplot(nrows, ncols, lay_info[0,ctr]))
+                    pv.append(av[lay_i].imshow(data, interpolation='nearest', 
+                                               extent=_extent))
+                    pv[lay_i].set_cmap(plt.cm.cool)
+                    cv.append(plt.colorbar(pv[lay_i]))
+                    _x = data_all[:,:,lay_i::2]
+                    _x = _x[~np.isnan(_x)]
+                    cv[lay_i].set_label(cbl, fontsize=16)
+                    pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
+                    av[lay_i].set_xlabel('E [km]', fontsize=16)
+                    av[lay_i].set_ylabel('N [km]', fontsize=16)
+                    av[lay_i].yaxis.set_major_formatter(y_formatter)
+                    av[lay_i].xaxis.set_major_formatter(x_formatter)
+                    cs = av[lay_i].contour(TOP_in_basin, colors='k', 
+                                           extent=_extent_countour)
+                    plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
+                    av[lay_i].set_aspect('equal', 'datalim')
+                else:
+                    pv[lay_i].set_data(data)        
+                titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
+                               str(int(lay_info[0,ctr])) + \
+                               '\nwith topographic contours [m]'
+                av[lay_i].set_title(titlestr, fontsize=16)
+                im2 = av[lay_i].imshow(outline, interpolation='nearest',
+                                       extent=_extent)
+                im2.set_clim(0, 1)
+                cmap = plt.get_cmap('binary',2)
+                im2.set_cmap(cmap)   
+
+                ctr = ctr + 1
+            #    plt.show()
+            #plt.tight_layout()
+            plt.pause(0.5)
+            
+            # Optional write movie frame
+            if moviefile_name:
+                writer.grab_frame()
+                
+            # Optional write figure to file
+            
+            #for _axis in av:
+            #    _axis.cla()
+                    
+            #plt.savefig("myplot.png", dpi = 300)
+else:
+    av = []
+    pv = []
+    cv = []
+    lay_i = 0
+    cbl = 'Topographic elevation [m]'
+    data = data_all = TOP_in_basin
+    av.append(plt.subplot(nrows, ncols, 1))
+    pv.append(av[lay_i].imshow(data, interpolation='nearest', 
+                               extent=_extent))
+    pv[lay_i].set_cmap(truncate_colormap(plt.cm.terrain, 0.25, 1.0))
+    cv.append(plt.colorbar(pv[lay_i]))
+    _col = data_all[:]
+    _col = _col[~np.isnan(_col)]
+    cv[lay_i].set_label(cbl, fontsize=16)
+    pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
+    av[lay_i].set_xlabel('E [km]', fontsize=16)
+    av[lay_i].set_ylabel('N [km]', fontsize=16)
+    av[lay_i].yaxis.set_major_formatter(y_formatter)
+    av[lay_i].xaxis.set_major_formatter(x_formatter)
+    av[lay_i].set_aspect('equal', 'datalim')
+    im2 = av[lay_i].imshow(outline, interpolation='nearest',
+                           extent=_extent)
+    im2.set_clim(0, 1)
+    cmap = plt.get_cmap('binary',2)
+    im2.set_cmap(cmap)   
+
