@@ -375,10 +375,10 @@ if sw_head_WTD_dhead != 'topo':
                                                extent=_extent))
                     pv[lay_i].set_cmap(plt.cm.cool)
                     cv.append(plt.colorbar(pv[lay_i]))
-                    _x = data_all[:,:,lay_i::2]
-                    _x = _x[~np.isnan(_x)]
+                    _col = data_all[:,:,lay_i::2]
+                    _col = _col[~np.isnan(_col)]
                     cv[lay_i].set_label(cbl, fontsize=16)
-                    pv[lay_i].set_clim(vmin=np.min(_x), vmax=np.max(_x))
+                    pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
                     av[lay_i].set_xlabel('E [km]', fontsize=16)
                     av[lay_i].set_ylabel('N [km]', fontsize=16)
                     av[lay_i].yaxis.set_major_formatter(y_formatter)
