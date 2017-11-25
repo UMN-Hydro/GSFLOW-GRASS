@@ -107,6 +107,7 @@ if Settings.fl_print_climate_hru == 1:
     tmin_datafil = PRMSinput_dir + slashstr + 'tmin.day'
     hum_datafil = PRMSinput_dir + slashstr + 'humidity.day' # needed for Penman-Monteith
     solrad_datafil = PRMSinput_dir + slashstr + 'swrad.day'
+    solrad_datafil = PRMSinput_dir + slashstr + 'wind.day'
     
     # - how many of above met variables to process (0 thru N)
     # (always need to include precip, tmin, tmax; gsflow 1.2.1 and 1.2.2beta also require humidity.day)
@@ -122,7 +123,15 @@ if Settings.fl_print_climate_hru == 1:
     except:
         pass
     else:
-        N = 5
+        N = N+1
+
+    try:
+        wind
+    except:
+        pass
+    else:
+        N = N+1
+
     
     for ii in range(0, N+1):
         if ii==0:
@@ -151,6 +160,10 @@ if Settings.fl_print_climate_hru == 1:
         elif ii==5: 
             outdatafil = solrad_datafil
             data = Data['swrad'] * 1.e+6 / 41480.  # MJ/m2 -> Langeley (1 Langely = 41840 J/m2)
+            label = ['swrad {}'.format(nhru)]
+        elif ii==6: 
+            outdatafil = wind_datafil
+            data = Data['wind']   # m/s
             label = ['swrad {}'.format(nhru)]
     
         fid = open(outdatafil, "w+")
