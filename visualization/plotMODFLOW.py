@@ -81,9 +81,13 @@ requiredArgs.add_argument('-i', '--infile', type=str, default=argparse.SUPPRESS,
                     help='input <settings>.ini fiile for GSFLOW',
                     required = True)
 requiredArgs.add_argument('-p', '--plot', type=str, default='wtd',
-                          choices=['topo', 'head', 'wtd', 'dhead'],
-                          help='Plot variable selector: topography (topo), head, \
-                          water table depth (wtd), or change in head (dhead)')
+                          choices=['topo', 'head', 'wtd', 'dhead', 'hydcond',
+                                   'hydcond_vertical', 'ss', 'sy'],
+                          help='Plot variable selector: topography (topo), \
+                                head, water table depth (wtd), change in head \
+                                (dhead), hydraulic conductivity (hydcond), \
+                                vertical hydraulic conductivity (hydcond_vert) \
+                                specific storage (ss), or specific yield (sy)')
 
 # OPTIONAL
 parser.add_argument('-o', '--outmovie', type=str, default=None,
@@ -93,7 +97,7 @@ args = parser.parse_args()
 args = vars(args)
 
 settings_input_file = args['infile']
-sw_head_WTD_dhead = args['plot']
+plotvar = args['plot']
 moviefile_name = args['outmovie']
 
 ##################
@@ -265,6 +269,19 @@ x = np.arange(_W + dx/2., _E, dx)
 y = np.arange(_S + dy/2., _N, dy)
 X, Y = np.meshgrid(x,y)
 
+
+# VARIABLES
+#############
+
+HY = np.zeros((NROW, NCOL, NLAY),float); # hyd conductivity
+VKA = np.zeros((NROW, NCOL, NLAY),float); # vertical hyd conductivity
+Ss = np.zeros((NROW, NCOL, NLAY),float); # specific storage
+Sy = np.zeros((NROW, NCOL, 1),float); # specific yield
+ctr = 7+1
+for ii in range(NLAY):
+    HY[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+    max_rows=NROW, dtype=float)
+
 # Head
 data_head_all_NaN = data_head_all
 data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan # dry cell
@@ -277,13 +294,33 @@ WTD_all = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay)) - data_head_all_NaN
 dhead_all = np.zeros((NROW,NCOL,ntimeslay))
 dhead_all[:,:,1:] = data_head_all_NaN[:,:,1:] - data_head_all_NaN[:,:,:-1]
 
-# -- get active cells
+# Active cells
 IBOUND = np.genfromtxt(ba6_fil, skip_header=3, max_rows=NROW, dtype=float)
 
 # Topography in basin only
 TOP_in_basin = TOP * (IBOUND == 1)
 TOP_in_basin[TOP_in_basin == 0] = np.nan
 
+# Hydraulic conductivity, specific storage, and specific yield
+hydraulic_conductivity = np.zeros((NROW, NCOL, NLAY), float)
+hydraulic_conductivity__vertical = np.zeros((NROW, NCOL, NLAY), float)
+specific_storage = np.zeros((NROW, NCOL, NLAY), float)
+specific_yield = np.zeros((NROW, NCOL, 1), float)
+_ctr = 7+1
+for ii in range(NLAY):
+    hydraulic_conductivity[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+        max_rows=NROW, dtype=float)
+    _ctr = _ctr + NROW + 1
+    hydraulic_conductivity__vertical[:,:,ii] = np.genfromtxt(flo_fil, \
+        skip_header=ctr, max_rows=NROW, dtype=float)
+    _ctr = _ctr + NROW + 1
+    specific_yield[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+        max_rows=NROW, dtype=float)
+    _ctr = _ctr + NROW + 1
+    if ii == 0:
+        specific_yield[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+            max_rows=NROW, dtype=float)
+        _ctr = _ctr + NROW + 1
 
 # -- find boundary cells
 IBOUND0 = np.copy(IBOUND)
@@ -330,7 +367,13 @@ else:
     nrows = 2
 ncols = (NLAY+1)/2
 
-# head plot movie
+# Multiple times or no
+if plotvar in ['topo', 'hydcond', 'hydcond', 'ss', 'sy']:
+    static_plot = True
+else:
+    static_plot = False
+
+# Plot
 fig = plt.figure()
 
 if moviefile_name:
@@ -343,21 +386,21 @@ else:
     metadata = None
     writer = None
 
-if sw_head_WTD_dhead != 'topo':
+if not static_plot:
     with datasink(writer=writer, fig=fig, moviefile_name=moviefile_name):
         ctr = 0
         for ii in range(ntimes):
             for lay_i in range(NLAY):
-                if sw_head_WTD_dhead == 'head':
+                if plotvar == 'head':
                     # head:
                     cbl = 'Hydraulic head [m]'
                     #ti = 'head [m], '
                     data_all = data_head_all_NaN
-                elif sw_head_WTD_dhead == 'wtd':        
+                elif plotvar == 'wtd':        
                     # WTD:
                     cbl = 'Water table depth [m]'
                     data_all = WTD_all
-                elif sw_head_WTD_dhead == 'dhead':
+                elif plotvar == 'dhead':
                     # change in head:
                     cbl = 'Change in hydraulic head [m]'
                     data_all = dhead_all
@@ -377,22 +420,22 @@ if sw_head_WTD_dhead != 'topo':
                     cv.append(plt.colorbar(pv[lay_i]))
                     _col = data_all[:,:,lay_i::2]
                     _col = _col[~np.isnan(_col)]
-                    cv[lay_i].set_label(cbl, fontsize=16)
+                    cv[lay_i].set_label(cbl, fontsize=24)
                     pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-                    av[lay_i].set_xlabel('E [km]', fontsize=16)
-                    av[lay_i].set_ylabel('N [km]', fontsize=16)
+                    av[lay_i].set_xlabel('E [km]', fontsize=24)
+                    av[lay_i].set_ylabel('N [km]', fontsize=24)
                     av[lay_i].yaxis.set_major_formatter(y_formatter)
                     av[lay_i].xaxis.set_major_formatter(x_formatter)
                     cs = av[lay_i].contour(TOP_in_basin, colors='k', 
                                            extent=_extent_countour)
-                    plt.clabel(cs, inline=1, fontsize=14, fmt='%d')
+                    plt.clabel(cs, inline=1, fontsize=16, fmt='%d')
                     av[lay_i].set_aspect('equal', 'datalim')
                 else:
                     pv[lay_i].set_data(data)        
                 titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
                                str(int(lay_info[0,ctr])) + \
                                '\nwith topographic contours [m]'
-                av[lay_i].set_title(titlestr, fontsize=16)
+                av[lay_i].set_title(titlestr, fontsize=24)
                 im2 = av[lay_i].imshow(outline, interpolation='nearest',
                                        extent=_extent)
                 im2.set_clim(0, 1)
@@ -418,20 +461,37 @@ else:
     av = []
     pv = []
     cv = []
+    if plotvar == 'topo':
+        cbl = 'Topographic elevation [m]'
+        data_all = data_head_all_NaN
+    elif plotvar == 'hydcond':
+        cbl = 'Hydraulic conductivity [m/d]'
+        data_all = hydraulic_conductivity
+    elif plotvar == 'hydcond_vert':
+        cbl = 'Hydraulic conductivity (vertical) [m/d]'
+        data_all = hydraulic_conductivity__vertical
+    elif plotvar == 'ss':
+        cbl = 'Specific storage [1/m]'
+        data_all = specific_storage
+    elif plotvar == 'sy':
+        cbl = 'Specific yield [-]'
+        data_all = specific_yield
     lay_i = 0
-    cbl = 'Topographic elevation [m]'
     data = data_all = TOP_in_basin
     av.append(plt.subplot(nrows, ncols, 1))
     pv.append(av[lay_i].imshow(data, interpolation='nearest', 
                                extent=_extent))
-    pv[lay_i].set_cmap(truncate_colormap(plt.cm.terrain, 0.25, 1.0))
+    if plotvar == 'topo':
+        pv[lay_i].set_cmap(truncate_colormap(plt.cm.terrain, 0.25, 1.0))
+    else:
+        pv[lay_i].set_cmap(plt.cm.cool)
     cv.append(plt.colorbar(pv[lay_i]))
     _col = data_all[:]
     _col = _col[~np.isnan(_col)]
-    cv[lay_i].set_label(cbl, fontsize=16)
+    cv[lay_i].set_label(cbl, fontsize=24)
     pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-    av[lay_i].set_xlabel('E [km]', fontsize=16)
-    av[lay_i].set_ylabel('N [km]', fontsize=16)
+    av[lay_i].set_xlabel('E [km]', fontsize=24)
+    av[lay_i].set_ylabel('N [km]', fontsize=24)
     av[lay_i].yaxis.set_major_formatter(y_formatter)
     av[lay_i].xaxis.set_major_formatter(x_formatter)
     av[lay_i].set_aspect('equal', 'datalim')
