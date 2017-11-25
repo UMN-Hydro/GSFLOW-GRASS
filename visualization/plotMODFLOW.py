@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 27 23:36:53 2017
@@ -5,6 +7,48 @@ Created on Fri Oct 27 23:36:53 2017
 @author: gcng
 @author: awickert
 """
+
+#########################
+## COMMAND-LINE PARSER ##
+#########################
+
+import argparse
+
+parser = argparse.ArgumentParser(description= \
+        'Plot animated time-series of groundwater conditions from GSFLOW.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+requiredArgs = parser.add_argument_group('required arguments')
+
+# REQUIRED
+requiredArgs.add_argument('-i', '--infile', type=str, default=argparse.SUPPRESS,
+                    help='input <settings>.ini fiile for GSFLOW',
+                    required = True)
+requiredArgs.add_argument('-p', '--plot', type=str, default='wtd',
+                          choices=['topo', 'head', 'wtd', 'dhead', 'hydcond',
+                                   'hydcond_vertical', 'ss', 'sy'],
+                          help='Plot variable selector: topography (topo), \
+                                head, water table depth (wtd), change in head \
+                                (dhead), hydraulic conductivity (hydcond), \
+                                vertical hydraulic conductivity (hydcond_vert) \
+                                specific storage (ss), or specific yield (sy)')
+
+# OPTIONAL
+parser.add_argument('-o', '--outmovie', type=str, default=None,
+                    help='Output file (mp4) for movie, if desired')
+
+args = parser.parse_args()
+args = vars(args)
+
+settings_input_file = args['infile']
+plotvar = args['plot']
+moviefile_name = args['outmovie']
+
+
+###################
+## OTHER IMPORTS ##
+###################
+
 import sys
 import platform
 import struct
@@ -12,7 +56,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.animation as manimation
 import matplotlib as mpl
-import argparse
+
 
 ###############
 ## FUNCTIONS ##
@@ -65,40 +109,6 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
         cmap(np.linspace(minval, maxval, n)))
     return new_cmap
 
-
-#########################
-## COMMAND-LINE PARSER ##
-#########################
-
-parser = argparse.ArgumentParser(description= \
-        'Plot animated time-series of groundwater conditions from GSFLOW.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-requiredArgs = parser.add_argument_group('required arguments')
-
-# REQUIRED
-requiredArgs.add_argument('-i', '--infile', type=str, default=argparse.SUPPRESS,
-                    help='input <settings>.ini fiile for GSFLOW',
-                    required = True)
-requiredArgs.add_argument('-p', '--plot', type=str, default='wtd',
-                          choices=['topo', 'head', 'wtd', 'dhead', 'hydcond',
-                                   'hydcond_vertical', 'ss', 'sy'],
-                          help='Plot variable selector: topography (topo), \
-                                head, water table depth (wtd), change in head \
-                                (dhead), hydraulic conductivity (hydcond), \
-                                vertical hydraulic conductivity (hydcond_vert) \
-                                specific storage (ss), or specific yield (sy)')
-
-# OPTIONAL
-parser.add_argument('-o', '--outmovie', type=str, default=None,
-                    help='Output file (mp4) for movie, if desired')
-
-args = parser.parse_args()
-args = vars(args)
-
-settings_input_file = args['infile']
-plotvar = args['plot']
-moviefile_name = args['outmovie']
 
 ##################
 ## MAIN PROGRAM ##
@@ -420,22 +430,26 @@ if not static_plot:
                     cv.append(plt.colorbar(pv[lay_i]))
                     _col = data_all[:,:,lay_i::2]
                     _col = _col[~np.isnan(_col)]
-                    cv[lay_i].set_label(cbl, fontsize=24)
+                    cv[lay_i].set_label(cbl, fontsize=20)
+                    cv[lay_i].ax.tick_params(labelsize=14) 
                     pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-                    av[lay_i].set_xlabel('E [km]', fontsize=24)
-                    av[lay_i].set_ylabel('N [km]', fontsize=24)
+                    av[lay_i].set_xlabel('E [km]', fontsize=20)
+                    av[lay_i].set_ylabel('N [km]', fontsize=20)
                     av[lay_i].yaxis.set_major_formatter(y_formatter)
                     av[lay_i].xaxis.set_major_formatter(x_formatter)
+                    av[lay_i].tick_params(axis='both', which='major',
+                                          labelsize=14)
                     cs = av[lay_i].contour(TOP_in_basin, colors='k', 
                                            extent=_extent_countour)
                     plt.clabel(cs, inline=1, fontsize=16, fmt='%d')
                     av[lay_i].set_aspect('equal', 'datalim')
+                    
                 else:
                     pv[lay_i].set_data(data)        
                 titlestr = '%d' %time_info[0,ctr] + ' days; layer ' + \
                                str(int(lay_info[0,ctr])) + \
                                '\nwith topographic contours [m]'
-                av[lay_i].set_title(titlestr, fontsize=24)
+                av[lay_i].set_title(titlestr, fontsize=20)
                 im2 = av[lay_i].imshow(outline, interpolation='nearest',
                                        extent=_extent)
                 im2.set_clim(0, 1)
@@ -488,16 +502,21 @@ else:
     cv.append(plt.colorbar(pv[lay_i]))
     _col = data_all[:]
     _col = _col[~np.isnan(_col)]
-    cv[lay_i].set_label(cbl, fontsize=24)
+    cv[lay_i].set_label(cbl, fontsize=20)
+    cv[lay_i].ax.tick_params(labelsize=14) 
     pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-    av[lay_i].set_xlabel('E [km]', fontsize=24)
-    av[lay_i].set_ylabel('N [km]', fontsize=24)
+    av[lay_i].set_xlabel('E [km]', fontsize=20)
+    av[lay_i].set_ylabel('N [km]', fontsize=20)
     av[lay_i].yaxis.set_major_formatter(y_formatter)
     av[lay_i].xaxis.set_major_formatter(x_formatter)
     av[lay_i].set_aspect('equal', 'datalim')
+    av[lay_i].tick_params(axis='both', which='major',
+                          labelsize=14)
     im2 = av[lay_i].imshow(outline, interpolation='nearest',
                            extent=_extent)
     im2.set_clim(0, 1)
     cmap = plt.get_cmap('binary',2)
-    im2.set_cmap(cmap)   
+    im2.set_cmap(cmap)
+    
+    plt.show()
 
