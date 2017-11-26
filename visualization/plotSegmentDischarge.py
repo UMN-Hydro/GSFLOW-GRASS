@@ -106,7 +106,7 @@ ax = plt.subplot(111)
 
 cax, _ = mpl.colorbar.make_axes(ax, location='right')
 cbar = mpl.colorbar.ColorbarBase(cax, cmap=cm.jet,
-               norm=mpl.colors.Normalize(vmin=_min, vmax=_max))
+               norm=mpl.colors.LogNorm(vmin=_min, vmax=_max))
 
 y_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
 x_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
@@ -135,7 +135,8 @@ with writer.saving(fig, moviefile_name, 100):
                 continue
         _values = np.array(_values) * 0.0283168466
         # Floating colorbar
-        colors = cm.jet(plt.Normalize( _min, _max) (_values) )
+        colors = cm.jet(plt.Normalize( np.log10(_min), np.log10(_max)) 
+                                       (np.log10(_values)) )
         ax.cla()
         _lines = []
         for i in range(_shape.GetFeatureCount()):
