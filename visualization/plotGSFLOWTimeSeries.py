@@ -17,7 +17,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import datetime as dt
 import matplotlib.dates as mdates
-import gsflow_csv_table as gvar  # all variable names, units, and descriptions
+import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -42,8 +42,15 @@ Settings = Settings(settings_input_file)
  
 # *** enter variables to plot (see list in gsflow_csv_table.py):
 PlotVar = []
+PlotVar.append('basinstrmflow')
+PlotVar.append('uzf_recharge')
+PlotVar.append('basinsroff')
+PlotVar.append('gwflow2strms')
+#PlotVar.append('basininterflow')
+#PlotVar.append('streambed_loss')
+
 PlotVar.append('basinppt')
-PlotVar.append('basinactet')
+#PlotVar.append('basinactet')
 
 # *** save figure to this file
 savefigfile = 'fig.png'
@@ -51,10 +58,22 @@ savefigfile = 'fig.png'
 #%% *** CHANGE FILE NAMES AS NEEDED *******************************************
 # (default is to use entries from Settings File) 
 gsflow_csv_fil = Settings.PRMSoutput_dir + slashstr + 'gsflow.csv'  # gsflow time series data
-
+plot_title = Settings.PROJ_CODE
 
 #%%
 
+# make sure basinppt and basinacet are listed last, because of twin y-axis
+PlotVar0 = PlotVar[:]
+ctr = 1
+ctr_end = len(PlotVar)
+for ii in range(len(PlotVar)):
+    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
+        PlotVar0[ctr_end-1] = PlotVar[ii]
+        ctr_end = ctr_end - 1
+    else:
+        PlotVar0[ctr-1] = PlotVar[ii]
+        ctr = ctr + 1
+PlotVar = PlotVar0[:]
 
 descr = []
 unit_prev = []
@@ -80,19 +99,36 @@ dateList = [dt.datetime.strptime(date, '%m/%d/%Y').date() for date in data['Date
 
 
 # - plot data
-plt.figure()
+fig, ax1 = plt.subplots()
+ax2 = ax1.twinx()
+
 #plt.close("all")
 for ii in range(len(PlotVar)):
-    plt.plot(dateList, data[PlotVar[ii]])
+    
+    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
+        ln0 = ax2.plot(dateList, data[PlotVar[ii]], '--')
+        ax2.set_ylabel(unit)
+    else:
+        ln0 = ax1.plot(dateList, data[PlotVar[ii]])            
+        ax1.set_ylabel(unit)
+
+    if ii == 0:
+        lns = ln0
+    else:
+        lns = lns + ln0
+     
 #    plt.plot(range(len(data)), data[PlotVar[ii]])
     plt.show
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
 #    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gcf().autofmt_xdate()    
-    plt.ylabel(unit)
+
+#lns = lns1+lns2+lns3
+#labs = [l.get_label() for l in lns]
+ax1.legend(lns, PlotVar, loc=0)
     
-plt.legend(PlotVar)
-plt.title(Settings.PROJ_CODE)
+#plt.legend(PlotVar)
+plt.title(plot_title)
 
 plt.show()
 

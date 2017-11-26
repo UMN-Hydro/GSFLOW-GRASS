@@ -153,7 +153,7 @@ varname.append('streambed_loss') # ****
 descr.append('Volumetric flow rate of stream leakage to unsaturated and saturated zones')
 unit.append(MODFLOW_len_unit + '^3/'+ MODFLOW_time_unit)  
  
-varname.append('sfruz_change_store')
+varname.append('sfruz_change_stor')
 descr.append('Change in unsaturated-zone storage under streams')
 unit.append(MODFLOW_len_unit + '^3') 
  

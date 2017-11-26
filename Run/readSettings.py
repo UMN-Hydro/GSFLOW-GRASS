@@ -27,44 +27,27 @@ class Settings(object):
 
         parser = SafeConfigParser()
         
-        """
-        # Set input file
-        if len(sys.argv) < 2:
-            input_file = 'settings.ini'
-            print 'Using default input file: ' + input_file
-        else:
-            input_file = sys.argv[1]
-            print 'Using specified input file: ' + input_file
-        """
 
         # Read in directory information
         #parser.read('settings_test.ini')
         parser.read(input_file)
-        self.PROJ_NAME = parser.get('settings', 'proj_name')
+        self.PROJ_NAME = parser.get('paths', 'proj_name')
         self.PROJ_CODE=self.PROJ_NAME.replace(" ", "") # remove blank spaces
 
         # command-line executable for GSFLOW (just used to print message)
-        self.GSFLOW_exe = parser.get('settings', 'gsflow_exe')
-        self.GSFLOW_ver = parser.get('settings', 'gsflow_ver')
+        self.GSFLOW_exe = parser.get('paths', 'gsflow_exe')
+        self.GSFLOW_ver = parser.get('paths', 'gsflow_ver')
         
-        self.fl_print_climate_hru = int(parser.get('settings', 'fl_print_climate_hru'))
-        if self.fl_print_climate_hru == 1:        
-            self.climate_data_file = parser.get('settings', 'climate_data_file')
-        else:
-            self.climate_hru_dir = parser.get('settings', 'climate_hru_dir')            
-            print "STILL NEED TO WRITE CODE TO MOVE EXISTING CLIMATE\_HRU FILES TO INPUT DIRECTORY!"
-
-
-        self.gsflow_path_simdir = parser.get('settings', 'gsflow_path_simdir')
+        self.gsflow_path_simdir = parser.get('paths', 'gsflow_path_simdir')
         self.gsflow_simdir = self.gsflow_path_simdir + slashstr + self.PROJ_CODE
         self.GISinput_dir = self.gsflow_simdir + slashstr + 'GIS'
         
         # 1: for spinup (starts with steady-state run), 2: for restart (run AFTER spinup)
-        self.sw_1spinup_2restart = int(parser.get('settings', 'sw_1spinup_2restart'))
+        self.sw_1spinup_2restart = int(parser.get('run_mode', 'sw_1spinup_2restart'))
         if self.sw_1spinup_2restart == 2:
             # point to files created from spinup run
-            self.init_PRMSfil = parser.get('settings', 'init_PRMSfil')
-            self.init_MODfil = parser.get('settings', 'init_MODfil')
+            self.init_PRMSfil = parser.get('run_mode', 'init_PRMSfil')
+            self.init_MODfil = parser.get('run_mode', 'init_MODfil')
 
 
         # for relative pathname
@@ -109,11 +92,17 @@ class Settings(object):
 
         # -- problem-specifc variables
 
+        self.fl_print_climate_hru = int(parser.get('custom_inputs', 'fl_print_climate_hru'))
+        if self.fl_print_climate_hru == 1:        
+            self.climate_data_file = parser.get('custom_inputs', 'climate_data_file')
+        else:
+            self.climate_hru_dir = parser.get('custom_inputs', 'climate_hru_dir')            
+
         # either single value for constant K or name of file with array [m/d]
-        self.fl_create_hydcond = int(parser.get('custom_params', 'fl_create_hydcond'))
-        hydcond0 = parser.get('custom_params', 'hydcond') 
+        self.fl_create_hydcond = int(parser.get('custom_inputs', 'fl_create_hydcond'))
+        hydcond0 = parser.get('custom_inputs', 'hydcond') 
         # either single value for spatially constant finf or name of file with array [m/d]
-        self.finf0 = parser.get('custom_params', 'finf') 
+        self.finf0 = parser.get('custom_inputs', 'finf') 
 
         self.START_DATE = parser.get('domain', 'start_date')
         self.END_DATE = parser.get('domain', 'end_date')
@@ -139,35 +128,4 @@ class Settings(object):
               self.hydcond0.append(float(value[ii]))
             except:
               self.hydcond0 = hydcond0_arr_str
-
-        ## move to MODFLOW_NWT_lib_Shullcas_test.py
-        #import numpy as np
-        #NROW = 25
-        #NCOL = 14
-        #NLAY = 2
-        #hydcond = np.ones((NROW,NCOL,NLAY))
-        #try:
-        #   float(hydcond0)
-        #   hydcond = float(hydcond0) * hydcond
-        #except ValueError:
-        #   for ii in range(NLAY):
-        #        hydcond[:,:,ii] = np.genfromtxt(hydcond0, skip_header=1+ii*(NROW+1), \
-        #        max_rows=NROW, dtype=float)
-        #        
-        #finf = np.ones((NROW,NCOL))
-        #try:
-        #   float(finf0)
-        #   finf = float(finf0) * finf
-        #except ValueError:
-        #   for ii in range(NLAY):
-        #        finf[:,:,ii] = np.genfromtxt(finf0, skip_header=1+ii*(NROW+1), \
-        #        max_rows=NROW, dtype=float)
-
-
-
-        #hydcond_fil = parser.get('custom_params', 'hydcond_array_fil') # file with array, NROW x NCOL
-        #finf_const = parser.get('custom_params', 'finf') # constant finf (infiltration for MODFLOW's steady-state stress period
-        #finf_fil = parser.get('custom_params', 'finf_array_fil') # file with array, NROW x NCOL
-        #NLAY = parser.get('custom_params', 'NLAY_MODFLOW') # number of MODFLOW layers
-        #dz = parser.get('custom_params', 'NLAY_MODFLOW') # 
 
