@@ -84,19 +84,19 @@ class Settings(object):
         if not os.path.isdir(self.MODFLOWoutput_dir):
             os.makedirs(self.MODFLOWoutput_dir)
 
-        if self.fl_print_climate_hru == 0:
-            climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
-            for item in climatehru_fils:
-                source_fil = self.climate_hru_dir + slashstr + item
-                shutil.copy2(source_fil, self.PRMSinput_dir)
-
         # -- problem-specifc variables
 
         self.fl_print_climate_hru = int(parser.get('custom_inputs', 'fl_print_climate_hru'))
         if self.fl_print_climate_hru == 1:        
             self.climate_data_file = parser.get('custom_inputs', 'climate_data_file')
-        else:
+        elif self.fl_print_climate_hru == 0:
             self.climate_hru_dir = parser.get('custom_inputs', 'climate_hru_dir')            
+            climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
+            for item in climatehru_fils:
+                source_fil = self.climate_hru_dir + slashstr + item
+                shutil.copy2(source_fil, self.PRMSinput_dir)
+        else:
+            sys.exit("Must choose 1 or 0 for 'fl_print_climate_hru'")
 
         # either single value for constant K or name of file with array [m/d]
         self.fl_create_hydcond = int(parser.get('custom_inputs', 'fl_create_hydcond'))
