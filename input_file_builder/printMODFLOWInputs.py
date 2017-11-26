@@ -8,7 +8,7 @@ Based on: print_MODFLOW_inputs_res_NWT.m
 """
 
 # print_MODFLOW_inputs
-import MODFLOWLib.py as mf # functions to write individual MODFLOW files
+import MODFLOWLib as mf # functions to write individual MODFLOW files
 import datetime as dt
 import platform
 import sys
