@@ -233,7 +233,7 @@ def main():
         g.rename(raster=('tmp3','tmp'), overwrite=True, quiet=True)
         #r.null(map='tmp', setnull=0) # Not necessary: center point removed above
         r.to_vect(input='tmp', output=bc_cell, type='point', column='z',
-                  overwrite=True, quiet=True)
+                  overwrite=gscript.overwrite(), quiet=True)
         v.db_addcolumn(map=bc_cell, columns=('row integer','col integer','x double precision','y double precision'), quiet=True)
         v.build(map=bc_cell, quiet=True)
         v.what_vect(map=bc_cell, query_map=grid, column='row', \
