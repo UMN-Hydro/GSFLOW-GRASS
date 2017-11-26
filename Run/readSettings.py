@@ -71,6 +71,9 @@ class Settings(object):
         self.outlet_point_x = parser.get('GRASS', 'outlet_point_x')
         self.outlet_point_y = parser.get('GRASS', 'outlet_point_y')
         self.icalc = parser.get('GRASS', 'icalc')
+        self.channel_Mannings_n = parser.get('GRASS', 'channel_Mannings_n')
+        self.overbank_Mannings_n = parser.get('GRASS', 'overbank_Mannings_n')
+        self.channel_width = parser.get('GRASS', 'channel_width')
 
         # create directories if they do not exist:
         if not os.path.isdir(self.control_dir):

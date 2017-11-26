@@ -107,7 +107,10 @@ v.stream_network(map=streams_all)
 v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, output_streams=streams_inbasin, output_basin=basins_inbasin, x_outlet=Settings.outlet_point_x, y_outlet=Settings.outlet_point_y, output_pour_point=pour_point, overwrite=True)
 
 # GSFLOW segments: sections of stream that define subbasins
-v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc, overwrite=True)
+v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc,
+                  roughch=self.channel_Mannings_n, 
+                  roughbk=self.overbank_Mannings_n, 
+                  self.channel_width=self.channel_width, overwrite=True)
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
 # Fill nulls in case of ocean
