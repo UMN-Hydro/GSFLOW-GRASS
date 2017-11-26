@@ -483,35 +483,39 @@ else:
         cbl = 'Specific yield [-]'
         data = data_all = specific_yield
     lay_i = 0
-    if plotvar == 'topo':
-        av.append(plt.subplot(1, 1, 1))
-    else:
-        av.append(plt.subplot(nrows, ncols, 1))
-        print "WARNING: DOES NOT CREATE PLOTS FOR MULTI-LAYER MODELS!"
-    pv.append(av[lay_i].imshow(data, interpolation='nearest', 
-                               extent=_extent))
-    if plotvar == 'topo':
-        pv[lay_i].set_cmap(truncate_colormap(plt.cm.terrain, 0.25, 1.0))
-    else:
-        pv[lay_i].set_cmap(plt.cm.cool)
-    cv.append(plt.colorbar(pv[lay_i]))
-    _col = data_all[:]
-    _col = _col[~np.isnan(_col)]
-    cv[lay_i].set_label(cbl, fontsize=20)
-    cv[lay_i].ax.tick_params(labelsize=14) 
-    pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-    av[lay_i].set_xlabel('E [km]', fontsize=20)
-    av[lay_i].set_ylabel('N [km]', fontsize=20)
-    av[lay_i].yaxis.set_major_formatter(y_formatter)
-    av[lay_i].xaxis.set_major_formatter(x_formatter)
-    av[lay_i].set_aspect('equal', 'datalim')
-    av[lay_i].tick_params(axis='both', which='major',
-                          labelsize=14)
-    im2 = av[lay_i].imshow(outline, interpolation='nearest',
-                           extent=_extent)
-    im2.set_clim(0, 1)
-    cmap = plt.get_cmap('binary',2)
-    im2.set_cmap(cmap)
+    for lay_i in range(NLAY):
+        if plotvar in ['topo', 'specific_yield']:
+            av.append(plt.subplot(1, 1, 1))
+            pv.append(av[lay_i].imshow(data, interpolation='nearest', 
+                                   extent=_extent))
+        else:
+            av.append(plt.subplot(nrows, ncols, lay_i+1))
+            pv.append(av[lay_i].imshow(data[:,:,lay_i], interpolation='nearest', 
+                                   extent=_extent))
+        if plotvar == 'topo':
+            pv[lay_i].set_cmap(truncate_colormap(plt.cm.terrain, 0.25, 1.0))
+        else:
+            pv[lay_i].set_cmap(plt.cm.cool)
+        cv.append(plt.colorbar(pv[lay_i]))
+        _col = data_all[:]
+        _col = _col[~np.isnan(_col)]
+        cv[lay_i].set_label(cbl, fontsize=20)
+        cv[lay_i].ax.tick_params(labelsize=14) 
+        pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
+        av[lay_i].set_xlabel('E [km]', fontsize=20)
+        av[lay_i].set_ylabel('N [km]', fontsize=20)
+        av[lay_i].yaxis.set_major_formatter(y_formatter)
+        av[lay_i].xaxis.set_major_formatter(x_formatter)
+        av[lay_i].set_aspect('equal', 'datalim')
+        av[lay_i].tick_params(axis='both', which='major',
+                              labelsize=14)
+        im2 = av[lay_i].imshow(outline, interpolation='nearest',
+                               extent=_extent)
+        im2.set_clim(0, 1)
+        cmap = plt.get_cmap('binary',2)
+        im2.set_cmap(cmap)
+        if plotvar in ['topo', 'specific_yield']:
+            break # only once in this loop
     
     plt.show()
 
