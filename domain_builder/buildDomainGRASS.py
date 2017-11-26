@@ -108,8 +108,8 @@ v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, output_stre
 
 # GSFLOW segments: sections of stream that define subbasins
 v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc,
-                  roughch=self.channel_Mannings_n, 
-                  width1=self.channel_width, width2=self.channel_width, 
+                  roughch=Settings.channel_Mannings_n, 
+                  width1=Settings.channel_width, width2=Settings.channel_width, 
                   overwrite=True)
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
