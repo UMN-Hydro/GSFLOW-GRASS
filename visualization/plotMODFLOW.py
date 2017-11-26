@@ -283,19 +283,11 @@ X, Y = np.meshgrid(x,y)
 # VARIABLES
 #############
 
-HY = np.zeros((NROW, NCOL, NLAY),float); # hyd conductivity
-VKA = np.zeros((NROW, NCOL, NLAY),float); # vertical hyd conductivity
-Ss = np.zeros((NROW, NCOL, NLAY),float); # specific storage
-Sy = np.zeros((NROW, NCOL, 1),float); # specific yield
-ctr = 7+1
-for ii in range(NLAY):
-    HY[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
-    max_rows=NROW, dtype=float)
-
 # Head
 data_head_all_NaN = data_head_all
-data_head_all_NaN[data_head_all_NaN > 1e29] = np.nan # dry cell
-data_head_all_NaN[data_head_all_NaN <= -999] = np.nan
+data_head_all_NaN[(data_head_all_NaN > 1e29) + 
+                  (data_head_all_NaN <= -999)] = np.nan # 1E30: dry cell
+                                                        # -999.99: inactive cell
 
 # WTD:
 WTD_all = np.tile(TOP[:,:,np.newaxis], (1,1,ntimeslay)) - data_head_all_NaN
@@ -315,20 +307,20 @@ TOP_in_basin[TOP_in_basin == 0] = np.nan
 hydraulic_conductivity = np.zeros((NROW, NCOL, NLAY), float)
 hydraulic_conductivity__vertical = np.zeros((NROW, NCOL, NLAY), float)
 specific_storage = np.zeros((NROW, NCOL, NLAY), float)
-specific_yield = np.zeros((NROW, NCOL, 1), float)
+specific_yield = np.zeros((NROW, NCOL), float)
 _ctr = 7+1
 for ii in range(NLAY):
-    hydraulic_conductivity[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+    hydraulic_conductivity[:,:,ii] = np.genfromtxt(flo_fil, skip_header=_ctr, \
         max_rows=NROW, dtype=float)
     _ctr = _ctr + NROW + 1
     hydraulic_conductivity__vertical[:,:,ii] = np.genfromtxt(flo_fil, \
-        skip_header=ctr, max_rows=NROW, dtype=float)
+        skip_header=_ctr, max_rows=NROW, dtype=float)
     _ctr = _ctr + NROW + 1
-    specific_yield[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+    specific_storage[:,:,ii] = np.genfromtxt(flo_fil, skip_header=_ctr, \
         max_rows=NROW, dtype=float)
     _ctr = _ctr + NROW + 1
     if ii == 0:
-        specific_yield[:,:,ii] = np.genfromtxt(flo_fil, skip_header=ctr, \
+        specific_yield[:,:] = np.genfromtxt(flo_fil, skip_header=_ctr, \
             max_rows=NROW, dtype=float)
         _ctr = _ctr + NROW + 1
 
@@ -477,22 +469,25 @@ else:
     cv = []
     if plotvar == 'topo':
         cbl = 'Topographic elevation [m]'
-        data_all = data_head_all_NaN
+        data = data_all = TOP_in_basin
     elif plotvar == 'hydcond':
         cbl = 'Hydraulic conductivity [m/d]'
-        data_all = hydraulic_conductivity
+        data = data_all = hydraulic_conductivity
     elif plotvar == 'hydcond_vert':
         cbl = 'Hydraulic conductivity (vertical) [m/d]'
-        data_all = hydraulic_conductivity__vertical
+        data = data_all = hydraulic_conductivity__vertical
     elif plotvar == 'ss':
         cbl = 'Specific storage [1/m]'
-        data_all = specific_storage
+        data = data_all = specific_storage
     elif plotvar == 'sy':
         cbl = 'Specific yield [-]'
-        data_all = specific_yield
+        data = data_all = specific_yield
     lay_i = 0
-    data = data_all = TOP_in_basin
-    av.append(plt.subplot(nrows, ncols, 1))
+    if plotvar == 'topo':
+        av.append(plt.subplot(1, 1, 1))
+    else:
+        av.append(plt.subplot(nrows, ncols, 1))
+        print "WARNING: DOES NOT CREATE PLOTS FOR MULTI-LAYER MODELS!"
     pv.append(av[lay_i].imshow(data, interpolation='nearest', 
                                extent=_extent))
     if plotvar == 'topo':
