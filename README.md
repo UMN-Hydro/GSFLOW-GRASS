@@ -332,15 +332,11 @@ g.extension r.hydrodem
 
 #### Create the domain inputs for input-file-builder scripts
 
-Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run `workflow_GRASS.py`. For example, if GSFLOW-GRASS is in your "models" folder:
-
-**TO DO: MUST INTEGRATE THIS WITH CRYSTAL'S PYTHON SETTINGS.INI READER, SO DON'T HAVE TO BE IN THE SAME LOCATION (ADDPATH)**
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, if GSFLOW-GRASS is in your "models" folder:
 
 ```sh
-python ~/models/GSFLOW-GRASS/domain_builder/workflow_GRASS.sh
+python ~/models/GSFLOW-GRASS/domain_builder/buildDomainGRASS.py.sh
 ```
-
-**TO DO: how to manage flow to the ocean with null cells? see v.gsflow.grid**
 
 Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
 
