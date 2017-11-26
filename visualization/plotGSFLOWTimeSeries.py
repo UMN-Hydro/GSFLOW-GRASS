@@ -57,10 +57,18 @@ PlotVar.append('basinppt')
 # *** save figure to this file
 savefigfile = 'fig.png'
 
-#%% *** CHANGE FILE NAMES AS NEEDED *******************************************
+#%% *** CHANGE FILE NAMES IF NEEDED *******************************************
 # (default is to use entries from Settings File) 
 gsflow_csv_fil = Settings.PRMSoutput_dir + slashstr + 'gsflow.csv'  # gsflow time series data
 plot_title = Settings.PROJ_CODE
+
+#  *** CHANGE BASIN AREA AS NEEDED (SEE prms.out FILE FOR AREA IN [acres]) ***
+# (default is to use entries from Settings File) 
+HRUfil = Settings.GISinput_dir + slashstr + 'HRUs.txt'
+HRUdata = pd.read_csv(HRUfil)
+HRUarea = HRUdata['hru_area']  # [acre]
+basin_area = sum(HRUarea) * 4046.85642  # acre -> m2
+
 
 #%%
 
@@ -103,6 +111,15 @@ dateList = [dt.datetime.strptime(date, '%m/%d/%Y').date() for date in data['Date
 # - plot data
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
+
+# convert volume units [m^3] to length [mm]
+if unit[0:2] == 'm^3':
+    conv = 1. / basin_area * 1000.
+    unit0 = 'mm' 
+    if len(unit) > 3:
+        unit0 + unit[3:]
+    unit = unit0[:]
+    
 
 #plt.close("all")
 for ii in range(len(PlotVar)):
