@@ -117,7 +117,6 @@ if Settings.fl_print_climate_hru == 1:
     print_fmt1 = ["%4d"] + ["%2d"] * 5
     print_fmt2 = ["%4d"] + ["%2d"] * 5 + ["%6.2f"] * nhru
     
-     
     try:
         swrad
     except:
@@ -132,23 +131,23 @@ if Settings.fl_print_climate_hru == 1:
     else:
         N = N+1
 
-    
     for ii in range(0, N+1):
+        print "ii", ii
         if ii==0:
             outdatafil = empty_datafil
             data = []
             label = ['precip 0', 'tmax 0', 'tmin 0']
         elif ii==1:
             outdatafil = precip_datafil
-            data = Data['precip'] / 10 / 2.54 # mm -> in
+            data = Data['precip'] / 10. / 2.54 # mm -> in
             label = ['precip {}'.format(nhru)]
         elif ii==2: 
             outdatafil = tmax_datafil
-            data = Data['tmax'] * 9/5 + 32 # C -> F
+            data = Data['tmax'] * 9/5. + 32 # C -> F
             label = ['tmaxf {}'.format(nhru)]
         elif ii==3: 
             outdatafil = tmin_datafil
-            data = Data['tmin'] * 9/5 + 32 # C -> F
+            data = Data['tmin'] * 9/5. + 32 # C -> F
             label = ['tminf {}'.format(nhru)]
         elif ii==4: 
             outdatafil = hum_datafil
