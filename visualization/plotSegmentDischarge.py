@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from osgeo import ogr
 from matplotlib import pyplot as plt
 from matplotlib import cm
