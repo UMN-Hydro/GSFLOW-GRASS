@@ -45,6 +45,7 @@ if sw_scheme == 1:
 
 if sw_scheme >= 2:
     # settings for hydraulic conductivity based on distance (in pixels) from stream
+    # Shullcas example (glacial)
     npix_stream_buffer = 1 # number of different buffers, based on pixels from stream
     buffer_dist_pix = np.arange(1,npix_stream_buffer+1)  # up to buffer_dist_pix pixels from stream
     buffer_hydcond = np.array([0.4, 0.2]) # will use the first npix_stream_buffer values

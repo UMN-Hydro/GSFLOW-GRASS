@@ -70,18 +70,52 @@ savefigfile = 'fig.png'
 #HRUarea = HRUdata['hru_area']  # [acre]
 #basin_area = sum(HRUarea) * 4046.85642  # acre -> m2
 
-
+# - Shullcas
+# run script with F5
 #plot_title = 'Shullcas'
 #gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
 #basin_area = 39873.97 * 4046.85642  # acre -> m2
+#PlotVar = []
+#PlotVar.append('basinppt')
+#PlotVar.append('basinstrmflow')
+#pTimeLastNDays = 365*2
+#figsize0 = (8*3,6) # 3x as wide as default (8W,6H)
+#savefigfile = 'Shullcas_timeseries'
+#clr = ['b', 'k', 'r', 'g']
 
-#plot_title = 'Cannon River'
-#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-#basin_area = 919964.24 * 4046.85642  # acre -> m2
 
-plot_title = 'Santa Rosa'
-gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-basin_area = 3078.39 * 4046.85642  # acre -> m2
+## - Santa Rosa
+## run script with F5
+#plot_title = 'Santa Rosa'
+#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+#basin_area = 3078.39 * 4046.85642  # acre -> m2
+#PlotVar = []
+#PlotVar.append('basinppt')
+#PlotVar.append('basinsroff')
+##PlotVar.append('basinstrmflow') # not for paper, just to see when to print streamflow
+#pTimeLastNDays = 365*1
+#figsize0 = (8*2,6)
+#savefigfile = 'SR_timeseries'
+#clr = ['b', 'r', 'k']
+
+
+# - Santa Rosa
+# run script with F5
+# Note for paper, just to find good date for streamflow plot
+plot_title = 'Cannon River'
+gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+basin_area = 919964.24 * 4046.85642  # acre -> m2
+PlotVar = []
+PlotVar.append('basinppt')
+PlotVar.append('basinstrmflow')
+#PlotVar.append('uzf_recharge')
+pTimeLastNDays = 365*1
+figsize0 = (8*2,6)
+savefigfile = 'Cannon_timeseries'
+clr = ['b', 'k', 'g']
+
+
+
 #%%
 
 ## make sure basinppt and basinacet are listed last, because of twin y-axis
@@ -120,7 +154,10 @@ data = pd.read_csv(gsflow_csv_fil);   #
 dateList = [dt.datetime.strptime(date, '%m/%d/%Y').date() for date in data['Date']]
 
 # - plot data
-fig, ax1 = plt.subplots(figsize=(14,5))
+#fig, ax1 = plt.subplots(figsize=(14,5))
+fig = plt.figure(figsize=figsize0)
+ax1 = fig.add_subplot(1,1,1)
+#fig, ax1 = plt.subplots(212)
 ax2 = ax1.twinx()
 
 # convert volume units [m^3] to length [mm]
@@ -132,17 +169,15 @@ if unit[0:3] == 'm^3':
         unit0 = unit0 + unit[3:]
     unit = unit0[:]
     
-clr = ['b', 'k', 'r', 'g']
-
 #plt.close("all")
 for ii in range(len(PlotVar)):
     
     if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
         ln0 = ax2.plot(dateList, conv*data[PlotVar[ii]], clr[ii], linewidth=2, alpha=.5 )
-        ax2.set_ylabel('precip ' + unit, fontsize=20)
+        ax2.set_ylabel('precip ' + unit, fontsize=26)
     else:
         ln0 = ax1.plot(dateList, conv*data[PlotVar[ii]], clr[ii], linewidth=3, alpha=1.0)            
-        ax1.set_ylabel(unit, fontsize=20)
+        ax1.set_ylabel(unit, fontsize=26)
 
     if ii == 0:
         lns = ln0
@@ -155,15 +190,18 @@ for ii in range(len(PlotVar)):
 #    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gcf().autofmt_xdate()    
 
-ax1.set_xlim(dateList[-365*2-1],dateList[-1])
-ax1.legend(lns, PlotVar, loc=0, fontsize=18)
-ax1.tick_params(axis="both", which="major", labelsize=14)
+ax1.set_xlim(dateList[-pTimeLastNDays-1],dateList[-1])
+#ax1.set_xlim(dateList[-365*2-1],dateList[-1])
+ax1.legend(lns, PlotVar, loc=0, fontsize=24)
+ax1.tick_params(axis="both", which="major", labelsize=24)
+ax2.tick_params(axis="both", which="major", labelsize=24)
     
 #plt.legend(PlotVar)
-plt.title(plot_title, fontsize=20, fontweight='bold')
+plt.title(plot_title, fontsize=28, fontweight='bold')
 plt.tight_layout()
 
-plt.savefig(savefigfile, dpi = 300)
+plt.savefig(savefigfile+'.png', dpi = 100)
+plt.savefig(savefigfile+'.svg', dpi = 100)
 
 plt.show()
 
