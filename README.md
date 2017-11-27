@@ -267,10 +267,12 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | **MODFLOW_grid_resolution_meters** | Target cell side length in meters for MODFLOW grid; side lengths will not be<br>exactly this long, as the nearest value to create an integer number<br>of cells in the domain will be chosen.
 | **outlet_point_x** | Pour point approximate x (Easting) position; the nearest stream<br>segment to this point is chosen as the true pour point.
 | **outlet_point_y** | Pour point approximate y (Northing) position; the nearest stream<br>segment to this point is chosen as the true pour point.
-| **icalc** | Method selector for hydraulic geometry computation<br>**0:** Constant<br>**1:** Manning's equation with the wide channel assumption.<br>**2:** Manning's Equation.<br>**3:** Power-law relationship between width, depth, velocity,<br/>and discharge, per Leopold and Maddock (1953)
+| **icalc** | Method selector for hydraulic geometry computation<br>**0:** Constant<br>**1:** Manning's equation with the wide channel assumption.<br>**2:** Manning's Equation.<br>**3:** Power-law relationship between width, depth, velocity,<br/>and discharge, per Leopold and Maddock (1953)<br>This input file is set up to work for **icalc = 1**.
+| **channel_Mannings_n** | In-channel flow resistance
+| overbank_Mannings_n | Overbank flow resistance (not used)
+| **channel_width** | Channel width for calculating flow resistance.<br>Currently uniform across the watershed.<br>This is not particularly realistic; we suggest that users customize this based<br>on drainage area, dowsnream hydraulic geometry regime relationships, and/or<br>field-surveyed channel geometries.<br> This can be done using **v.db.update** inside GRASS, or by editing the exported<br>CSV file. Note that there are two widths on each segment: width1 (upstream)<br>and width2 (downstream); this option sets both, but they may be changed by<br>hand to produce gradually-varying hydraulic geometries.
 | gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
 | version | Optional: GRASS GIS version number without any "." characters.<br>We used **73** or **74**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
-
 
 ### Step 2. Running GRASS GIS to build the model domain
 
@@ -332,15 +334,11 @@ g.extension r.hydrodem
 
 #### Create the domain inputs for input-file-builder scripts
 
-Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run `workflow_GRASS.py`. For example, if GSFLOW-GRASS is in your "models" folder:
-
-**TO DO: MUST INTEGRATE THIS WITH CRYSTAL'S PYTHON SETTINGS.INI READER, SO DON'T HAVE TO BE IN THE SAME LOCATION (ADDPATH)**
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, if GSFLOW-GRASS is in your "models" folder:
 
 ```sh
-python ~/models/GSFLOW-GRASS/domain_builder/workflow_GRASS.sh
+python ~/models/GSFLOW-GRASS/domain_builder/buildDomainGRASS.py.sh
 ```
-
-**TO DO: how to manage flow to the ocean with null cells? see v.gsflow.grid**
 
 Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
 
