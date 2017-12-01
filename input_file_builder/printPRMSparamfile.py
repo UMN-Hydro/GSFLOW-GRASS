@@ -10,7 +10,7 @@ import numpy as np # matlab core
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 #from ConfigParser import SafeConfigParser
-import MODFLOW_NWT_lib_current as mf
+import MODFLOWLib as mf
 import platform
 import sys
 
