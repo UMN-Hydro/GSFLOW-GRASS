@@ -8,7 +8,6 @@ import sys
 import os
 from ConfigParser import SafeConfigParser # use this in the future
 
-sys.argv.append('../Run/settings_AW.ini')
 # Import parsed config file to read in user-specified settings
 sys.path.append(os.path.join('..', 'Run'))
 from readSettings import Settings
