@@ -44,25 +44,39 @@ moviefile_name = 'SR_strmseg.mp4'
 ptime_ind = [] # movie
 p_dates = []
 
+
 # - only set ONE of the below (ptime_ind OR p_dates)
 #ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last, but last entry isn't read in properly, so use -2 instead)
 #p_dates = ['1993-01-09']
 
-## - Shullcas 
+# - Shullcas 
+# run plotSegmentDischarge_paper.py /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas_gcng.ini
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas_gcng.ini
-#figName = 'Shullcas_Q'
-#p_dates = ['2015-02-15']
+figName = 'Shullcas_Q'
+p_dates = ['2015-02-15']
+figsize0 = (7.5,5.5) # default (8W,6H) [inches]
+plot_pos = (0,1) # row 0, col 1 
+xlim = [480, 498]
+ylim = [8665, 8689]
+plot_ti_ltr = 'C) '
+
 
 ## - Santa Rosa 
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa_WaterCanyon_gcng.ini
 #figName = 'SR_Q'
 #p_dates = ['2017-02-17']
 
-# - Cannon River - 2 layer
-# run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini
-figName = 'Cannon_Q'
-p_dates = ['1943-07-06']
+## - Cannon River - 2 layer
+## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini
+#figName = 'Cannon_Q'
+#p_dates = ['1943-07-06']
 
+# font sizes
+FS_lab = 10
+FS_cvtick = 8
+FS_xylab = 10
+FS_clab = 10
+FS_ti = 10
 
 
 
@@ -152,10 +166,15 @@ if fl_plot_single == 1:
     _max = 10.**lmax
 
 
-fig = plt.figure(figsize=(8,6))
+nrows = 2
+ncols = 3
+fig = plt.figure(1)
+#gridspec.GridSpec(nrows,ncols)
 #plt.ion()
 
-ax = plt.subplot(111)
+#ax = plt.subplot(111)
+ax = plt.subplot2grid((nrows, ncols), plot_pos)
+
 
 cmap = plt.get_cmap('RdYlBu')
 _min = np.max((_max * 1e-2, _min))
@@ -163,6 +182,7 @@ print "colorbar min, max: ", _min, _max
 cax, _ = mpl.colorbar.make_axes(ax, location='right')
 cbar = mpl.colorbar.ColorbarBase(cax, cmap=cm.jet,
                norm=mpl.colors.LogNorm(vmin=_min, vmax=_max))
+
 
 y_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
 x_formatter = mpl.ticker.ScalarFormatter(useOffset=False)
@@ -175,51 +195,67 @@ writer = FFMpegWriter(fps=10, metadata=metadata)
 print "total number of dates", len(dates)    
 
 #print segment_outputs
-with writer.saving(fig, moviefile_name, 100):
-    for date in p_dates0:
+#with writer.saving(fig, moviefile_name, 100):
+for date in p_dates0:
 #        print date
-        _segment_outputs_on_date = segment_outputs.loc[segment_outputs['timestamp'] == date]
-        _values = []
-        for i in range(_shape.GetFeatureCount()):
-            _feature = _shape.GetFeature(i)
-            _n = _feature['id']
-            #print _nhru
-            _row = _segment_outputs_on_date.loc[_segment_outputs_on_date['nsegment'] == _n]
-            try:
-                # cfs to m3/s
-                _values.append(float(_row[plotting_variable].values))
-            except:
-                _values.append(np.nan)
-                print _n
-                continue
-        _values = np.array(_values) * 0.0283168466
-        # Floating colorbar
-        colors = cm.jet(plt.Normalize( np.log10(_min), np.log10(_max)) 
-                                       (np.log10(_values)) )
-        ax.cla()
-        _lines = []
-        for i in range(_shape.GetFeatureCount()):
-            _feature = _shape.GetFeature(i)
-            #feature = shape.GetFeature(0) # how to get it otherwise
-            _geometry = _feature.geometry()
-            _line_points = np.array(_geometry.GetLinearGeometry().GetPoints())
-            _x = _line_points[:,0]/1000.
-            _y = _line_points[:,1]/1000.
-            scale = .03
-            _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=(scale*_values[i]/0.0283168466)**.5+.25) )
-        #ax.set_title(plotting_variable+': '+date)
-        ax.set_title(date, fontsize=20, fontweight='bold')
-        cbar.set_label(r'Streamflow [m$^3$/s]', fontsize=20, fontweight='bold')
-        ax.set_xlabel('E [km]', fontsize=20)
-        ax.set_ylabel('N [km]', fontsize=20)
-        ax.yaxis.set_major_formatter(y_formatter)
-        ax.xaxis.set_major_formatter(x_formatter)
-        ax.tick_params(axis='both', which='major', labelsize=14)
-        ax.set_aspect('equal', 'datalim')
-        #plt.tight_layout()
-        writer.grab_frame()
-        plt.pause(0.01)
-        #plt.waitforbuttonpress()
+    _segment_outputs_on_date = segment_outputs.loc[segment_outputs['timestamp'] == date]
+    _values = []
+    for i in range(_shape.GetFeatureCount()):
+        _feature = _shape.GetFeature(i)
+        _n = _feature['id']
+        #print _nhru
+        _row = _segment_outputs_on_date.loc[_segment_outputs_on_date['nsegment'] == _n]
+        try:
+            # cfs to m3/s
+            _values.append(float(_row[plotting_variable].values))
+        except:
+            _values.append(np.nan)
+            print _n
+            continue
+    _values = np.array(_values) * 0.0283168466
+    # Floating colorbar
+    colors = cm.jet(plt.Normalize( np.log10(_min), np.log10(_max)) 
+                                   (np.log10(_values)) )
+    ax.cla()
+    _lines = []
+    for i in range(_shape.GetFeatureCount()):
+        _feature = _shape.GetFeature(i)
+        #feature = shape.GetFeature(0) # how to get it otherwise
+        _geometry = _feature.geometry()
+        _line_points = np.array(_geometry.GetLinearGeometry().GetPoints())
+        _x = _line_points[:,0]/1000.
+        _y = _line_points[:,1]/1000.
+        scale = .03
+        _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=(scale*_values[i]/0.0283168466)**.5+.25) )
+    #ax.set_title(plotting_variable+': '+date)
+#    ax.set_title(date, fontsize=FS_ti, fontweight='bold')
+#    ax.set_title(date, fontsize=FS_ti)
+    ax.set_title('Streamflow [m$^3$/s]', fontsize=FS_ti)
+#    cbar.set_label(r'Streamflow [m$^3$/s]', fontsize=FS_lab)
+    ax.set_xlabel('E [km]', fontsize=FS_xylab)
+    ax.set_ylabel('N [km]', fontsize=FS_xylab)
+    ax.yaxis.set_major_formatter(y_formatter)
+    ax.xaxis.set_major_formatter(x_formatter)
+    ax.tick_params(axis='both', which='major', labelsize=FS_cvtick)
+    cax.tick_params(labelsize=FS_cvtick) 
+                        
+#    ax.set_aspect('equal', 'datalim')
     
-plt.savefig(figName+'.png', dpi=100)
-plt.savefig(figName+'.svg')
+#    plt.tight_layout()
+#    writer.grab_frame()
+    plt.pause(0.01)
+    #plt.waitforbuttonpress()
+
+#ax.set_aspect('equal')
+#xlim = ax.get_xlim()
+#ax.set_xticks(np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.floor((xlim[-1]-xlim[0])/3)))  
+
+#ax.set_aspect('equal', 'datalim')
+ax.set_aspect('equal')
+ax.set_xlim(xlim)  
+ax.set_ylim(ylim)  
+ax.set_xticks(2+np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
+ax.set_yticks(2+np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
+
+#plt.savefig(figName+'.png', dpi=100)
+#plt.savefig(figName+'.svg')

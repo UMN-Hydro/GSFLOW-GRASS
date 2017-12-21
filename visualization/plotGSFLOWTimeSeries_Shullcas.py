@@ -72,16 +72,21 @@ savefigfile = 'fig.png'
 
 # - Shullcas
 # run script with F5
-#plot_title = 'Shullcas'
+plot_title = 'Shullcas'
 #gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-#basin_area = 39873.97 * 4046.85642  # acre -> m2
-#PlotVar = []
-#PlotVar.append('basinppt')
-#PlotVar.append('basinstrmflow')
-#pTimeLastNDays = 365*2
-#figsize0 = (8*3,6) # 3x as wide as default (8W,6H)
-#savefigfile = 'Shullcas_timeseries'
-#clr = ['b', 'k', 'r', 'g']
+gsflow_csv_fil = '/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+basin_area = 39873.97 * 4046.85642  # acre -> m2
+PlotVar = []
+PlotVar.append('basinppt')
+PlotVar.append('basinstrmflow')
+pTimeLastNDays = 365*2
+figsize0 = (8*3,6) # 3x as wide as default (8W,6H)
+savefigfile = 'Shullcas_timeseries'
+clr = ['b', 'k', 'r', 'g']
+plot_pos = (1,0) # row 1, col 0
+colspan_i = 3
+rowspan_i = 1 
+plot_title_ltr = 'Streamflow and Precipitation'
 
 
 ## - Santa Rosa
@@ -102,18 +107,24 @@ savefigfile = 'fig.png'
 # - Santa Rosa
 # run script with F5
 # Note for paper, just to find good date for streamflow plot
-plot_title = 'Cannon River'
-gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-basin_area = 919964.24 * 4046.85642  # acre -> m2
-PlotVar = []
-PlotVar.append('basinppt')
-PlotVar.append('basinstrmflow')
-#PlotVar.append('uzf_recharge')
-pTimeLastNDays = 365*1
-figsize0 = (8*2,6)
-savefigfile = 'Cannon_timeseries'
-clr = ['b', 'k', 'g']
+#plot_title = 'Cannon River'
+#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+#basin_area = 919964.24 * 4046.85642  # acre -> m2
+#PlotVar = []
+#PlotVar.append('basinppt')
+#PlotVar.append('basinstrmflow')
+##PlotVar.append('uzf_recharge')
+#pTimeLastNDays = 365*1
+#figsize0 = (8*2,6)
+#savefigfile = 'Cannon_timeseries'
+#clr = ['b', 'k', 'g']
 
+# font sizes
+FS_lab = 10
+FS_cvtick = 8
+FS_xylab = 10
+FS_clab = 10
+FS_ti = 10
 
 
 #%%
@@ -155,8 +166,13 @@ dateList = [dt.datetime.strptime(date, '%m/%d/%Y').date() for date in data['Date
 
 # - plot data
 #fig, ax1 = plt.subplots(figsize=(14,5))
-fig = plt.figure(figsize=figsize0)
-ax1 = fig.add_subplot(1,1,1)
+#fig = plt.figure(figsize=figsize0)
+nrows = 2
+ncols = 3
+fig = plt.figure(1)
+ax1 = plt.subplot2grid((nrows, ncols), plot_pos, colspan=colspan_i, rowspan=rowspan_i)
+
+#ax1 = fig.add_subplot(1,1,1)
 #fig, ax1 = plt.subplots(212)
 ax2 = ax1.twinx()
 
@@ -170,14 +186,21 @@ if unit[0:3] == 'm^3':
     unit = unit0[:]
     
 #plt.close("all")
+PlotVarLeg = PlotVar 
 for ii in range(len(PlotVar)):
     
     if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
         ln0 = ax2.plot(dateList, conv*data[PlotVar[ii]], clr[ii], linewidth=2, alpha=.5 )
-        ax2.set_ylabel('precip ' + unit, fontsize=26)
+        ax2.set_ylabel('Precipitation ' + unit, fontsize=FS_xylab)
+        PlotVarLeg[ii] = 'Precipitation'
     else:
-        ln0 = ax1.plot(dateList, conv*data[PlotVar[ii]], clr[ii], linewidth=3, alpha=1.0)            
-        ax1.set_ylabel(unit, fontsize=26)
+        ln0 = ax1.plot(dateList, conv*data[PlotVar[ii]], clr[ii], linewidth=3, alpha=1.0) 
+        if PlotVar[ii] == 'basinstrmflow':
+            ti = 'Streamflow'
+        elif PlotVar[ii] == 'basinsroff':
+            ti = 'Runoff'
+        PlotVarLeg[ii] = ti
+        ax1.set_ylabel(ti + ' ' + unit, fontsize=FS_xylab)
 
     if ii == 0:
         lns = ln0
@@ -192,13 +215,16 @@ for ii in range(len(PlotVar)):
 
 ax1.set_xlim(dateList[-pTimeLastNDays-1],dateList[-1])
 #ax1.set_xlim(dateList[-365*2-1],dateList[-1])
-ax1.legend(lns, PlotVar, loc=0, fontsize=24)
-ax1.tick_params(axis="both", which="major", labelsize=24)
-ax2.tick_params(axis="both", which="major", labelsize=24)
+ax1.legend(lns, PlotVarLeg, loc=0, fontsize=FS_xylab)
+ax1.tick_params(axis="both", which="major", labelsize=FS_cvtick)
+ax2.tick_params(axis="both", which="major", labelsize=FS_cvtick)
     
 #plt.legend(PlotVar)
-plt.title(plot_title, fontsize=28, fontweight='bold')
-plt.tight_layout()
+#plt.title(plot_title, fontsize=FS_ti, fontweight='bold')
+plt.title(plot_title_ltr, fontsize=FS_ti)
+#plt.tight_layout()
+#ax1.set_aspect('equal', 'datalim')
+#ax2.set_aspect('equal', 'datalim')
 
 plt.savefig(savefigfile+'.png', dpi = 100)
 plt.savefig(savefigfile+'.svg', dpi = 100)
