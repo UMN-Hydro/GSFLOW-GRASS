@@ -27,10 +27,8 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 Obtain the source code from:
 https://github.com/UMN-Hydro/GSFLOW-1.2.0
-compile and install it. For windows, you can also download the executable file already compiled from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads.
+compile and install it. For fulwindows, the pre-compiled executable file for GSFLOW 1.2.2 will be downloadable soon (if not already) from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads. Note that GSFLOW-GRASS is not fully compatible with GSFLOW 1.2.1.
 
-***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!
-May need tp remove link to USGS website if 1.2.2 is not available and we don't want to point people towards 1.2.1***
 
 ### Installing Python
 
@@ -58,10 +56,10 @@ python-gdal
 # pip (recommended for automatic installs via setuptools)
 sudo apt-get install python-pip
 
-# iPython console -- very useful (optional)
+# iPython console (very useful, optional)
 sudo apt-get install ipython
 
-# Sypder IDE (I don't personally use it but many others like it: optional)
+# Sypder IDE (popular interface, optional)
 sudo apt-get install spyder
 
 # OSGEO / GDAL
