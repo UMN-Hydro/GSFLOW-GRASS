@@ -80,11 +80,10 @@ if Settings.DEM_input != '':
     r.hydrodem(input=DEM_original_import, output=DEM, flags='a', overwrite=True)
     # No offmap flow
     r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='s', overwrite=True)
-    r.mapcalc(accumulation_onmap+' = '+accumulation+' * ('+accumulation+' > 0)', overwrite=True)
-    r.null(map=accumulation_onmap, setnull=0)
+    r.mapcalc(accumulation_onmap+' = if('+accumulation+'>0,'+accumulation+',null())', overwrite=True)
     r.mapcalc('tmp'+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
-    g.copy(raster=('tmp',DEM), overwrite=True)
-    # Ensure that null cells are shared
+    g.rename(raster=('tmp',DEM), overwrite=True)
+    # Ensure that null cells are shared -- should be unnecessary!
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
     # Repeat is sometimes needed
     r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
