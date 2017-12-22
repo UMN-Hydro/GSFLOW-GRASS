@@ -192,27 +192,24 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 * `GSFLOW-GRASS -> domain_builder` GRASS GIS Python scripts to build the watershed and MODFLOW geometries
 * `GSFLOW-GRASS -> input_file_builder` Python scripts to create input files for GSFLOW, including the control file, paramers file for PRMS, and input file for MODFLOW (NWT)
-  * `GSFLOW_print_controlfile_current.py`
-  * `GSFLOW_print_PRMSparamfile_current.py`
-  * `print_MODFLOW_inputs_res_NWT_current.py`
-  * `-> MODFLOW_scripts` \todo{consider doing away with this sub-directory?}
-    * `MODFLOW_NWT_lib_current.py` \todo{modify to read in down-gradient cell of discharge point}
-* `Create_hydcond_array.py`
+  * `printGSFLOWControlfile.py`
+  * `printPRMSparamfile.py`
+  * `printMODFLOWInputs.py`
+  * `MODFLOWLib.py`
+  * `createSpatialHydCond.py`
+  * `printClimatehru.py`
 * `GSFLOW-GRASS -> Run ->`
   * `settings_template.ini`
-  * `settings_test.py`
-  * `run_Python_GSFLOW_current.sh` **\todo{re-name as go-GSFLOW.sh}**
-  * `run_Python_GSFLOW_current_Win.bat` **\todo{re-name as go-GSFLOW.bat}**
+  * `readSettings.py`
+  * `goGSFLOW.sh`
+  * `goGSFLOW.bat`
 * `GSFLOW-GRASS -> visualization`
-  * `Plot_MODFLOW_inputs.py`
-  * `plot_gsflow_csv.py`
-  * `gsflow_csv_table.py`
-  * `Plot_MODFLOW_3D_head3.py`
-  * `Plot_MODFLOW_3D_uzf.py`
-\todo{Andy: put GRASS-GIS scripts for plotting HRU-distributed variables here?  Or above with domain-builder scripts?}
-* `GSFLOW-GRASS -> examples`
-  * `Shullcas`
-  * `Santa Rosa` **\todo{space here?}**
+  * `plotMODFLOW.py`
+  * `plotGSFLOWTimeSeries.py`
+  * `GSFLOWcsvTable.py`
+  * `plotBasin.py`
+  * `plotHRUvars.py`
+  * `plotSegmentDischarge.py`
 -->
 
 ## Pre-processing
