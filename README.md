@@ -27,10 +27,8 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 Obtain the source code from:
 https://github.com/UMN-Hydro/GSFLOW-1.2.0
-compile and install it. For windows, you can also download the executable file already compiled from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads.
+compile and install it. For fulwindows, the pre-compiled executable file for GSFLOW 1.2.2 will be downloadable soon (if not already) from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads. Note that GSFLOW-GRASS is not fully compatible with GSFLOW 1.2.1.
 
-***Hoping to have a better integration with GSFLOW v1.2.2, so not writing much more in the way of instructions!
-May need tp remove link to USGS website if 1.2.2 is not available and we don't want to point people towards 1.2.1***
 
 ### Installing Python
 
@@ -58,10 +56,10 @@ python-gdal
 # pip (recommended for automatic installs via setuptools)
 sudo apt-get install python-pip
 
-# iPython console -- very useful (optional)
+# iPython console (very useful, optional)
 sudo apt-get install ipython
 
-# Sypder IDE (I don't personally use it but many others like it: optional)
+# Sypder IDE (popular interface, optional)
 sudo apt-get install spyder
 
 # OSGEO / GDAL
@@ -194,27 +192,24 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 * `GSFLOW-GRASS -> domain_builder` GRASS GIS Python scripts to build the watershed and MODFLOW geometries
 * `GSFLOW-GRASS -> input_file_builder` Python scripts to create input files for GSFLOW, including the control file, paramers file for PRMS, and input file for MODFLOW (NWT)
-  * `GSFLOW_print_controlfile_current.py`
-  * `GSFLOW_print_PRMSparamfile_current.py`
-  * `print_MODFLOW_inputs_res_NWT_current.py`
-  * `-> MODFLOW_scripts` \todo{consider doing away with this sub-directory?}
-    * `MODFLOW_NWT_lib_current.py` \todo{modify to read in down-gradient cell of discharge point}
-* `Create_hydcond_array.py`
+  * `printGSFLOWControlfile.py`
+  * `printPRMSparamfile.py`
+  * `printMODFLOWInputs.py`
+  * `MODFLOWLib.py`
+  * `createSpatialHydCond.py`
+  * `printClimatehru.py`
 * `GSFLOW-GRASS -> Run ->`
   * `settings_template.ini`
-  * `settings_test.py`
-  * `run_Python_GSFLOW_current.sh` **\todo{re-name as go-GSFLOW.sh}**
-  * `run_Python_GSFLOW_current_Win.bat` **\todo{re-name as go-GSFLOW.bat}**
+  * `readSettings.py`
+  * `goGSFLOW.sh`
+  * `goGSFLOW.bat`
 * `GSFLOW-GRASS -> visualization`
-  * `Plot_MODFLOW_inputs.py`
-  * `plot_gsflow_csv.py`
-  * `gsflow_csv_table.py`
-  * `Plot_MODFLOW_3D_head3.py`
-  * `Plot_MODFLOW_3D_uzf.py`
-\todo{Andy: put GRASS-GIS scripts for plotting HRU-distributed variables here?  Or above with domain-builder scripts?}
-* `GSFLOW-GRASS -> examples`
-  * `Shullcas`
-  * `Santa Rosa` **\todo{space here?}**
+  * `plotMODFLOW.py`
+  * `plotGSFLOWTimeSeries.py`
+  * `GSFLOWcsvTable.py`
+  * `plotBasin.py`
+  * `plotHRUvars.py`
+  * `plotSegmentDischarge.py`
 -->
 
 ## Pre-processing
