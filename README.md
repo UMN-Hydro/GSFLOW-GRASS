@@ -210,6 +210,7 @@ This seems like a lot of work to maintain when they could just look at the actua
   * `plotBasin.py`
   * `plotHRUvars.py`
   * `plotSegmentDischarge.py`
+* `GSFLOW-GRASS -> examples` Settings files for examples presented in GMD paper (Shullcas, Peru; Santa Rosa Island, California, USA; and Cannon River, Minnesota, USA)
 -->
 
 ## Pre-processing
