@@ -25,9 +25,9 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 ***Download and install GSFLOW 1.2.0 or 1.2.2***
 
-Obtain the source code from:
-https://github.com/UMN-Hydro/GSFLOW-1.2.0
-compile and install it. For fulwindows, the pre-compiled executable file for GSFLOW 1.2.2 will be downloadable soon (if not already) from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads. Note that GSFLOW-GRASS is not fully compatible with GSFLOW 1.2.1.
+Obtain the source code for GSFLOW 1.2.0 from:
+https://github.com/UMN-Hydro/GSFLOW-1.2.0,
+compile and install it. For windows, the pre-compiled executable file for GSFLOW 1.2.2 will be downloadable soon (if not already) from the USGS website: https://water.usgs.gov/ogw/gsflow/#downloads. Note that GSFLOW-GRASS is not fully compatible with GSFLOW 1.2.1.
 
 
 ### Installing Python
