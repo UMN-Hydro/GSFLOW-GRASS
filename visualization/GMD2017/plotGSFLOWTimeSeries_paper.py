@@ -70,61 +70,72 @@ savefigfile = 'fig.png'
 #HRUarea = HRUdata['hru_area']  # [acre]
 #basin_area = sum(HRUarea) * 4046.85642  # acre -> m2
 
+"""
+
 # - Shullcas
 # run script with F5
 plot_title = 'Shullcas'
-#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-gsflow_csv_fil = '/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+#gsflow_csv_fil = '/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+gsflow_csv_fil = '/home/awickert/GSFLOW/Shullcas' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
 basin_area = 39873.97 * 4046.85642  # acre -> m2
 PlotVar = []
 PlotVar.append('basinppt')
 PlotVar.append('basinstrmflow')
 pTimeLastNDays = 365*2
-figsize0 = (8*3,6) # 3x as wide as default (8W,6H)
+#figsize0 = (8*3,6) # 3x as wide as default (8W,6H)
 savefigfile = 'Shullcas_timeseries'
 clr = ['b', 'k', 'r', 'g']
-plot_pos = (1,0) # row 1, col 0
-colspan_i = 3
-rowspan_i = 1 
+#colspan_i = 1
+#rowspan_i = 1 
+multi = 3
 plot_title_ltr = 'Streamflow and Precipitation'
 
 
 ## - Santa Rosa
 ## run script with F5
-#plot_title = 'Santa Rosa'
-#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-#basin_area = 3078.39 * 4046.85642  # acre -> m2
-#PlotVar = []
-#PlotVar.append('basinppt')
-#PlotVar.append('basinsroff')
-##PlotVar.append('basinstrmflow') # not for paper, just to see when to print streamflow
-#pTimeLastNDays = 365*1
+plot_title = 'Santa Rosa'
+gsflow_csv_fil = '/home/awickert/GSFLOW/SantaRosa' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+basin_area = 3078.39 * 4046.85642  # acre -> m2
+PlotVar = []
+PlotVar.append('basinppt')
+PlotVar.append('basinsroff')
+#PlotVar.append('basinstrmflow') # not for paper, just to see when to print streamflow
+pTimeLastNDays = 365*1
 #figsize0 = (8*2,6)
-#savefigfile = 'SR_timeseries'
-#clr = ['b', 'r', 'k']
+savefigfile = 'SR_timeseries'
+clr = ['b', 'r', 'k']
+plot_title_ltr = 'Surface Runoff and Precipitation'
+multi=2
+"""
 
-
-# - Santa Rosa
-# run script with F5
-# Note for paper, just to find good date for streamflow plot
-#plot_title = 'Cannon River'
-#gsflow_csv_fil = '/media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-#basin_area = 919964.24 * 4046.85642  # acre -> m2
-#PlotVar = []
-#PlotVar.append('basinppt')
-#PlotVar.append('basinstrmflow')
-##PlotVar.append('uzf_recharge')
-#pTimeLastNDays = 365*1
+## - Cannon River
+## run script with F5
+plot_title = 'Cannon River'
+gsflow_csv_fil = '/home/awickert/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
+basin_area = 3078.39 * 4046.85642  # acre -> m2 # WRONG!!!!!!!!
+PlotVar = []
+PlotVar.append('basinppt')
+PlotVar.append('basinstrmflow')
+#PlotVar.append('basinstrmflow') # not for paper, just to see when to print streamflow
+pTimeLastNDays = 365*3
 #figsize0 = (8*2,6)
-#savefigfile = 'Cannon_timeseries'
-#clr = ['b', 'k', 'g']
+savefigfile = 'C_timeseries'
+clr = ['b', 'k', 'r', 'g']
+plot_title_ltr = 'Streamflow and Precipitation'
+multi=2
 
 # font sizes
-FS_lab = 10
-FS_cvtick = 8
-FS_xylab = 10
-FS_clab = 10
-FS_ti = 10
+mult = 1
+FS_lab = 10 * mult * 2/3.
+FS_cvtick = 8 * mult * 2/3.
+FS_xylab = 10 * mult * 2/3.
+FS_clab = 8 * mult * 2/3.
+FS_ti = 10 * mult * 2/3.
+
+figsize0 = (2.5*mult*multi,2.5*mult)
+plot_pos = (0,0)
+tight_layout = True
 
 
 #%%
@@ -160,21 +171,25 @@ for jj in range(len(PlotVar)):
 
 # header{1,NVars}: variable name
 # data{NVars}: all data 
-data = pd.read_csv(gsflow_csv_fil);   # 
+data = pd.read_csv(gsflow_csv_fil)
+data = data[-pTimeLastNDays:]
     
 dateList = [dt.datetime.strptime(date, '%m/%d/%Y').date() for date in data['Date']]
 
 # - plot data
 #fig, ax1 = plt.subplots(figsize=(14,5))
 #fig = plt.figure(figsize=figsize0)
-nrows = 2
-ncols = 3
-fig = plt.figure(1)
-ax1 = plt.subplot2grid((nrows, ncols), plot_pos, colspan=colspan_i, rowspan=rowspan_i)
-
-#ax1 = fig.add_subplot(1,1,1)
+nrows = 1
+ncols = 1
+fig = plt.figure(1, figsize=figsize0)
+#ax1 = plt.subplot2grid((nrows, ncols), plot_pos, colspan=colspan_i, rowspan=rowspan_i)
+ax1 = fig.add_subplot(1,1,1)
+if tight_layout:
+    plt.tight_layout()
 #fig, ax1 = plt.subplots(212)
 ax2 = ax1.twinx()
+if tight_layout:
+    plt.tight_layout()
 
 # convert volume units [m^3] to length [mm]
 conv = 1.
@@ -202,6 +217,7 @@ for ii in range(len(PlotVar)):
         PlotVarLeg[ii] = ti
         ax1.set_ylabel(ti + ' ' + unit, fontsize=FS_xylab)
 
+
     if ii == 0:
         lns = ln0
     else:
@@ -213,11 +229,14 @@ for ii in range(len(PlotVar)):
 #    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gcf().autofmt_xdate()    
 
-ax1.set_xlim(dateList[-pTimeLastNDays-1],dateList[-1])
+#ax1.set_xlim(dateList[-pTimeLastNDays-1],dateList[-1])
+ax1.set_xlim(dateList[0],dateList[-1])
 #ax1.set_xlim(dateList[-365*2-1],dateList[-1])
 ax1.legend(lns, PlotVarLeg, loc=0, fontsize=FS_xylab)
 ax1.tick_params(axis="both", which="major", labelsize=FS_cvtick)
 ax2.tick_params(axis="both", which="major", labelsize=FS_cvtick)
+
+#ax2.set_ylim(ax1.get_ylim()[0], np.round(conv*np.max(data['basinppt'])*1.1/10.)*10. )
     
 #plt.legend(PlotVar)
 #plt.title(plot_title, fontsize=FS_ti, fontweight='bold')

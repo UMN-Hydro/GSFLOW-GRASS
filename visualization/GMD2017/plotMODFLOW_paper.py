@@ -19,36 +19,44 @@ fl_same_cax_lay = 0 # default: different caxis for each layer
 #%%
 # UNCOMMENT / COMMENT FOR PAPER #
 
+"""
 ## - Shullcas:
 ## run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas_gcng.ini -p wtd
 ### run plotMODFLOW_paper.py -i /media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas_gcng.ini -p wtd
 #ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
 #figsize0 = (7.5,5.5) # default (8W,6H) [inches]
 #plot_pos = (0,2) # row 0, col 2 
-#xlim = [480, 498]
-#ylim = [8665, 8689]
-#figName = 'Shullcas_wtd'
+xlim = [480, 498]
+ylim = [8665, 8689]
+figName = 'Shullcas_wtd'
 ##plot_ti_ltr = 'C) '
 #site_i = 1 # Shullcas
+"""
 
 # - Santa Rosa: (run 2x, once for head and once for hydcond)
 # run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p wtd
 ## run plotMODFLOW_paper.py -i /media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa_WaterCanyon_gcng.ini -p wtd
+
+"""
+# UNCOMMENT HERE
 #ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
 #figsize0 = (7.5,5.5) # default (8W,6H) [inches]
 #plot_pos = (0,2) # row 0, col 2 
+#plot_pos = (0,0)
+xlim = [214, 220]
+ylim = [3760, 3767]
+figName = 'SR_wtd'
+#site_i = 0 # Sta Rosa WTD
+"""
+
+# run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p hydcond
+#ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
+#figsize0 = (7.5,5.5) # default (8W,6H) [inches]
+#plot_pos = (1,2) # row 1, col 2 
 #xlim = [213, 220]
 #ylim = [3760, 3766]
-#figName = 'SR_wtd'
-#site_i = 2 # Sta Rosa WTD
-# run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p hydcond
-ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
-figsize0 = (7.5,5.5) # default (8W,6H) [inches]
-plot_pos = (1,2) # row 1, col 2 
-xlim = [213, 220]
-ylim = [3760, 3766]
-figName = 'SR_hydcond'
-site_i = 3 # Sta Rosa hydcond
+#figName = 'SR_hydcond'
+#site_i = 3 # Sta Rosa hydcond
 
 # - Cannon River 2 layer (run below blocks separately):
 ## run plotMODFLOW_paper.py -i /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini -p wtd
@@ -59,14 +67,9 @@ site_i = 3 # Sta Rosa hydcond
 #ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
 #figsize0 = (8,6*2) # default (8W,6H)
 #fl_same_cax_lay = 1
-#figName = 'Cannon_head'
-
-# font sizes
-FS_lab = 10
-FS_cvtick = 8
-FS_xylab = 10
-FS_clab = 8
-FS_ti = 10
+figName = 'Cannon_head'
+xlim = [430, 540]
+ylim = [4850, 4950]
 
 #########################
 ## COMMAND-LINE PARSER ##
@@ -103,6 +106,28 @@ args = vars(args)
 settings_input_file = args['infile']
 plotvar = args['plot']
 moviefile_name = args['outmovie']
+
+#############################
+## BASED ON INPUTS (MAYBE) ##
+#############################
+
+# font sizes
+mult = 1
+FS_lab = 10 * mult * 2/3.
+FS_cvtick = 8 * mult * 2/3.
+FS_xylab = 10 * mult * 2/3.
+FS_clab = 8 * mult * 2/3.
+FS_ti = 10 * mult * 2/3.
+
+figsize0 = (2.5*mult,2.5*mult)
+if plotvar == 'head': # temporary
+    figsize0 = (2.5*mult,2.5*mult*2.)
+
+ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
+#plot_pos = (0,0)
+site_i = 0
+
+tight_layout = True
 
 
 ###################
@@ -431,8 +456,10 @@ else:
 ncols = (NLAY+1)/2
 
 # for paper plots:
-nrows = 2
-ncols = 3
+#nrows = 2
+#ncols = 3
+
+
 
 # Multiple times or no
 if plotvar in ['topo', 'hydcond', 'hydcond', 'ss', 'sy']:
@@ -490,8 +517,9 @@ if not static_plot:
                         av = []
                         pv = []
                         cv = []
-#                    av.append(plt.subplot(nrows, ncols, lay_info[0,varIndex]))
-                    av.append(plt.subplot2grid((nrows, ncols), plot_pos)) 
+                    av.append(plt.subplot(nrows, ncols, lay_info[0,varIndex]))
+                    #av.append(plt.subplot2grid((nrows, ncols), plot_pos)) 
+                    av[lay_i].set_aspect('equal') # keep this for Shullcas
                     pv.append(av[lay_i].imshow(data, interpolation='nearest', 
                                                extent=_extent))
                     pv[lay_i].set_cmap(plt.cm.cool)
@@ -538,12 +566,7 @@ if not static_plot:
 
                 ctr = ctr + 1
             #    plt.show()
-            if site_i == 1: # Shullcas
-                av[lay_i].set_aspect('equal') # keep this for Shullcas
-                plt.xlim(xlim)  
-                plt.ylim(ylim)  
-                plt.xticks(2+np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
-                plt.yticks(2+np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
+            #if site_i == 1: # Shullcas
                 
             
 #            plt.tight_layout()
@@ -596,16 +619,17 @@ else:
         cv.append(plt.colorbar(pv[lay_i]))
         _col = data_all[:]
         _col = _col[~np.isnan(_col)]
-        cv[lay_i].set_label(cbl, fontsize=20)
-        cv[lay_i].ax.tick_params(labelsize=14) 
+        #cv[lay_i].set_label(cbl, fontsize=20)
+        av[lay_i].set_title(cbl, fontsize=FS_ti)
+        cv[lay_i].ax.tick_params(labelsize=FS_cvtick) 
         pv[lay_i].set_clim(vmin=np.min(_col), vmax=np.max(_col))
-        av[lay_i].set_xlabel('E [km]', fontsize=20)
-        av[lay_i].set_ylabel('N [km]', fontsize=20)
+        av[lay_i].set_xlabel('E [km]', fontsize=FS_xylab)
+        av[lay_i].set_ylabel('N [km]', fontsize=FS_xylab)
         av[lay_i].yaxis.set_major_formatter(y_formatter)
         av[lay_i].xaxis.set_major_formatter(x_formatter)
 #        av[lay_i].set_aspect('equal')
         av[lay_i].tick_params(axis='both', which='major',
-                              labelsize=14)
+                              labelsize=FS_cvtick)
         im2 = av[lay_i].imshow(outline, interpolation='nearest',
                                extent=_extent)
         im2.set_clim(0, 1)
@@ -613,8 +637,17 @@ else:
         im2.set_cmap(cmap)
         if plotvar in ['topo', 'specific_yield']:
             break # only once in this loop
+
+plt.xlim(xlim)  
+plt.ylim(ylim)  
+plt.xticks(1+np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
+plt.yticks(1+np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
+
+if tight_layout:
+    plt.tight_layout()
     
-plt.show()
-plt.savefig(figName+'.png', dpi=100)
+plt.savefig(figName+'.png', dpi=300)
 plt.savefig(figName+'.svg')
+
+plt.show()
 

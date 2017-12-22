@@ -52,31 +52,42 @@ p_dates = []
 # - Shullcas 
 # run plotSegmentDischarge_paper.py /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas_gcng.ini
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas_gcng.ini
+"""
 figName = 'Shullcas_Q'
 p_dates = ['2015-02-15']
-figsize0 = (7.5,5.5) # default (8W,6H) [inches]
-plot_pos = (0,1) # row 0, col 1 
 xlim = [480, 498]
 ylim = [8665, 8689]
-plot_ti_ltr = 'C) '
-
 
 ## - Santa Rosa 
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa_WaterCanyon_gcng.ini
-#figName = 'SR_Q'
-#p_dates = ['2017-02-17']
+figName = 'SR_Q'
+p_dates = ['2017-02-17']
+xlim = [214, 220]
+ylim = [3760, 3767]
+"""
 
 ## - Cannon River - 2 layer
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini
-#figName = 'Cannon_Q'
-#p_dates = ['1943-07-06']
+figName = 'Cannon_Q'
+p_dates = ['1943-07-06']
+xlim = [430, 540]
+ylim = [4850, 4950]
 
 # font sizes
-FS_lab = 10
-FS_cvtick = 8
-FS_xylab = 10
-FS_clab = 10
-FS_ti = 10
+mult = 1
+FS_lab = 10 * mult * 2/3.
+FS_cvtick = 8 * mult * 2/3.
+FS_xylab = 10 * mult * 2/3.
+FS_clab = 8 * mult * 2/3.
+FS_ti = 10 * mult * 2/3.
+
+figsize0 = (2.5*mult,2.5*mult)
+
+plot_ti_ltr = 'C) '
+
+plot_pos = (0,0)
+
+tight_layout = True
 
 
 
@@ -166,16 +177,18 @@ if fl_plot_single == 1:
     _max = 10.**lmax
 
 
-nrows = 2
-ncols = 3
-fig = plt.figure(1)
+nrows = 1
+ncols = 1
+fig = plt.figure(1, figsize=figsize0)
 #gridspec.GridSpec(nrows,ncols)
 #plt.ion()
 
-#ax = plt.subplot(111)
-ax = plt.subplot2grid((nrows, ncols), plot_pos)
+ax = plt.subplot(111)
+#ax = plt.subplot2grid((nrows, ncols), plot_pos)
 
-
+if tight_layout:
+    plt.tight_layout()
+                  
 cmap = plt.get_cmap('RdYlBu')
 _min = np.max((_max * 1e-2, _min))
 print "colorbar min, max: ", _min, _max
@@ -226,19 +239,26 @@ for date in p_dates0:
         _x = _line_points[:,0]/1000.
         _y = _line_points[:,1]/1000.
         scale = .03
-        _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=(scale*_values[i]/0.0283168466)**.5+.25) )
+        scale2 = 48. / (scale*np.max(_values)/0.0283168466)
+        _lines.append( ax.plot(_x, _y, '-', color=colors[i], linewidth=(scale2 * scale * _values[i]/0.0283168466)**.5+.25) )
     #ax.set_title(plotting_variable+': '+date)
 #    ax.set_title(date, fontsize=FS_ti, fontweight='bold')
 #    ax.set_title(date, fontsize=FS_ti)
     ax.set_title('Streamflow [m$^3$/s]', fontsize=FS_ti)
 #    cbar.set_label(r'Streamflow [m$^3$/s]', fontsize=FS_lab)
+    #cbar.ax.set_yticklabel(
+    #cbar.set_ticks([np.min(data), 0.1, 1, 10, 100, 1000, 10000, np.max(data)])
+    #cbar.set_ticklabels([np.min(data), '$\\mathdefault{10^{-1}}$', '$\\mathdefault{10^{0}}$', '$\\mathdefault{10^{1}}$', '$\\mathdefault{10^{2}}$', '$\\mathdefault{10^{3}}$', '$\\mathdefault{10^{4}}$', np.max(data)])
+    cbar.set_ticks([0.1, 0.5, 1, 5, 10, 50, 100, 500, 1000, 5000, 10000])
+    #cbar.set_ticks([-1, 0, 1, 2, 3, 4])
+    cbar.set_ticklabels([r'$\mathdefault{10^{-1}}$', r'$\mathdefault{5 \times 10^{-1}}$', r'$\mathdefault{10^{0}}$', r'$\mathdefault{5 \times 10^{0}}$', r'$\mathdefault{10^{1}}$', r'$\\mathdefault{5 \times 10^{1}}$', r'$\mathdefault{10^{2}}$', r'$\mathdefault{5 \times 10^{2}}$', r'$\mathdefault{10^{3}}$', r'$\mathdefault{5 \times 10^{3}}$', r'$\mathdefault{10^{4}}$'])
     ax.set_xlabel('E [km]', fontsize=FS_xylab)
     ax.set_ylabel('N [km]', fontsize=FS_xylab)
     ax.yaxis.set_major_formatter(y_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
     ax.tick_params(axis='both', which='major', labelsize=FS_cvtick)
     cax.tick_params(labelsize=FS_cvtick) 
-                        
+
 #    ax.set_aspect('equal', 'datalim')
     
 #    plt.tight_layout()
@@ -254,8 +274,11 @@ for date in p_dates0:
 ax.set_aspect('equal')
 ax.set_xlim(xlim)  
 ax.set_ylim(ylim)  
-ax.set_xticks(2+np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
-ax.set_yticks(2+np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
+ax.set_xticks(1+np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
+ax.set_yticks(1+np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
+ax.ticklabel_format(useOffset=False)
+#ax.set_xticks(np.arange(np.floor(xlim[0]), np.floor(xlim[-1]), np.ceil((xlim[-1]-xlim[0])/3)))  
+#ax.set_yticks(np.arange(np.floor(ylim[0]), np.floor(ylim[-1]), np.ceil((ylim[-1]-ylim[0])/3)))  
 
-#plt.savefig(figName+'.png', dpi=100)
-#plt.savefig(figName+'.svg')
+plt.savefig(figName+'.png', dpi=100)
+plt.savefig(figName+'.svg')
