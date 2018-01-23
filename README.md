@@ -14,7 +14,7 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 **Required:**
 * **GSFLOW 1.2**
-* **GRASS GIS 7.3+** and extensions (described below); **7.4** is the stable version at the time of writing
+* **GRASS GIS** and extensions (described below); **7.5+** is the development version at the time of writing; **7.2.2** will soon be upgraded to **7.4** as the stable version.
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
@@ -330,10 +330,16 @@ g.extension r.hydrodem
 
 #### Create the domain inputs for input-file-builder scripts
 
-Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, if GSFLOW-GRASS is in your "models" folder:
+Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, from within the "GSFLOW-GRASS" folder::
 
+Linux
 ```sh
-python ~/models/GSFLOW-GRASS/domain_builder/buildDomainGRASS.py.sh
+python domain_builder/buildDomainGRASS.py /PATH/TO/settings.ini
+```
+
+Windows
+```bat
+python domain_builder\buildDomainGRASS.py DRIVE_LETTER:\PATH\TO\settings.ini
 ```
 
 Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
