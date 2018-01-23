@@ -348,9 +348,9 @@ Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder t
 
 Pat yourself on the back! The GRASS portion is complete.
 
-### Step 3: Customize the Go-GSFLOW File to set input-file-builder options
+### Step 3: Customize the `goGSFLOW` File to set input-file-builder options
 
-The Go-GSFLOW File (`go-GSFLOW.sh` on Linux and `go-GSFLOW.bat` on Windows) in the 'Run' folder, is for pre-processing and running GSFLOW.
+The goGSFLOW File (`goGSFLOW.sh` on Linux and `goGSFLOW.bat` on Windows) in the `Run` folder, is for pre-processing and running GSFLOW.
 
 At the top of the file, the user should customize:
 
@@ -366,7 +366,7 @@ The rest of the file will execute scripts to: (1) set up certain model inputs (c
 * `printMODFLOWInputs.py`: This script creates all the MODFLOW input files.  This line generally should be included, but it may be commented out if the user has already run the script previously and will be using the same files in their same location.
 * `runGSFLOW.py`: This script executes the GSFLOW model.  This line generally should be included, but it may be commented out if the user only wishes to create the input files without running the model.
 
-Note that the above Python scripts can also be run independently using Python, outside of the Go-GSFLOW File; just be sure to include the *Settings File* name as an argument.
+Note that the above Python scripts can also be run independently using Python, outside of the goGSFLOW File; just be sure to include the *Settings File* name as an argument.
 
 ### Step 4. Optional steps
 
