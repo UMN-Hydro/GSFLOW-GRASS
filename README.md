@@ -342,7 +342,7 @@ Windows
 python domain_builder\buildDomainGRASS.py DRIVE_LETTER:\PATH\TO\settings.ini
 ```
 
-Time will pass and a lot of text will go past on the screen. If it ends with "Done.", regardless of warning/error messages about adding fields to shapefiles. If it does not end with "Done.", please contact us!
+Time will pass and a lot of text will go past on the screen. If it ends with "Done.", it has succeeded! This is regardless of warning/error messages about adding fields to shapefiles, skipping features without categories, or file extensions not being allowed by the GPKG specification. If it does not end with "Done.", please contact us!
 
 Once this has finished check our **"gsflow_simdir"** for a **"GIS"** subfolder that contains the outputs of your work here. The files there will be automatically read in during Step 4.
 
