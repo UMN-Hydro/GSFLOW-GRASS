@@ -6,7 +6,9 @@ GSFLOW is the US Geological Survey's combined groundwater (MODFLOW) and surface 
 
 These instructions are meant to take a user familiar with computers but new to (or a beginner with) GSFLOW and GRASS GIS through the basics of how to get GSFLOW-GRASS to work. *Please leave a message if you have trouble working with GSFLOW-GRASS; your comments could assist both you and the more general improvement of this documentation.*
 
-When you use GSFLOW-GRASS, please contact us; a reference (Ng et al.) will be noted here as soon as the paper is made available.
+When you use GSFLOW-GRASS, please cite:
+**Ng, G.-H.C., Wickert, A.D., Somers, L.D., Saberi, L., Cronkite-Ratcliff, C., Niswonger, R.G., and McKenzie, J.M., 2018, [GSFLOW-GRASS v1.0.0: GIS-enabled hydrologic modeling of coupled groundwater–surface-water systems](https://www.geosci-model-dev-discuss.net/gmd-2017-321/): *Geoscientific Model Development Discussions*, doi:10.5194/gmd-2017-321.**
+In addition, please contact us if you have questions or suggestions!
 
 This manual is written in the style of a quick(-ish) start guide that allows users to get GSFLOW up and running for their target watershed using mostly default options in our toolkit and without modifying GRASS-GIS or Python scripts. Additional customization is possible by more advanced users by editing our GRASS GIS and input file building scripts to extend the set of GSFLOW parameters that may be set through GSFLOW-GRASS.
 
