@@ -94,7 +94,7 @@
 #%option
 #%  key: flow
 #%  type: string
-#%  description: Streamflow entering the upstream-most segments (cat,Q,cat,Q,...)
+#%  description: Streamflow entering the upstream-most segs (cat,Q,cat,Q,...)
 #%  answer: 0,0
 #%  required: no
 #%end
@@ -124,15 +124,36 @@
 #%end
 
 #%option
-#%  key: roughch
+#%  key: roughch_value
 #%  type: double
-#%  description: In-channel Manning's n for ICALC=1,2
+#%  description: In-channel Manning's n (single value) for ICALC=1,2
 #%  answer: 0.035
 #%  required: no
 #%end
 
 #%option
-#%  key: roughbk
+#%  key: roughch_raster
+#%  type: string
+#%  description: In-channel Manning's n raster map for ICALC=1,2
+#%  required: no
+#%end
+
+#%option
+#%  key: roughch_points
+#%  type: string
+#%  description: In-channel Manning's n vector point meas for ICALC=1,2
+#%  required: no
+#%end
+
+#%option
+#%  key: roughch_pt_col
+#%  type: string
+#%  description: Column name for in-channel n point measurements
+#%  required: no
+#%end
+
+#%option
+#%  key: roughbk_value
 #%  type: double
 #%  description: Overbank Manning's n for ICALC=2
 #%  answer: 0.06
@@ -140,9 +161,30 @@
 #%end
 
 #%option
+#%  key: roughbk_raster
+#%  type: string
+#%  description: Overbank Manning's n raster map for ICALC=2
+#%  required: no
+#%end
+
+#%option
+#%  key: roughbk_points
+#%  type: string
+#%  description: Overbank Manning's n vector point meas for ICALC=2
+#%  required: no
+#%end
+
+#%option
+#%  key: roughbk_pt_col
+#%  type: string
+#%  description: Column name for overbank n point measurements
+#%  required: no
+#%end
+
+#%option
 #%  key: width1
 #%  type: double
-#%  description: Upstream width in segment [m], uniform through watershed
+#%  description: Upstream width in segment [m], uniform in watershed
 #%  answer: 5
 #%  required: no
 #%end
@@ -150,8 +192,22 @@
 #%option
 #%  key: width2
 #%  type: double
-#%  description: Downstream width in segment [m], uniform through watershed
+#%  description: Downstream width in segment [m], uniform in watershed
 #%  answer: 5
+#%  required: no
+#%end
+
+#%option
+#%  key: width_points
+#%  type: string
+#%  description: Channel width point meas vect (instead of width1,width2)
+#%  required: no
+#%end
+
+#%option
+#%  key: width_points_col
+#%  type: string
+#%  description: Channel width point meas vect column
 #%  required: no
 #%end
 
@@ -172,6 +228,8 @@ from grass.pygrass.vector import Vector, VectorTopo
 from grass.pygrass.raster import RasterRow
 from grass.pygrass import utils
 from grass import script as gscript
+#from pygrass.messages import Messenger
+#import sys
 
 ###############
 # MAIN MODULE #
@@ -200,12 +258,8 @@ def main():
     WIDTH1 = options['width1']
     WIDTH2 = options['width2']
     
-    # ICALC=1: Manning
-    ROUGHCH = options['roughch']
+    # ICALC=1,2: Manning (in channel and overbank): below
     
-    # ICALC=2: Manning
-    ROUGHBK = options['roughbk']
-
     # ICALC=3: Power-law relationships (following Leopold and others)
     # The at-a-station default exponents are from Rhodes (1977)
     CDPTH = str(float(options['cdpth']) / 35.3146667) # cfs to m^3/s
@@ -287,33 +341,105 @@ def main():
     cur.execute("update "+segments+" set OUTSEG=0")
     cur.executemany("update "+segments+" set OUTSEG=? where tostream=?", nseg_cats)
 
-    # Discharge and hydraulic geometry
-    cur.execute("update "+segments+" set WIDTH1="+str(WIDTH1))
-    cur.execute("update "+segments+" set WIDTH2="+str(WIDTH2))
-    cur.execute("update "+segments+" set ROUGHCH="+str(ROUGHCH))
-    cur.execute("update "+segments+" set ROUGHBK="+str(ROUGHBK))
+    # Hydraulic geometry selection
     cur.execute("update "+segments+" set ICALC="+str(ICALC))
-    cur.execute("update "+segments+" set CDPTH="+str(CDPTH))
-    cur.execute("update "+segments+" set FDPTH="+str(FDPTH))
-    cur.execute("update "+segments+" set AWDTH="+str(AWDTH))
-    cur.execute("update "+segments+" set BWDTH="+str(BWDTH))
+    segmentsTopo.table.conn.commit()
+    segmentsTopo.close()
+    if ICALC == 0:
+        gscript.message('')
+        gscript.message('ICALC=0 (constant) not supported')
+        gscript.message('Continuing nonetheless.')
+        gscript.message('')
+    if ICALC == 1:
+        if width_points is not '':
+            # Can add machinery here for separate upstream and downstream widths
+            # But really should not vary all that much
+            #v.to_db(map=segments, option='start', columns='xr1,yr1')
+            #v.to_db(map=segments, option='end', columns='xr2,yr2')
+            gscript.run_command('v.distance', from_=segments, to=options['width_points'], upload=options['width_points_col'], column='WIDTH1')
+            v.db_update(map=segments, column='WIDTH2', query_column='WIDTH1')
+        else:
+            segmentsTopo = VectorTopo(segments)
+            segmentsTopo.open('rw')
+            cur = segmentsTopo.table.conn.cursor()
+            cur.execute("update "+segments+" set WIDTH1="+str(WIDTH1))
+            cur.execute("update "+segments+" set WIDTH2="+str(WIDTH2))
+            segmentsTopo.table.conn.commit()
+            segmentsTopo.close()
+    if ICALC == 2:
+        gscript.message('')
+        gscript.message('ICALC=2 (8-point channel + floodplain) not supported')
+        gscript.message('Continuing nonetheless.')
+        gscript.message('')
+    if ICALC == 3:
+        segmentsTopo = VectorTopo(segments)
+        segmentsTopo.open('rw')
+        cur = segmentsTopo.table.conn.cursor()
+        cur.execute("update "+segments+" set CDPTH="+str(CDPTH))
+        cur.execute("update "+segments+" set FDPTH="+str(FDPTH))
+        cur.execute("update "+segments+" set AWDTH="+str(AWDTH))
+        cur.execute("update "+segments+" set BWDTH="+str(BWDTH))
+        segmentsTopo.table.conn.commit()
+        segmentsTopo.close()
 
+    # values that are 0
     gscript.message('')
     gscript.message('NOTICE: not currently used:')
     gscript.message('IUPSEG, FLOW, RUNOFF, ETSW, and PPTSW.')
     gscript.message('All set to 0.')
     gscript.message('')
 
-    # values that are 0
+    segmentsTopo = VectorTopo(segments)
+    segmentsTopo.open('rw')
+    cur = segmentsTopo.table.conn.cursor()
     cur.execute("update "+segments+" set IUPSEG="+str(0))
     cur.execute("update "+segments+" set FLOW="+str(0))
     cur.execute("update "+segments+" set RUNOFF="+str(0))
     cur.execute("update "+segments+" set ETSW="+str(0))
     cur.execute("update "+segments+" set PPTSW="+str(0))
-
     segmentsTopo.table.conn.commit()
     segmentsTopo.close()
 
+    # Roughness
+    # ICALC=1,2: Manning (in channel)
+    if (options['roughch_raster'] is not '') and (options['roughch_points'] is not ''):
+        grass.fatal("Choose either a raster or vector or a value as Manning's n input.")
+    if options['roughch_raster'] is not '':
+        ROUGHCH = options['roughch_raster']
+        v.rast_stats(raster=ROUGHCH, method='average', column_prefix='tmp', map=segments, flags='c')
+        #v.db_renamecolumn(map=segments, column='tmp_average,ROUGHCH', quiet=True)
+        v.db_update(map=segments, column='ROUGHCH', query_column='tmp_average', quiet=True)
+        v.db_dropcolumn(map=segments, columns='tmp_average', quiet=True)
+    elif options['roughch_points'] is not '':
+        ROUGHCH = options['roughch_points']
+        gscript.run_command('v.distance', from_=segments, to=ROUGHCH, upload=options['roughch_points_col'], column='ROUGHCH')
+    else:
+        segmentsTopo = VectorTopo(segments)
+        segmentsTopo.open('rw')
+        cur = segmentsTopo.table.conn.cursor()
+        ROUGHCH = options['roughch_value']
+        cur.execute("update "+segments+" set ROUGHCH="+str(ROUGHCH))
+        segmentsTopo.table.conn.commit()
+        segmentsTopo.close()
+    
+    # ICALC=2: Manning (overbank)
+    if (options['roughbk_raster'] is not '') and (options['roughbk_points'] is not ''):
+        grass.fatal("Choose either a raster or vector or a value as Manning's n input.")
+    if options['roughbk_raster'] is not '':
+        ROUGHBK = options['roughbk_raster']
+        v.rast_stats(raster=ROUGHBK, method='average', column_prefix='tmp', map=segments, flags='c')
+        v.db_renamecolumn(map=segments, column='tmp_average,ROUGHBK', quiet=True)
+    elif options['roughbk_points'] is not '':
+        ROUGHBK = options['roughbk_points']
+        gscript.run_command('v.distance', from_=segments, to=ROUGHBK, upload=options['roughbk_points_col'], column='ROUGHBK')
+    else:
+        segmentsTopo = VectorTopo(segments)
+        segmentsTopo.open('rw')
+        cur = segmentsTopo.table.conn.cursor()
+        ROUGHBK = options['roughbk_value']
+        cur.execute("update "+segments+" set ROUGHBK="+str(ROUGHBK))
+        segmentsTopo.table.conn.commit()
+        segmentsTopo.close()
 
 if __name__ == "__main__":
     main()
