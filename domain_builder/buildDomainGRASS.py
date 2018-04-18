@@ -23,6 +23,8 @@ try:
 except:
     sys.exit('Error opening or parsing input file: ' + settings_input_file)
 
+startdir = os.getcwd()
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -180,8 +182,9 @@ for _vector_file in [segments, reaches]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
 for _vector_file in [pour_point, bc_cell]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='point', quiet=True, overwrite=True)
-os.chdir('..')
-os.chdir('..')
+#os.chdir('..')
+#os.chdir('..')
+os.chdir(startdir)
 
 print ""
 print "Done."
