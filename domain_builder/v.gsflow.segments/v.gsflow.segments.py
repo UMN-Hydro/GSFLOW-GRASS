@@ -356,7 +356,7 @@ def main():
             # But really should not vary all that much
             #v.to_db(map=segments, option='start', columns='xr1,yr1')
             #v.to_db(map=segments, option='end', columns='xr2,yr2')
-            gscript.run_command('v.distance', from_=segments, to=options['width_points'], upload=options['width_points_col'], column='WIDTH1')
+            gscript.run_command('v.distance', from_=segments, to=options['width_points'], upload='to_attr', to_column=options['width_points_col'], column='WIDTH1')
             v.db_update(map=segments, column='WIDTH2', query_column='WIDTH1')
         else:
             segmentsTopo = VectorTopo(segments)
