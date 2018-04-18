@@ -412,7 +412,7 @@ def main():
         v.db_dropcolumn(map=segments, columns='tmp_average', quiet=True)
     elif options['roughch_points'] is not '':
         ROUGHCH = options['roughch_points']
-        gscript.run_command('v.distance', from_=segments, to=ROUGHCH, upload=options['roughch_points_col'], column='ROUGHCH')
+        gscript.run_command('v.distance', from_=segments, to=ROUGHCH, upload='to_attr', to_column=options['roughch_pt_col'], column='ROUGHCH')
     else:
         segmentsTopo = VectorTopo(segments)
         segmentsTopo.open('rw')
@@ -431,7 +431,7 @@ def main():
         v.db_renamecolumn(map=segments, column='tmp_average,ROUGHBK', quiet=True)
     elif options['roughbk_points'] is not '':
         ROUGHBK = options['roughbk_points']
-        gscript.run_command('v.distance', from_=segments, to=ROUGHBK, upload=options['roughbk_points_col'], column='ROUGHBK')
+        gscript.run_command('v.distance', from_=segments, to=ROUGHBK, upload='to_attr', to_column=options['roughbk_pt_col'], column='ROUGHBK')
     else:
         segmentsTopo = VectorTopo(segments)
         segmentsTopo.open('rw')
