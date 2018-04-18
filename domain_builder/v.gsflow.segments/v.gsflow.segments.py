@@ -275,7 +275,7 @@ def main():
         if CDPTH and FDPTH and AWDTH and BWDTH:
             pass
         else:
-            grass.fatal('Missing CDPTH, FDPTH, AWDTH, and/or BWDTH. \
+            gscript.fatal('Missing CDPTH, FDPTH, AWDTH, and/or BWDTH. \
                          These are required when ICALC = 3.')
 
     ###########
@@ -403,7 +403,7 @@ def main():
     # Roughness
     # ICALC=1,2: Manning (in channel)
     if (options['roughch_raster'] is not '') and (options['roughch_points'] is not ''):
-        grass.fatal("Choose either a raster or vector or a value as Manning's n input.")
+        gscript.fatal("Choose either a raster or vector or a value as Manning's n input.")
     if options['roughch_raster'] is not '':
         ROUGHCH = options['roughch_raster']
         v.rast_stats(raster=ROUGHCH, method='average', column_prefix='tmp', map=segments, flags='c')
@@ -424,7 +424,7 @@ def main():
     
     # ICALC=2: Manning (overbank)
     if (options['roughbk_raster'] is not '') and (options['roughbk_points'] is not ''):
-        grass.fatal("Choose either a raster or vector or a value as Manning's n input.")
+        gscript.fatal("Choose either a raster or vector or a value as Manning's n input.")
     if options['roughbk_raster'] is not '':
         ROUGHBK = options['roughbk_raster']
         v.rast_stats(raster=ROUGHBK, method='average', column_prefix='tmp', map=segments, flags='c')
