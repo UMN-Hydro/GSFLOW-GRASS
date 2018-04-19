@@ -427,34 +427,11 @@ def main():
         gscript.message('Continuing nonetheless.')
         gscript.message('')
         if options['fp_width_pts'] is not '':
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
             gscript.run_command('v.distance', from_=segments, 
                                 to=options['fp_width_pts'], upload='to_attr', 
                                 to_column=options['fp_width_pts_col'], 
                                 column='floodplain_width')
         else:
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
-            print "***********"
             segmentsTopo = VectorTopo(segments)
             segmentsTopo.open('rw')
             cur = segmentsTopo.table.conn.cursor()
