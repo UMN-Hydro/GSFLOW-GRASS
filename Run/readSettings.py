@@ -79,6 +79,9 @@ class Settings(object):
         self.channel_width = parser.get('GRASS', 'channel_width')
         self.channel_width_vector = parser.get('GRASS', 'channel_width_vector')
         self.channel_width_vector_col = parser.get('GRASS', 'channel_width_vector_col')
+        self.floodplain_width = parser.get('GRASS', 'floodplain_width')
+        self.floodplain_width_vector = parser.get('GRASS', 'floodplain_width_vector')
+        self.floodplain_width_vector_col = parser.get('GRASS', 'floodplain_width_vector_col')
 
         # create directories if they do not exist:
         if not os.path.isdir(self.control_dir):

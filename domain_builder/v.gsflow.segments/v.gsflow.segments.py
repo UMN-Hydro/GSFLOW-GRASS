@@ -211,6 +211,58 @@
 #%  required: no
 #%end
 
+#%option
+#%  key: width1
+#%  type: double
+#%  description: Upstream width in segment [m], uniform in watershed
+#%  answer: 5
+#%  required: no
+#%end
+
+#%option
+#%  key: width2
+#%  type: double
+#%  description: Downstream width in segment [m], uniform in watershed
+#%  answer: 5
+#%  required: no
+#%end
+
+#%option
+#%  key: width_points
+#%  type: string
+#%  description: Channel width point meas vect (instead of width1,width2)
+#%  required: no
+#%end
+
+#%option
+#%  key: width_points_col
+#%  type: string
+#%  description: Channel width point meas vect column
+#%  required: no
+#%end
+
+#%option
+#%  key: fp_width_value
+#%  type: double
+#%  description: Floodplain width as constant value (ICALC=2)
+#%  answer: 0
+#%  required: no
+#%end
+
+#%option
+#%  key: fp_width_pts
+#%  type: string
+#%  description: Floodplain width measurement vector (ICALC=2)
+#%  required: no
+#%end
+
+#%option
+#%  key: fp_width_pts_col
+#%  type: string
+#%  description: Floodplain width measurement column (ICALC=2)
+#%  required: no
+#%end
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -229,7 +281,8 @@ from grass.pygrass.raster import RasterRow
 from grass.pygrass import utils
 from grass import script as gscript
 #from pygrass.messages import Messenger
-#import sys
+import sys
+import time
 
 ###############
 # MAIN MODULE #
@@ -252,7 +305,7 @@ def main():
     segments = options['output']
     
     # Hydraulic geometry
-    ICALC = options['icalc']
+    ICALC = int(options['icalc'])
     
     # ICALC=0: Constant depth
     WIDTH1 = options['width1']
@@ -289,7 +342,7 @@ def main():
     segment_columns.append('ISEG integer') # segment number
     segment_columns.append('NSEG integer') # segment number
     # for GSFLOW
-    segment_columns.append('ICALC integer') # 3 for power function
+    segment_columns.append('ICALC integer') # 1 for channel, 2 for channel+fp, 3 for power function
     segment_columns.append('OUTSEG integer') # downstream segment -- tostream, renumbered
     segment_columns.append('ROUGHCH double precision') # overbank roughness
     segment_columns.append('ROUGHBK double precision') # in-channel roughness
@@ -299,6 +352,7 @@ def main():
     segment_columns.append('FDPTH double precision') # depth exp
     segment_columns.append('AWDTH double precision') # width coeff
     segment_columns.append('BWDTH double precision') # width exp
+    segment_columns.append('floodplain_width double precision') # floodplain width (8-pt approx channel + flat fp)
     # The below will be all 0
     segment_columns.append('IUPSEG varchar') # upstream segment ID number, for diversions
     segment_columns.append('FLOW varchar')
@@ -351,7 +405,7 @@ def main():
         gscript.message('Continuing nonetheless.')
         gscript.message('')
     if ICALC == 1:
-        if width_points is not '':
+        if options['width_points'] is not '':
             # Can add machinery here for separate upstream and downstream widths
             # But really should not vary all that much
             #v.to_db(map=segments, option='start', columns='xr1,yr1')
@@ -367,10 +421,46 @@ def main():
             segmentsTopo.table.conn.commit()
             segmentsTopo.close()
     if ICALC == 2:
+        # REMOVE THIS MESSAGE ONCE THIS IS INCLUDED IN INPUT-FILE BUILDER
         gscript.message('')
         gscript.message('ICALC=2 (8-point channel + floodplain) not supported')
         gscript.message('Continuing nonetheless.')
         gscript.message('')
+        if options['fp_width_pts'] is not '':
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            gscript.run_command('v.distance', from_=segments, 
+                                to=options['fp_width_pts'], upload='to_attr', 
+                                to_column=options['fp_width_pts_col'], 
+                                column='floodplain_width')
+        else:
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            print "***********"
+            segmentsTopo = VectorTopo(segments)
+            segmentsTopo.open('rw')
+            cur = segmentsTopo.table.conn.cursor()
+            cur.execute("update "+segments+" set floodplain_width="+str(options['fp_width_value']))
+            segmentsTopo.table.conn.commit()
+            segmentsTopo.close()
     if ICALC == 3:
         segmentsTopo = VectorTopo(segments)
         segmentsTopo.open('rw')
@@ -381,7 +471,7 @@ def main():
         cur.execute("update "+segments+" set BWDTH="+str(BWDTH))
         segmentsTopo.table.conn.commit()
         segmentsTopo.close()
-
+    
     # values that are 0
     gscript.message('')
     gscript.message('NOTICE: not currently used:')
