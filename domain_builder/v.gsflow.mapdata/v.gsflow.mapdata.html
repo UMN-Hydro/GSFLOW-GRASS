@@ -2,11 +2,11 @@
 
 <em>v.gsflow.mapdata</em> allows the user to add attributes from any raster or vector (area or point) data set to a GSFLOW set of HRUs, MODFLOW grid cells, stream segments, or stream reaches. It does so by using either an averaging or a nearest-neighbor approach, depending on the type of both the data source geometry (raster, vector area, vector point) and, if it is a vector, the data source in the column (integer, string (varchar), or float (double precision)).<br>
 
-Nearest-neighbor (v.distance) is used for:<br>
+Nearest-neighbor (<a href="v.distance">v.distance</a>,) is used for:<br>
 Vector point data<br>
 Vector area data in which the data type in the column that is queried is integer or varchar<br>
 
-An average (v.rast.stats) is used for:<br>
+An average (<a href="v.rast.stats">v.rast.stats</a>,) is used for:<br>
 Raster data<br>
 Vector area data with data in the column that is queried that is of "double precision" type<br>
 
