@@ -149,7 +149,7 @@ def main():
         g.region(vector=options['map'], res=options['dxy'])
         v.to_rast(input=options['vector_area'], output='tmp___tmp',
                   use='attr', attribute_column=options['from_column'],
-                  quiet=True)
+                  quiet=True, overwrite=True)
         if attrtype is 'double precision':
             v.rast_stats(map=options['map'], raster='tmp___tmp',
                          column_prefix='tmp', method='average', flags='c',
@@ -162,34 +162,43 @@ def main():
             except:
                 pass
             v.db_renamecolumn(map=options['map'],
-                              column='tmp_average,'+options['column'], 
+                              column=['tmp_average',options['column']], 
                               quiet=True)
         else:
-            v.db_addcolumn(map=options['map'], columns=options['column'],
-                           quiet=True)
+            try:
+                v.db_dropcolumn(map=options['map'],
+                                columns=options['column'],
+                                quiet=True)
+                v.db_addcolumn(map=options['map'],
+                               columns=options['column']+' '+attrtype,
+                               quiet=True)
+            except:
+                pass
             gscript.run_command('v.distance', from_=options['map'],
-                                to=options['vector_points'],
-                                upload='to_attr', to_column='from_column',
+                                to=options['vector_area'],
+                                upload='to_attr',
+                                to_column=options['from_column'],
                                 column=options['column'], quiet=True)
 
     elif options['vector_points'] is not '':
-        v.db_addcolumn(map=options['map'], columns=options['column'],
-                       quiet=True)
+        try:
+            v.db_dropcolumn(map=options['map'],
+                            columns =+options['column'],
+                            quiet=True)
+            v.db_addcolumn(map=options['map'],
+                           columns=options['column']+' '+attrtype,
+                           quiet=True)
+        except:
+            pass
         gscript.run_command('v.distance', from_=options['map'],
                             to=options['vector_points'],
-                            upload='to_attr', to_column='from_column',
+                            upload='to_attr', to_column=options['from_column'],
                             column=options['column'], quiet=True)
     
     elif options['raster'] is not '':
         v.rast_stats(map=options['map'], raster=options['raster'],
                      column_prefix='tmp', method='average', flags='c', 
                      quiet=True)
-        try:
-            v.db_dropcolumn(map=options['map'],
-                            column='tmp_average,'+options['column'], 
-                            quiet=True)
-        except:
-            pass
         v.db_renamecolumn(map=options['map'],
                           column=['tmp_average',options['column']], quiet=True)
 
