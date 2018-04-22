@@ -33,7 +33,7 @@
 
 #%option G_OPT_V_INPUT
 #%  key: map
-#%  label: HRUs, MODFLOW grid, segments, or reaches
+#%  label: GSFLOW vect: HRUs, MODFLOW grid, gravres, segments, or reaches
 #%  required: yes
 #%  guidependency: layer,column
 #%end
