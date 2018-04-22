@@ -84,7 +84,7 @@
 #%option
 #%  key: attrtype
 #%  type: string
-#%  description: Data type in column
+#%  description: Data type in column; user may treat int as float
 #%  options: int,float,string
 #%  required: no
 #%end
@@ -150,25 +150,31 @@ def main():
         v.to_rast(input=options['vector_area'], output='tmp___tmp',
                   use='attr', attribute_column=options['from_column'],
                   quiet=True, overwrite=True)
+        try:
+            gscript.message("Checking for existing column to overwrite")
+            v.db_dropcolumn(map=options['map'],
+                            columns=options['column'],
+                            quiet=True)
+        except:
+            pass
         if attrtype is 'double precision':
+            try:
+                gscript.message("Checking for existing column to overwrite")
+                v.db_dropcolumn(map=options['map'],
+                                columns='tmp_average',
+                                quiet=True)
+            except:
+                pass
             v.rast_stats(map=options['map'], raster='tmp___tmp',
                          column_prefix='tmp', method='average', flags='c',
                          quiet=True)
             g.remove(type='raster', name='tmp___tmp', flags='f', quiet=True)
-            try:
-                v.db_dropcolumn(map=options['map'],
-                                column='tmp_average,'+options['column'],
-                                quiet=True)
-            except:
-                pass
             v.db_renamecolumn(map=options['map'],
                               column=['tmp_average',options['column']], 
                               quiet=True)
+
         else:
             try:
-                v.db_dropcolumn(map=options['map'],
-                                columns=options['column'],
-                                quiet=True)
                 v.db_addcolumn(map=options['map'],
                                columns=options['column']+' '+attrtype,
                                quiet=True)
@@ -179,11 +185,11 @@ def main():
                                 upload='to_attr',
                                 to_column=options['from_column'],
                                 column=options['column'], quiet=True)
-
     elif options['vector_points'] is not '':
         try:
+            gscript.message("Checking for existing column to overwrite")
             v.db_dropcolumn(map=options['map'],
-                            columns =+options['column'],
+                            columns = options['column'],
                             quiet=True)
             v.db_addcolumn(map=options['map'],
                            columns=options['column']+' '+attrtype,
@@ -196,11 +202,20 @@ def main():
                             column=options['column'], quiet=True)
     
     elif options['raster'] is not '':
+        try:
+            gscript.message("Checking for existing column to overwrite")
+            v.db_dropcolumn(map=options['map'],
+                            columns=options['column'],
+                            quiet=True)
+        except:
+            pass
         v.rast_stats(map=options['map'], raster=options['raster'],
                      column_prefix='tmp', method='average', flags='c', 
                      quiet=True)
         v.db_renamecolumn(map=options['map'],
                           column=['tmp_average',options['column']], quiet=True)
+
+    gscript.message("Done.")
 
 if __name__ == "__main__":
     main()
