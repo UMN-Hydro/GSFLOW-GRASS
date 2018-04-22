@@ -447,3 +447,7 @@ Our extensions are stored at both our GitHub repository and in the official GRAS
 #### If you make modifications, please contact us.
 
 We would be happy to include your contributions in the main code base, and any changes to the GRASS GIS commands to the main GRASS GIS extensions (add-ons) repository: this will help future users!
+
+## Visitors since April 22nd, 2018
+
+[![HitCount](http://hits.dwyl.io/umn-hydro/GSFLOW-GRASS.svg)](http://hits.dwyl.io/umn-hydro/GSFLOW-GRASS)
