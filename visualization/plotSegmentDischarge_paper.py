@@ -49,22 +49,27 @@ p_dates = []
 #ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last, but last entry isn't read in properly, so use -2 instead)
 #p_dates = ['1993-01-09']
 
-# - Shullcas 
-# run plotSegmentDischarge_paper.py /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas_gcng.ini
-## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas_gcng.ini
-figName = 'Shullcas_Q'
-p_dates = ['2015-02-15']
-figsize0 = (7.5,5.5) # default (8W,6H) [inches]
-plot_pos = (0,1) # row 0, col 1 
-xlim = [480, 498]
-ylim = [8665, 8689]
-plot_ti_ltr = 'C) '
+## - Shullcas 
+## run plotSegmentDischarge_paper.py /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/Shullcas_gcng.ini
+### run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/Shullcas_gcng.ini
+#figName = 'Shullcas_Q'
+#p_dates = ['2015-02-15']
+##figsize0 = (7.5,5.5) # default (8W,6H) [inches]
+#plot_pos = (0,1) # row 0, col 1 
+#xlim = [480, 498]
+#ylim = [8665, 8689]
+##plot_ti_ltr = 'C) '
 
 
-## - Santa Rosa 
+# - Santa Rosa 
+# run plotSegmentDischarge_paper.py /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa_WaterCanyon_gcng.ini
-#figName = 'SR_Q'
-#p_dates = ['2017-02-17']
+figName = 'SR_Q'
+p_dates = ['2017-02-17']
+plot_pos = (0,1) # row 0, col 1 
+xlim = [213, 220]
+ylim = [3760, 3766]
+#plot_ti_ltr = 'C) '
 
 ## - Cannon River - 2 layer
 ## run plotSegmentDischarge_paper.py /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini

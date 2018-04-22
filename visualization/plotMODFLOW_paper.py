@@ -34,21 +34,21 @@ fl_same_cax_lay = 0 # default: different caxis for each layer
 # - Santa Rosa: (run 2x, once for head and once for hydcond)
 # run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p wtd
 ## run plotMODFLOW_paper.py -i /media/gcng/STORAGE3A/ANDY/GSFLOW/SantaRosa_WaterCanyon_gcng.ini -p wtd
-#ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
-#figsize0 = (7.5,5.5) # default (8W,6H) [inches]
-#plot_pos = (0,2) # row 0, col 2 
-#xlim = [213, 220]
-#ylim = [3760, 3766]
-#figName = 'SR_wtd'
-#site_i = 2 # Sta Rosa WTD
-# run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p hydcond
 ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
 figsize0 = (7.5,5.5) # default (8W,6H) [inches]
-plot_pos = (1,2) # row 1, col 2 
+plot_pos = (0,2) # row 0, col 2 
 xlim = [213, 220]
 ylim = [3760, 3766]
-figName = 'SR_hydcond'
-site_i = 3 # Sta Rosa hydcond
+figName = 'SR_wtd'
+site_i = 2 # Sta Rosa WTD
+## run plotMODFLOW_paper.py -i /home/gcng/workspace/ProjectFiles/GSFLOW-GRASS_ms/examples4ms/SantaRosa_WaterCanyon_gcng.ini -p hydcond
+#ptime_ind = [-1] # plot only this time index, starts at 0 (-1 for last)
+#figsize0 = (7.5,5.5) # default (8W,6H) [inches]
+#plot_pos = (1,2) # row 1, col 2 
+#xlim = [213, 220]
+#ylim = [3760, 3766]
+#figName = 'SR_hydcond'
+#site_i = 3 # Sta Rosa hydcond
 
 # - Cannon River 2 layer (run below blocks separately):
 ## run plotMODFLOW_paper.py -i /media/gcng/STORAGE3A/ANDY/GSFLOW/CannonRiver_2layer_gcng.ini -p wtd
@@ -538,7 +538,8 @@ if not static_plot:
 
                 ctr = ctr + 1
             #    plt.show()
-            if site_i == 1: # Shullcas
+#            if site_i == 1: # Shullcas
+            if site_i > 0: # 
                 av[lay_i].set_aspect('equal') # keep this for Shullcas
                 plt.xlim(xlim)  
                 plt.ylim(ylim)  
