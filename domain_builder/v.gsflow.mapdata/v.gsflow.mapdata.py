@@ -38,10 +38,6 @@
 #%  guidependency: layer,column
 #%end
 
-#%rules
-#% required: vector_area, vector_points, raster
-#%end
-
 #%option G_OPT_V_INPUT
 #%  key: vector_area
 #%  label: Input vector area (polygon) data set (e.g., geologic map)
@@ -75,14 +71,14 @@
 #%  key: column
 #%  type: string
 #%  description: Column to which to upload data (will create if doesn't exist)
-#%  required: yes
+#%  required: no
 #%end
 
 #%option
 #%  key: from_column
 #%  type: string
 #%  description: Column from which to upload data (for vector input)
-#%  required: yes
+#%  required: no
 #%end
 
 #%option
@@ -90,8 +86,15 @@
 #%  type: string
 #%  description: Data type in column
 #%  options: int,float,string
-#%  required: yes
+#%  required: no
 #%end
+
+#%rules
+#% exclusive: vector_area, vector_points, raster
+#% requires: vector_area, column, from_column, attrtype
+#% requires: vector_points, column, from_column, attrtype
+#%end
+
 
 ##################
 # IMPORT MODULES #
@@ -149,7 +152,8 @@ def main():
                   quiet=True)
         if attrtype is 'double precision':
             v.rast_stats(map=options['map'], raster='tmp___tmp',
-                         column_prefix='tmp_', method='average', quiet=True)
+                         column_prefix='tmp', method='average', flags='c',
+                         quiet=True)
             g.remove(type='raster', name='tmp___tmp', flags='f', quiet=True)
             try:
                 v.db_dropcolumn(map=options['map'],
@@ -158,33 +162,36 @@ def main():
             except:
                 pass
             v.db_renamecolumn(map=options['map'],
-                              column='tmp_average,'+options['column'], quiet=True)
+                              column='tmp_average,'+options['column'], 
+                              quiet=True)
         else:
             v.db_addcolumn(map=options['map'], columns=options['column'],
                            quiet=True)
             gscript.run_command('v.distance', from_=options['map'],
-                                to=options['vector_point'],
+                                to=options['vector_points'],
                                 upload='to_attr', to_column='from_column',
                                 column=options['column'], quiet=True)
 
-    elif options['vector_point'] is not '':
+    elif options['vector_points'] is not '':
         v.db_addcolumn(map=options['map'], columns=options['column'],
                        quiet=True)
         gscript.run_command('v.distance', from_=options['map'],
-                            to=options['vector_point'],
+                            to=options['vector_points'],
                             upload='to_attr', to_column='from_column',
                             column=options['column'], quiet=True)
     
     elif options['raster'] is not '':
         v.rast_stats(map=options['map'], raster=options['raster'],
-                     column_prefix='tmp_', method='average', quiet=True)
+                     column_prefix='tmp', method='average', flags='c', 
+                     quiet=True)
         try:
             v.db_dropcolumn(map=options['map'],
-                            column='tmp_average,'+options['column'], quiet=True)
+                            column='tmp_average,'+options['column'], 
+                            quiet=True)
         except:
             pass
         v.db_renamecolumn(map=options['map'],
-                          column='tmp_average,'+options['column'], quiet=True)
+                          column=['tmp_average',options['column']], quiet=True)
 
 if __name__ == "__main__":
     main()
