@@ -23,6 +23,8 @@ try:
 except:
     sys.exit('Error opening or parsing input file: ' + settings_input_file)
 
+startdir = os.getcwd()
+
 ##################
 # IMPORT MODULES #
 ##################
@@ -80,11 +82,10 @@ if Settings.DEM_input != '':
     r.hydrodem(input=DEM_original_import, output=DEM, flags='a', overwrite=True)
     # No offmap flow
     r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='s', overwrite=True)
-    r.mapcalc(accumulation_onmap+' = '+accumulation+' * ('+accumulation+' > 0)', overwrite=True)
-    r.null(map=accumulation_onmap, setnull=0)
+    r.mapcalc(accumulation_onmap+' = if('+accumulation+'>0,'+accumulation+',null())', overwrite=True)
     r.mapcalc('tmp'+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
-    g.copy(raster=('tmp',DEM), overwrite=True)
-    # Ensure that null cells are shared
+    g.rename(raster=('tmp',DEM), overwrite=True)
+    # Ensure that null cells are shared -- should be unnecessary!
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
     # Repeat is sometimes needed
     r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
@@ -107,8 +108,16 @@ v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, output_stre
 
 # GSFLOW segments: sections of stream that define subbasins
 v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc,
-                  roughch=Settings.channel_Mannings_n, 
+                  roughch_value=Settings.channel_Mannings_n, 
+                  roughch_raster=Settings.channel_Mannings_n_grid,
+                  roughch_points=Settings.channel_Mannings_n_vector,
+                  roughch_pt_col=Settings.channel_Mannings_n_vector_col,
                   width1=Settings.channel_width, width2=Settings.channel_width, 
+                  width_points=Settings.channel_width_vector,
+                  width_points_col=Settings.channel_width_vector_col,
+                  fp_width_value=Settings.floodplain_width,
+                  fp_width_pts=Settings.floodplain_width_vector,
+                  fp_width_pts_col=Settings.floodplain_width_vector_col,
                   overwrite=True)
 
 # MODFLOW grid & basin mask (1s where basin exists and 0 where it doesn't)
@@ -176,8 +185,9 @@ for _vector_file in [segments, reaches]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
 for _vector_file in [pour_point, bc_cell]:
     v.out_ogr(input=_vector_file, output=_vector_file, type='point', quiet=True, overwrite=True)
-os.chdir('..')
-os.chdir('..')
+#os.chdir('..')
+#os.chdir('..')
+os.chdir(startdir)
 
 print ""
 print "Done."

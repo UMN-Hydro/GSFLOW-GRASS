@@ -72,8 +72,16 @@ class Settings(object):
         self.outlet_point_y = parser.get('GRASS', 'outlet_point_y')
         self.icalc = parser.get('GRASS', 'icalc')
         self.channel_Mannings_n = parser.get('GRASS', 'channel_Mannings_n')
+        self.channel_Mannings_n_grid = parser.get('GRASS', 'channel_Mannings_n_grid')
+        self.channel_Mannings_n_vector = parser.get('GRASS', 'channel_Mannings_n_vector')
+        self.channel_Mannings_n_vector_col = parser.get('GRASS', 'channel_Mannings_n_vector_col')
         #self.overbank_Mannings_n = parser.get('GRASS', 'overbank_Mannings_n')
         self.channel_width = parser.get('GRASS', 'channel_width')
+        self.channel_width_vector = parser.get('GRASS', 'channel_width_vector')
+        self.channel_width_vector_col = parser.get('GRASS', 'channel_width_vector_col')
+        self.floodplain_width = parser.get('GRASS', 'floodplain_width')
+        self.floodplain_width_vector = parser.get('GRASS', 'floodplain_width_vector')
+        self.floodplain_width_vector_col = parser.get('GRASS', 'floodplain_width_vector_col')
 
         # create directories if they do not exist:
         if not os.path.isdir(self.control_dir):
