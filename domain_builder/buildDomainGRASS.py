@@ -48,6 +48,8 @@ DEM_original_import = 'DEM_original_import'   # Raw DEM
 DEM                 = 'DEM'                   # DEM after offmap flow removed
 DEM_MODFLOW         = 'DEM_MODFLOW'           # DEM for MODFLOW
 cellArea_meters2    = 'cellArea_meters2'      # Grid cell size
+flow_weights        = 'flow_weights'          # Weights for flow inputs (Q)
+flow                = 'flow'                  # Weighted (A * weights) Q/cell
 accumulation        = 'accumulation'          # Flow accumulation
 accumulation_onmap  = 'accumulation_onmap'    # Flow accum: no off-map flow
 draindir            = 'draindir'              # Drainage direction
@@ -78,10 +80,19 @@ if Settings.DEM_input != '':
     # Build flow accumulation with only fully on-map flow
     # Cell areas
     r.cell_area(output=cellArea_meters2, units='m2', overwrite=True)
+    # Flow weights (e.g., precipitation
+    # Test first if it is an existing raster; if not, import
+    rastersAll = np.array(list(set(list(gscript.parse_command('g.list', type='raster')))))
+    if Settings.flow_weights in rastersAll:
+        # NOTE: Here, this might not necessarily be called "flow_weights"
+        r.mapcalc(flow+' = '+cellArea_meters2 * Settings.flow_weights, overwrite=True)
+    else:
+        r.in_gdal(input=Settings.flow_weights, output=flow_weights, overwrite=True)
+        r.mapcalc(flow+' = '+cellArea_meters2 * flow_weights, overwrite=True)
     # Hydrologic correction
     r.hydrodem(input=DEM_original_import, output=DEM, flags='a', overwrite=True)
     # No offmap flow
-    r.watershed(elevation=DEM, flow=cellArea_meters2, accumulation=accumulation, flags='s', overwrite=True)
+    r.watershed(elevation=DEM, flow=flow, accumulation=accumulation, flags='s', overwrite=True)
     r.mapcalc(accumulation_onmap+' = if('+accumulation+'>0,'+accumulation+',null())', overwrite=True)
     r.mapcalc('tmp'+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
     g.rename(raster=('tmp',DEM), overwrite=True)
@@ -91,12 +102,11 @@ if Settings.DEM_input != '':
     r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
 
-
 # Set region
 g.region(raster=DEM_original_import)
 
 # Build streams and sub-basins
-r.stream_extract(elevation=DEM, accumulation=accumulation_onmap, stream_raster=streams_all, stream_vector=streams_all, threshold=Settings.drainage_area_threshold, direction=draindir, d8cut=0, overwrite=True)
+r.stream_extract(elevation=DEM, accumulation=accumulation_onmap, stream_raster=streams_all, stream_vector=streams_all, threshold=Settings.drainage_threshold, direction=draindir, d8cut=0, overwrite=True)
 r.stream_basins(direction=draindir, stream_rast=streams_all, basins=basins_all, overwrite=True)
 r.to_vect(input=basins_all, output=basins_all, type='area', flags='v', overwrite=True)
 

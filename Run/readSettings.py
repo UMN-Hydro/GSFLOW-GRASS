@@ -66,7 +66,8 @@ class Settings(object):
         # GRASS GIS variables
         self.GIS_output_rootdir = self.gsflow_simdir + slashstr + 'GIS'
         self.DEM_input = parser.get('GRASS', 'DEM_file_path_to_import')
-        self.drainage_area_threshold = parser.get('GRASS', 'threshold_drainage_area_meters2')
+        self.drainage_threshold = parser.get('GRASS', 'threshold_drainage')
+        self.flow_weights = parser.get('GRASS', 'flow_weights')
         self.MODFLOW_grid_resolution = parser.get('GRASS', 'MODFLOW_grid_resolution_meters')
         self.outlet_point_x = parser.get('GRASS', 'outlet_point_x')
         self.outlet_point_y = parser.get('GRASS', 'outlet_point_y')
