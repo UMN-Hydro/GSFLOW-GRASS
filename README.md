@@ -251,15 +251,13 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | init_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
 | init_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
 
-#### "domain" section
+#### "time" section
 
 | Option             | Description
 | ------------------ | ---------
 | **start_date**     | Start date of simulation, format: YYYY-MM-DD
 | **end_date**       | End date of simulation, format: YYYY-MM-DD
 | **init_start_date**| Set to the **start_date** of the spinup run used as initial conditions.<br>Note that **spinup_end_date** is assumed to be 1 day previous to **start_date**.<br>Format: YYYY-MM-DD
-| **NLAY**           | Integer number of vertical layers
-| **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.<br>There is a no-flow boundary condition at the base of the bottom layer.
 
 #### "GRASS_drainage" section
 
@@ -299,6 +297,8 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 
 | Option             | Description
 | ------------------ | ---------
+| **NLAY**           | Integer number of vertical layers in the subsurface
+| **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.<br>There is a no-flow boundary condition at the base of the bottom layer.
 | **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
 | **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
 | finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
