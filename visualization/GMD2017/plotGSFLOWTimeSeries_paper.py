@@ -20,6 +20,7 @@ import pandas as pd
 import datetime as dt
 import matplotlib.dates as mdates
 import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
+plt.ion()
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -113,7 +114,7 @@ multi=2
 ## run script with F5
 plot_title = 'Cannon River'
 gsflow_csv_fil = '/home/awickert/GSFLOW/CannonRiver_2layer' + '/outputs/PRMS_GSFLOW/gsflow.csv'  # gsflow time series data
-basin_area = 3078.39 * 4046.85642  # acre -> m2 # WRONG!!!!!!!!
+basin_area = 3783E6 #3078.39 * 4046.85642  # acre -> m2 # WRONG!!!!!!!!
 PlotVar = []
 PlotVar.append('basinppt')
 PlotVar.append('basinstrmflow')
@@ -124,6 +125,7 @@ savefigfile = 'C_timeseries'
 clr = ['b', 'k', 'r', 'g']
 plot_title_ltr = 'Streamflow and Precipitation'
 multi=2
+
 
 # font sizes
 mult = 1
@@ -224,10 +226,24 @@ for ii in range(len(PlotVar)):
         lns = lns + ln0
      
 #    plt.plot(range(len(data)), data[PlotVar[ii]])
-    plt.show
+#    plt.show
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
 #    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.gcf().autofmt_xdate()    
+
+# Plus data for the Cannon
+cd = pd.read_csv('/home/awickert/Dropbox/Papers/Submitted/GSFLOW-GRASS/figures/inprogress/hydro_data_39004002_1909-07-01_2018-04-21.csv', infer_datetime_format=True, parse_dates=True, index_col=1)
+idx = (cd.index > pd.datetime(1940, 11, 6)) * (cd.index < pd.datetime(1943, 11, 5))
+ln0 = ax1.plot(cd['Discharge (cfs)'][idx]/35.3146667*(3600*24*1000/3723E6), '-', color='0.7', linewidth=2)
+lns = lns + ln0
+PlotVar += ['Welch, MN gauge']
+print np.mean(cd['Discharge (cfs)'][idx])/35.3146667*(3600*24*1000/3723E6)
+print np.std(cd['Discharge (cfs)'][idx])/35.3146667*(3600*24*1000/3723E6)
+# From model
+print np.mean(conv*data['basinstrmflow'])
+print np.std(conv*data['basinstrmflow'])
+
+
 
 #ax1.set_xlim(dateList[-pTimeLastNDays-1],dateList[-1])
 ax1.set_xlim(dateList[0],dateList[-1])
