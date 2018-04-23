@@ -226,27 +226,30 @@ The **Settings** file holds user-defined information that defines how GSFLOW is 
 
 Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required, and those that are ***Boldface and italic*** font is used to represent one of a set of options that must be given, dpeending on the value of a particular switch variable that is set. Each `*.ini` file includes:
 
-#### "settings" section
+#### "paths" section
 
 | Option             | Description
 | ------------------ | ---------
 | **proj_name**      | Label for the project; no spaces
 | **gsflow_exe**     | Full pathname for GSFLOW executable
+| **gsflow_ver** | GSFLOW version number
 | **gsflow_path_simdir** | Full pathname for location where GSFLOW simulation<br>directory should go.
-| **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
-| ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>Format is:<br>`SITE_NAME Met station data (in degrees Celcius and mm/d)`<br>`tmax 1`<br>`tmin 1`<br>`precip 1`<br>`###########################################`<br>`YYYY MM DD HH MM SS T_max T_min Precip`<br>`...continue this pattern until the end of the data set...`<br>One line should be included per day.<br>`HH`, `MM`, and `SS` are all typically `0`
-| ***climate_hru_dir***    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
-| **sw_1spinup_2restart** | **1** for spin-up run starting from steady-state MODFLOW period<br>**2** for restart run starting from states saved in the below files
-| init_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
-| init_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
 
-#### "custom_params" section
+#### "GRASS_core" section
 
 | Option             | Description
 | ------------------ | ---------
-| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
-| **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
-| finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
+| **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
+| gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
+| version | Optional: GRASS GIS version number without any "." characters.<br>We used **73** or **74**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
+
+#### "run_mode" section
+
+| Option             | Description
+| ------------------ | ---------
+| **sw_1spinup_2restart** | **1** for spin-up run starting from steady-state MODFLOW period<br>**2** for restart run starting from states saved in the below files
+| init_PRMSfil | optional: for restart runs (sw_1spinup_2restart=2)<br>full pathname of file that is saved under ``save_vars_to_file''<br>in the GSFLOW control file during a previous run.<br>This entry won't be used (but should still be entered) if *sw_1spinup_2restart*=1<br>for startup runs.
+| init_MODfil | optional: for restart runs (sw_1spinup_2restart=2)<br>Full pathname of file that is saved under ``IWRT'' in the MODFLOW name file<br>during a previous run. This entry won't be used (but should still be entered)<br>if sw_1spinup_2restart= 1 for startup runs
 
 #### "domain" section
 
@@ -258,21 +261,47 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | **NLAY**           | Integer number of vertical layers
 | **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.<br>There is a no-flow boundary condition at the base of the bottom layer.
 
-#### GRASS section
+#### "GRASS_drainage" section
 
 | Option             | Description
 | ------------------ | ---------
-| **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
 | **threshold_drainage_area_meters2** | Threshold drainage area in square meters at which flow is considered to create<br>a channel
 | **MODFLOW_grid_resolution_meters** | Target cell side length in meters for MODFLOW grid; side lengths will not be<br>exactly this long, as the nearest value to create an integer number<br>of cells in the domain will be chosen.
 | **outlet_point_x** | Pour point approximate x (Easting) position; the nearest stream<br>segment to this point is chosen as the true pour point.
 | **outlet_point_y** | Pour point approximate y (Northing) position; the nearest stream<br>segment to this point is chosen as the true pour point.
+
+#### "GRASS_hydraulics" section
+
+| Option             | Description
+| ------------------ | ---------
 | **icalc** | Method selector for hydraulic geometry computation<br>**0:** Constant<br>**1:** Manning's equation with the wide channel assumption.<br>**2:** Manning's Equation.<br>**3:** Power-law relationship between width, depth, velocity,<br/>and discharge, per Leopold and Maddock (1953)<br>This input file is set up to work for **icalc = 1**.
-| **channel_Mannings_n** | In-channel flow resistance
-| overbank_Mannings_n | Overbank flow resistance (not used)
-| **channel_width** | Channel width for calculating flow resistance.<br>Currently uniform across the watershed.<br>This is not particularly realistic; we suggest that users customize this based<br>on drainage area, dowsnream hydraulic geometry regime relationships, and/or<br>field-surveyed channel geometries.<br> This can be done using **v.db.update** inside GRASS, or by editing the exported<br>CSV file. Note that there are two widths on each segment: width1 (upstream)<br>and width2 (downstream); this option sets both, but they may be changed by<br>hand to produce gradually-varying hydraulic geometries.
-| gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
-| version | Optional: GRASS GIS version number without any "." characters.<br>We used **73** or **74**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
+| ***channel_Mannings_n*** | In-channel flow resistance as a uniform value;<br>is overridden by the following Manning's n<br>options if they are chosen
+| ***channel_Mannings_n_grid*** | Gridded in-channel flow resistance GRASS raster data<br>source
+| ***channel_Mannings_n_vector*** | Point-based in-channel flow resistance GRASS vector<br>data source
+| ***channel_Mannings_n_vector_col*** | Column in GRASS point data vector with Manning's n<br>values
+| overbank_Mannings_n | Overbank flow resistance as a single value (not used)
+| ***channel_width*** | Channel width for calculating flow resistance.<br>Currently uniform across the watershed.<br>This is not particularly realistic; we suggest that users customize this based<br>on drainage area, dowsnream hydraulic geometry regime relationships, and/or<br>field-surveyed channel geometries.<br> This can be done using **v.db.update** inside GRASS, or by editing the exported<br>CSV file. Note that there are two widths on each segment: width1 (upstream)<br>and width2 (downstream); this option sets both, but they may be changed by<br>hand to produce gradually-varying hydraulic geometries.<br>This is overridden by either of the spatially distributed<br>options below.
+| ***channel_width_vector*** | GRASS vector data source with point measurements of<br>channel width; widths for each river segment are chosen<br>via a nearest-neighbor method.
+| ***channel_width_vector_col*** | Column in GRASS point data vector with channel<br>width values
+| ***floodplain_width*** | Floodplain width for when ICALC=3<br>Used with 8-point channel<br>Not currently enabled<br>Uniform value; is overridden by the following two options
+| ***floodplain_width_vector*** | GRASS point vector with floodplain width measurements;<br>widths for each river segment are chosen<br>via a nearest-neighbor method.
+| ***floodplain_width_vector_col*** | Column in GRASS point data vector with floodplain<br>width values
+
+#### "climate_inputs" section
+
+| Option             | Description
+| ------------------ | ---------
+| **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
+| ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>Format is:<br>`SITE_NAME Met station data (in degrees Celcius and mm/d)`<br>`tmax 1`<br>`tmin 1`<br>`precip 1`<br>`###########################################`<br>`YYYY MM DD HH MM SS T_max T_min Precip`<br>`...continue this pattern until the end of the data set...`<br>One line should be included per day.<br>`HH`, `MM`, and `SS` are all typically `0`
+| ***climate_hru_dir***    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
+
+#### "hydrogeologic_inputs" section
+
+| Option             | Description
+| ------------------ | ---------
+| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
+| **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
+| finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
 ### Step 2. Running GRASS GIS to build the model domain
 
@@ -447,3 +476,7 @@ Our extensions are stored at both our GitHub repository and in the official GRAS
 #### If you make modifications, please contact us.
 
 We would be happy to include your contributions in the main code base, and any changes to the GRASS GIS commands to the main GRASS GIS extensions (add-ons) repository: this will help future users!
+
+## Visitors since April 22nd, 2018
+
+[![HitCount](http://hits.dwyl.io/umn-hydro/GSFLOW-GRASS.svg)](http://hits.dwyl.io/umn-hydro/GSFLOW-GRASS)
