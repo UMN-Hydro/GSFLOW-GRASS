@@ -6,7 +6,7 @@ do
 	echo $folder
 	echo --------------------------------------
 	cd $folder
-	make MODULE_TOPDIR=/usr/local/grass-7.3.svn
+	make MODULE_TOPDIR=/usr/local/grass-7.4.svn
 	cd ..
 done
 
