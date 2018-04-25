@@ -63,26 +63,30 @@ class Settings(object):
         self.PRMSoutput_dir = self.gsflow_simdir + slashstr + self.PRMSoutput_dir_rel
         self.MODFLOWoutput_dir = self.gsflow_simdir + slashstr + self.MODFLOWoutput_dir_rel
         
-        # GRASS GIS variables
+        # GRASS GIS core variables
         self.GIS_output_rootdir = self.gsflow_simdir + slashstr + 'GIS'
-        self.DEM_input = parser.get('GRASS', 'DEM_file_path_to_import')
-        self.drainage_threshold = parser.get('GRASS', 'threshold_drainage')
-        self.flow_weights = parser.get('GRASS', 'flow_weights')
-        self.MODFLOW_grid_resolution = parser.get('GRASS', 'MODFLOW_grid_resolution_meters')
-        self.outlet_point_x = parser.get('GRASS', 'outlet_point_x')
-        self.outlet_point_y = parser.get('GRASS', 'outlet_point_y')
-        self.icalc = parser.get('GRASS', 'icalc')
-        self.channel_Mannings_n = parser.get('GRASS', 'channel_Mannings_n')
-        self.channel_Mannings_n_grid = parser.get('GRASS', 'channel_Mannings_n_grid')
-        self.channel_Mannings_n_vector = parser.get('GRASS', 'channel_Mannings_n_vector')
-        self.channel_Mannings_n_vector_col = parser.get('GRASS', 'channel_Mannings_n_vector_col')
-        #self.overbank_Mannings_n = parser.get('GRASS', 'overbank_Mannings_n')
-        self.channel_width = parser.get('GRASS', 'channel_width')
-        self.channel_width_vector = parser.get('GRASS', 'channel_width_vector')
-        self.channel_width_vector_col = parser.get('GRASS', 'channel_width_vector_col')
-        self.floodplain_width = parser.get('GRASS', 'floodplain_width')
-        self.floodplain_width_vector = parser.get('GRASS', 'floodplain_width_vector')
-        self.floodplain_width_vector_col = parser.get('GRASS', 'floodplain_width_vector_col')
+        self.DEM_input = parser.get('GRASS_core', 'DEM_file_path_to_import')
+        
+        # GRASS GIS drainage variables
+        self.drainage_threshold = parser.get('GRASS_drainage', 'threshold_drainage')
+        self.flow_weights = parser.get('GRASS_drainage', 'flow_weights')
+        self.MODFLOW_grid_resolution = parser.get('GRASS_drainage', 'MODFLOW_grid_resolution_meters')
+        self.outlet_point_x = parser.get('GRASS_drainage', 'outlet_point_x')
+        self.outlet_point_y = parser.get('GRASS_drainage', 'outlet_point_y')
+        
+        # GRASS GIS hydraulics variables
+        self.icalc = parser.get('GRASS_hydraulics', 'icalc')
+        self.channel_Mannings_n = parser.get('GRASS_hydraulics', 'channel_Mannings_n')
+        self.channel_Mannings_n_grid = parser.get('GRASS_hydraulics', 'channel_Mannings_n_grid')
+        self.channel_Mannings_n_vector = parser.get('GRASS_hydraulics', 'channel_Mannings_n_vector')
+        self.channel_Mannings_n_vector_col = parser.get('GRASS_hydraulics', 'channel_Mannings_n_vector_col')
+        self.overbank_Mannings_n = parser.get('GRASS_hydraulics', 'overbank_Mannings_n')
+        self.channel_width = parser.get('GRASS_hydraulics', 'channel_width')
+        self.channel_width_vector = parser.get('GRASS_hydraulics', 'channel_width_vector')
+        self.channel_width_vector_col = parser.get('GRASS_hydraulics', 'channel_width_vector_col')
+        self.floodplain_width = parser.get('GRASS_hydraulics', 'floodplain_width')
+        self.floodplain_width_vector = parser.get('GRASS_hydraulics', 'floodplain_width_vector')
+        self.floodplain_width_vector_col = parser.get('GRASS_hydraulics', 'floodplain_width_vector_col')
 
         # create directories if they do not exist:
         if not os.path.isdir(self.control_dir):
@@ -98,11 +102,11 @@ class Settings(object):
 
         # -- problem-specifc variables
 
-        self.fl_print_climate_hru = int(parser.get('custom_inputs', 'fl_print_climate_hru'))
+        self.fl_print_climate_hru = int(parser.get('climate_inputs', 'fl_print_climate_hru'))
         if self.fl_print_climate_hru == 1:        
-            self.climate_data_file = parser.get('custom_inputs', 'climate_data_file')
+            self.climate_data_file = parser.get('climate_inputs', 'climate_data_file')
         elif self.fl_print_climate_hru == 0:
-            self.climate_hru_dir = parser.get('custom_inputs', 'climate_hru_dir')            
+            self.climate_hru_dir = parser.get('climate_inputs', 'climate_hru_dir')            
             climatehru_fils = ['tmin.day', 'tmax.day', 'precip.day', 'empty.day']
             for item in climatehru_fils:
                 source_fil = self.climate_hru_dir + slashstr + item
@@ -111,18 +115,18 @@ class Settings(object):
             sys.exit("Must choose 1 or 0 for 'fl_print_climate_hru'")
 
         # either single value for constant K or name of file with array [m/d]
-        self.fl_create_hydcond = int(parser.get('custom_inputs', 'fl_create_hydcond'))
-        hydcond0 = parser.get('custom_inputs', 'hydcond') 
+        self.fl_create_hydcond = int(parser.get('hydrogeologic_inputs', 'fl_create_hydcond'))
+        hydcond0 = parser.get('hydrogeologic_inputs', 'hydcond') 
         # either single value for spatially constant finf or name of file with array [m/d]
-        self.finf0 = parser.get('custom_inputs', 'finf') 
+        self.finf0 = parser.get('hydrogeologic_inputs', 'finf') 
 
-        self.START_DATE = parser.get('domain', 'start_date')
-        self.END_DATE = parser.get('domain', 'end_date')
+        self.START_DATE = parser.get('time', 'start_date')
+        self.END_DATE = parser.get('time', 'end_date')
         if self.sw_1spinup_2restart == 2:
-            self.INIT_START_DATE = parser.get('domain', 'init_start_date')
+            self.INIT_START_DATE = parser.get('time', 'init_start_date')
 
-        self.NLAY = int(parser.get('domain', 'NLAY'))
-        DZ_str = parser.get('domain', 'DZ')  # for NLAY>1, this is comma-separated list (e.g., dz=50, 100), spaces don't matter
+        self.NLAY = int(parser.get('hydrogeologic_inputs', 'NLAY'))
+        DZ_str = parser.get('hydrogeologic_inputs', 'DZ')  # for NLAY>1, this is comma-separated list (e.g., dz=50, 100), spaces don't matter
         value = DZ_str.split(',')
         self.DZ = []
         for ii in range(self.NLAY):
