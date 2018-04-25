@@ -86,9 +86,11 @@ if Settings.DEM_input != '':
     if Settings.flow_weights in rastersAll:
         # NOTE: Here, this might not necessarily be called "flow_weights"
         r.mapcalc(flow+' = '+cellArea_meters2 * Settings.flow_weights, overwrite=True)
-    else:
+    elif Settings.flow_weights is not '':
         r.in_gdal(input=Settings.flow_weights, output=flow_weights, overwrite=True)
         r.mapcalc(flow+' = '+cellArea_meters2 * flow_weights, overwrite=True)
+    else:
+        r.mapcalc(flow+' = '+cellArea_meters2, overwrite=True)
     # Hydrologic correction
     r.hydrodem(input=DEM_original_import, output=DEM, flags='a', overwrite=True)
     # No offmap flow
