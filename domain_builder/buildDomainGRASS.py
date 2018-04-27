@@ -193,11 +193,11 @@ except:
     pass
 os.chdir('shapefiles')
 for _vector_file in [HRUs, gravity_reservoirs, MODFLOW_grid, basin]:
-    v.out_ogr(input=_vector_file, output=_vector_file, type='area', format=ESRI_Shapefile, quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='area', format='ESRI_Shapefile', quiet=True, overwrite=True)
 for _vector_file in [segments, reaches]:
-    v.out_ogr(input=_vector_file, output=_vector_file, type='line', format=ESRI_Shapefile, quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='line', format='ESRI_Shapefile', quiet=True, overwrite=True)
 for _vector_file in [pour_point, bc_cell]:
-    v.out_ogr(input=_vector_file, output=_vector_file, type='point', format=ESRI_Shapefile, quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='point', format='ESRI_Shapefile', quiet=True, overwrite=True)
 #os.chdir('..')
 #os.chdir('..')
 os.chdir(startdir)
