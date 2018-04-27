@@ -193,23 +193,11 @@ except:
     pass
 os.chdir('shapefiles')
 for _vector_file in [HRUs, gravity_reservoirs, MODFLOW_grid, basin]:
-    try:
-        shutil.rmtree(_vector_file)
-    except:
-        pass
-    v.out_ogr(input=_vector_file, output=_vector_file, type='area', quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='area', format=ESRI_Shapefile, quiet=True, overwrite=True)
 for _vector_file in [segments, reaches]:
-    try:
-        shutil.rmtree(_vector_file)
-    except:
-        pass
-    v.out_ogr(input=_vector_file, output=_vector_file, type='line', quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='line', format=ESRI_Shapefile, quiet=True, overwrite=True)
 for _vector_file in [pour_point, bc_cell]:
-    try:
-        shutil.rmtree(_vector_file)
-    except:
-        pass
-    v.out_ogr(input=_vector_file, output=_vector_file, type='point', quiet=True, overwrite=True)
+    v.out_ogr(input=_vector_file, output=_vector_file, type='point', format=ESRI_Shapefile, quiet=True, overwrite=True)
 #os.chdir('..')
 #os.chdir('..')
 os.chdir(startdir)
