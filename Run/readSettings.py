@@ -136,12 +136,5 @@ class Settings(object):
               self.DZ.append(float(value[ii]))
 
 
-        hydcond0_arr_str = hydcond0
-        value = hydcond0_arr_str.split(',')
-        self.hydcond0 = []
-        for ii in range(self.NLAY):
-            try:
-              self.hydcond0.append(float(value[ii]))
-            except:
-              self.hydcond0 = hydcond0_arr_str
+        ydcond0 = hydcond0.split(',')
 

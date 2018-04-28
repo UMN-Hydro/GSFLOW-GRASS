@@ -56,20 +56,15 @@ if sw_scheme >= 2:
 # %%
 
 # Only run this script if using spatially distributed K
-try:
-   float(Settings.hydcond0)
-   fl_runscript = 0 # don't run this script, set constant K
-except ValueError:
-   fl_runscript = 1 # run this script to generate spatially variable K
-   hydcond_fil = Settings.hydcond0
-
-
-surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
-NLAY = Settings.NLAY
-
+fl_runscript = 0
+if len(Settings.hydcond0) == 1:
+    if type(Settings.hydcond0[0]) is str:
+        Settings.hydcond0 = settings.hydcond0[0]
+        fl_runscript = 1
 
 if fl_runscript == 1:
-
+    surfz_fil = Settings.GISinput_dir + slashstr + 'DEM.asc'
+    NLAY = Settings.NLAY
     f = open(surfz_fil, 'r')
     sdata = {}
     for i in range(6):
