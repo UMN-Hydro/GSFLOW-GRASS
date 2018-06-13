@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # stop on error in execution
 
 # full pathname for location of GSFLOWGRASS_toolkit
 toolkit_dir="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS"
