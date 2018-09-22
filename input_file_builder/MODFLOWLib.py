@@ -1043,7 +1043,6 @@ def make_sfr2_f_Mannings(GSFLOW_indir, infile_pre, reach_fil, dis_fil, segment_f
 
         # renumber IREACH to start at 1 for each segment
         reach_data_all['IREACH'].iloc[ind1] = range(1,len(ind1)+1)
-        reach_data_all.iloc[ind1,ind_IREACH[0]] = range(1,len(ind1)+1)
             
     # -- make sure STRTOP is within 1st layer 
     # - read in TOP and BOTM from .dis file
