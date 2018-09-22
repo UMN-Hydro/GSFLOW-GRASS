@@ -68,7 +68,7 @@ class Settings(object):
         self.DEM_input = parser.get('GRASS_core', 'DEM_file_path_to_import')
         
         # GRASS GIS drainage variables
-        self.drainage_threshold = parser.get('GRASS_drainage', 'threshold_drainage')
+        self.drainage_threshold = parser.get('GRASS_drainage', 'threshold_drainage_area_meters2')
         self.flow_weights = parser.get('GRASS_drainage', 'flow_weights')
         self.MODFLOW_grid_resolution = parser.get('GRASS_drainage', 'MODFLOW_grid_resolution_meters')
         self.outlet_point_x = parser.get('GRASS_drainage', 'outlet_point_x')
