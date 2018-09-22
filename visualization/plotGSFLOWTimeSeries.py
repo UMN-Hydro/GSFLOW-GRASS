@@ -126,7 +126,7 @@ for ii in range(len(PlotVar)):
     
     if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
         ln0 = ax2.plot(dateList, data[PlotVar[ii]], '--')
-        ax2.set_ylabel(unit)
+        ax2.set_ylabel(PlotVar[ii] + ' ' + unit)
     else:
         ln0 = ax1.plot(dateList, data[PlotVar[ii]])            
         ax1.set_ylabel(unit)
