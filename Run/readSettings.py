@@ -136,5 +136,5 @@ class Settings(object):
               self.DZ.append(float(value[ii]))
 
 
-        ydcond0 = hydcond0.split(',')
+        self.hydcond0 = hydcond0.split(',')
 
