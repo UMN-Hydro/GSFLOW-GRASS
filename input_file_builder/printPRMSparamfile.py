@@ -10,9 +10,9 @@ import numpy as np # matlab core
 import os  # os functions
 import pandas as pd # for data structures and reading in data from text file
 #from ConfigParser import SafeConfigParser
-import MODFLOWLib as mf
 import platform
 import sys
+
 
 if platform.system() == 'Linux':
     slashstr = '/'
@@ -32,6 +32,26 @@ else:
     settings_input_file = sys.argv[1]
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
+
+
+# From MODFLOWLib
+
+# function for parsing ASCII grid header in GIS data files
+def read_grid_file_header(fname):
+    f = open(fname, 'r')
+    sdata = {}
+    for i in range(6):
+        line = f.readline()
+        line = line.rstrip() # remove newline characters
+        key, value = line.split(': ')
+        try:
+          value = int(value)
+        except:
+          value = float(value)
+        sdata[key] = value
+    f.close()
+
+    return sdata
 
 
 # note on order of parameter values when there are 2 dimensions: 
@@ -99,7 +119,7 @@ HRUdata = pd.read_csv(HRUfil)
 reachdata = pd.read_csv(reachfil)
 gvrdata = pd.read_csv(gvrfil)
 
-griddata = mf.read_grid_file_header(GISgridfil)
+griddata = read_grid_file_header(GISgridfil)
 
 
 # 2 lines available for comments
