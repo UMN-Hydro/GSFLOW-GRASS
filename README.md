@@ -199,7 +199,6 @@ This seems like a lot of work to maintain when they could just look at the actua
   * `printGSFLOWControlfile.py`
   * `printPRMSparamfile.py`
   * `printMODFLOWInputs.py`
-  * `MODFLOWLib.py`
   * `createSpatialHydCond.py`
   * `printClimatehru.py`
 * `GSFLOW-GRASS -> Run ->`
@@ -459,7 +458,7 @@ The visualization scripts in the toolkit include the following:
 Our toolkit is set up to easily change hydraulic conductivity, climate, and infiltration inputs through the *Settings* File.  To change other model input parameters (described in the GSFLOW manual), the user must locate those entries in the Python input-file-builder scripts and edit the values there.  These scripts are in Toolkit_GSFLOW ->input_file_builder and include:
 * `printGSFLOWControlfile.py`: Builds GSFLOW control file, which controls model options.  See commented Section headings to make changes.
 * `printPRMSparamfile.py`: Builds PRMS parameter file, which contains all (non-stream) surface properties in "Section 2: Parameters."  While any of these may be customized, those of particular interest are commented with "# *** CHANGE FOR SPECIFIC SITE"
-* `MODFLOWLib.py`: Library of functions to build the various MODFLOW input files (used in `print_MODFLOW_inputs_res_NWT_current.py.`  See individual functions to change input parameters for the different corresponding MODFLOW packages.
+* `printMODFLOWInputs.py`: Includes functions to build the various MODFLOW input files.  See individual functions to change input parameters for the different corresponding MODFLOW packages.
 * Subdirectories of `domain_builder` hold the GRASS GIS commands. If the user needs to expand the set of variables exported under these commands, one should:
   1. Open the desired `.py` file and follow the pattern shown to edit its parser inputs/outputs (formatted comments near the top) and the Python code inside that first parses these comments and then runs GRASS GIS commands
   2. Ensure that you have a C compiler installed (gcc)
