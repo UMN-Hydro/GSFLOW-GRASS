@@ -1,11 +1,25 @@
 #!/bin/bash
 set -e # stop on error in execution
 
-# full pathname for location of GSFLOWGRASS_toolkit
-toolkit_dir="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS"
+# USAGE: ./goGSFLOW.sh [$SETTINGS_FILE_VAR] [$GSFLOW-GRASS_DIR]
 
 # full pathname for Settings File
-Settings_file="/home/gcng/workspace/ProjectFiles/GSFLOW-GRASS/Run/settings_template_spinup_mni_1p2p0.ini"
+if [ -z "$1" ]
+then
+    Settings_file="/home/awickert/models/GSFLOW-GRASS/examples/gridTestCannon.ini"
+else
+    Settings_file="$1"
+fi
+echo Settings_file = $Settings_file
+
+# full pathname for location of GSFLOWGRASS_toolkit
+if [ -z "$2" ]
+then
+    toolkit_dir="/home/awickert/models/GSFLOW-GRASS"
+else
+    toolkit_dir="$2"
+fi
+echo toolkit_dir = $toolkit_dir
 
 # ------------------------------------------------------------------------------
 # **For default implementation, user does not need to make changes to below lines**
