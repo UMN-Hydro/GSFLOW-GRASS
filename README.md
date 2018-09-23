@@ -384,10 +384,12 @@ Pat yourself on the back! The GRASS portion is complete.
 
 The goGSFLOW File (`goGSFLOW.sh` on Linux and `goGSFLOW.bat` on Windows) in the `Run` folder, is for pre-processing and running GSFLOW.
 
-At the top of the file, the user should customize:
+At the top of the file, the user may customize:
 
-* `toolkit_dir` full pathname for location of GSFLOWGRASS_toolkit
 * `settings_file` Full pathname for Settings File (customized in Step 1).
+* `toolkit_dir` full pathname for location of GSFLOWGRASS_toolkit
+
+Alternatively, for `goGSFLOW.sh`, the user may pass the `settings_file` as the first argument and (optionally) the `toolkit_dir` as the second argument.
 
 The rest of the file will execute scripts to: (1) set up certain model inputs (climate forcing data and hydraulic conductivity) according to the *Settings* File, (2) create GSFLOW input files (GSFLOW control file, PRMS parameter file, and MODFLOW input files), and (3) run GSFLOW.  In the default implementation, the user does not need to change the bottom part of the file with Python scripts.  However, certain lines may be commented out or changed, as described in the following:
 
