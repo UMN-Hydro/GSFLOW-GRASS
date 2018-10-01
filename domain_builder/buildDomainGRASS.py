@@ -75,6 +75,7 @@ bc_cell             = 'bc_cell'               # Grid cell for MODFLOW b.c.
 # And perform the standard starting tasks.
 # These take time, so skip if not needed
 if Settings.DEM_input != '':
+    print "Importing DEM and generating hydrologic correction"
     # Import DEM and set region
     r.in_gdal(input=Settings.DEM_input, output=DEM_original_import, overwrite=True)
     g.region(raster=DEM_original_import)
