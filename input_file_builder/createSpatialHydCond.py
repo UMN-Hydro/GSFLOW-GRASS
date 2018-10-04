@@ -59,7 +59,7 @@ if sw_scheme >= 2:
 fl_runscript = 0
 if len(Settings.hydcond0) == 1:
     if type(Settings.hydcond0[0]) is str:
-        Settings.hydcond0 = settings.hydcond0[0]
+        Settings.hydcond0 = Settings.hydcond0[0]
         fl_runscript = 1
 
 if fl_runscript == 1:
@@ -166,7 +166,7 @@ if fl_runscript == 1:
     
     #%% Write to File
         
-    fobj = open(hydcond_fil, 'w+')
+    fobj = open('hydcond_tmp_000001_fix_in_code.txt', 'w+')
     for ii in range(NLAY):
         fobj.write('Layer %d \n' % (ii+1))
         np.savetxt(fobj, hydcond[:,:,ii], delimiter=' ', fmt='%10g')        
