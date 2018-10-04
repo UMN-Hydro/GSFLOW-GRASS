@@ -766,7 +766,7 @@ def write_upw_MOD2_f2_2(GSFLOW_indir, infile_pre, surfz_fil, NLAY):
            hydcond[:,:,lay_i] = float(Settings.hydcond0[lay_i]) * hydcond[:,:,lay_i]
     except ValueError:
        for ii in range(NLAY):
-            hydcond[:,:,ii] = np.genfromtxt(Settings.hydcond0, skip_header=1+ii*(NROW+1), \
+            hydcond[:,:,ii] = np.genfromtxt(Settings.hydcond0[ii], skip_header=1+ii*(NROW+1), \
             max_rows=NROW, dtype=float)
            
     Ss = 2e-6*np.ones((NROW,NCOL,NLAY),float) # constant 2e-6 /m for Sagehen
