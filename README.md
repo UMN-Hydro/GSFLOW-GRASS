@@ -312,6 +312,8 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
   * We recommend naming the **"Project Location"** the same as **"proj_name"**.
   * No "Location Title" is needed.
   * We suggest that you **"Read projection and datum terms from a georeferenced data file"** to set the coordinate system. Each GRASS GIS location has only one coordinate system. Your DEM **must be in a projected coordinate system**: we do not test our codes using geographic (lat/lon) coordinate systems.
+  
+***Important***: Your **DEM** must be at least **2 full MODFLOW grid cells larger on each side than the catchment that you seek to model**. This will ensure that (1) offmap flow is not a problem and (2) the constant-head MODFLOW boundary condition at the outlet may properly be built. As additional cells with offmap flow inputs will be removed from the DEM, it is often wise to pad the DEM even more than this.
 
 ![GRASS GIS start-up screen](figures/GRASS_startup_screen.png)
 
