@@ -54,6 +54,7 @@ print '******************************************\n'
 
 #%% In general: don't change below here
 
+inches_to_mm = 25.4
 
 for filename in [HRUout_fil]:
     infile = file(filename, 'r')
@@ -78,8 +79,8 @@ _shape = _shapefile.GetLayer(0)
 dates = sorted(list(set(list(HRU_outputs.timestamp))))
 
 
-_min = np.min(HRU_outputs[plotting_variable])
-_max = np.max(HRU_outputs[plotting_variable])
+_min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
+_max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
 
 fig = plt.figure(figsize=(8,6))
 #plt.ion()
@@ -89,6 +90,7 @@ ax = plt.subplot(111)
 cax, _ = mpl.colorbar.make_axes(ax, location='right')
 cbar = mpl.colorbar.ColorbarBase(cax, cmap=cm.jet,
                norm=mpl.colors.Normalize(vmin=_min, vmax=_max))
+cbar.set_label('Precipitation [mm/day water equivalent]', fontsize=16)
 
 FFMpegWriter = manimation.writers['ffmpeg']
 metadata = dict(title='Movie Test', artist='Matplotlib',
@@ -110,7 +112,7 @@ with writer.saving(fig, moviefile_name, 100):
             except:
                 _values.append(np.nan)
                 #continue
-        _values = np.array(_values)
+        _values = np.array(_values) * inches_to_mm
         # Floating colorbar
         #colors = cm.jet(plt.Normalize( min(_values), max(_values)) (_values) )
         colors = cm.jet(plt.Normalize( _min, _max) (_values) )
