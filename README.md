@@ -436,10 +436,43 @@ After running GSFLOW, the user should check the following:
 
 
 ### Step 6. Visualization
-Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Each of these scripts can be run in Python using the following syntax at a Python console: *TODO: Andy - checking my wording, do you "run at a Python console"?*
+Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Most of of these scripts can be run using the following syntax
 
 ```bash
-run (visualization_script).py (Settings File full path)
+run <visualization_script>.py <Settings File full path> # in a Python shell
+./<visualization_script>.py <Settings File full path> # in bash (Unix shell)
+python <visualization_script>.py <Settings File full path> # bash or MS-DOS shell
+```
+
+However, `plotMODFLOW.py` is a bit more complicated because it has a parser that allows you to enter more options. Its help information follows:
+
+```
+usage: plotMODFLOW.py [-h] -i INFILE
+                      [-p {topo,head,wtd,dhead,hydcond,hydcond_vertical,ss,sy}]
+                      [-o OUTMOVIE]
+
+Plot animated time-series of groundwater conditions from GSFLOW.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTMOVIE, --outmovie OUTMOVIE
+                        Output file (mp4) for movie, if desired (default:
+                        None)
+
+required arguments:
+  -i INFILE, --infile INFILE
+                        input <settings>.ini fiile for GSFLOW
+  -p {topo,head,wtd,dhead,hydcond,hydcond_vertical,ss,sy}, --plot {topo,head,wtd,dhead,hydcond,hydcond_vertical,ss,sy}
+                        Plot variable selector: topography (topo), head, water
+                        table depth (wtd), change in head (dhead), hydraulic
+                        conductivity (hydcond), vertical hydraulic
+                        conductivity (hydcond_vert) specific storage (ss), or
+                        specific yield (sy) (default: wtd)
+```
+
+For example, one could type within a Python shell:
+```bash
+run plotMODFLOW.py -i <Settings File full path> -p wtd -o TEST.mp4
 ```
 
 By default, the visualization scripts will plot output files in directories specified by *Settings File*; this facilitates visualizing results directly after running GSFLOW with this toolkit.  However, the user can over-ride these file locations in the section `*** CHANGE FILE NAMES AS NEEDED` in order to plot arbitrary output files (not based on *Settings File*).  However, our visualization scripts assume certain output file formats and are not guaranteed to work with GSFLOW output files generated outside of this toolkit.
