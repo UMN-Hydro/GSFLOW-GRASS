@@ -436,7 +436,7 @@ After running GSFLOW, the user should check the following:
 
 
 ### Step 6. Visualization
-Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs.  Most of of these scripts can be run using the following syntax
+Our toolkit includes Python scripts in `GSFLOW-toolkit -> visualization` for graphically depicting major GSFLOW inputs and outputs. Currently these scrips work **only with GSFLOW 1.2.0**. The USGS is updating their standards, and we will update our visualization methods only after they have settled on new (and possibly NetCDF-based) file-output formats, organization, and nomenclature. Most of of these scripts can be run using the following syntax
 
 ```bash
 run <visualization_script>.py <Settings File full path> # in a Python shell
