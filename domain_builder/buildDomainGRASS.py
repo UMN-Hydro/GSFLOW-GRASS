@@ -117,8 +117,9 @@ r.to_vect(input=basins_all, output=basins_all, type='area', flags='v', overwrite
 # Build stream network
 v.stream_network(map=streams_all)
 
-# Restrict to a single basin
-v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, output_streams=streams_inbasin, output_basin=basins_inbasin, x_outlet=Settings.outlet_point_x, y_outlet=Settings.outlet_point_y, output_pour_point=pour_point, overwrite=True)
+# Restrict to a single basin -- default to precise selection rather than 
+# topological selection
+v.stream_inbasin(input_streams=streams_all, input_basins=basins_all, draindir=draindir, output_streams=streams_inbasin, output_basin=basins_inbasin, x_outlet=Settings.outlet_point_x, y_outlet=Settings.outlet_point_y, output_pour_point=pour_point, overwrite=True)
 
 # GSFLOW segments: sections of stream that define subbasins
 v.gsflow_segments(input=streams_inbasin, output=segments, icalc=Settings.icalc,
