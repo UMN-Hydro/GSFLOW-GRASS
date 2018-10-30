@@ -372,12 +372,12 @@ Either using the terminal or clicking on the "Console" tab in the GRASS GIS Laye
 
 In the terminal, this may be done as follows:
 
-On Linux, cd `GSFLOW-GRASS/domain-builder` and type:
+On Linux, cd `GSFLOW-GRASS/domain_builder` and type:
 ```sh
 sh install_extensions.sh
 ```
 
-On Windows, likewise cd to `GSFLOW-GRASS\domain-builder` and type:
+On Windows, likewise cd to `GSFLOW-GRASS\domain_builder` and type:
 ```bat
 install_extensions
 ```
