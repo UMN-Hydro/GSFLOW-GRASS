@@ -212,9 +212,13 @@ def main():
 
     else:
         # Have coordinates and will limit the area that way.
-        r.water_outlet(input=draindir, output='tmp', coordinates=str(x_outlet)+','+str(y_outlet))
-        v.clip(input=streams, clip='tmp', output=output_streams)
-        v.clip(input=basins, clip='tmp', output=output_basins)
+        r.water_outlet(input=draindir, output='tmp', coordinates=(x_outlet, y_outlet), overwrite=True)
+        r.to_vect(input='tmp', output='tmp', type='area', overwrite=True)
+        v.clip(input=basins, clip='tmp', output=output_basins, overwrite=True)
+        basincats = gscript.vector_db_select('basins_inbasin').values()[0].keys()
+        basincats_str = ','.join(map(str, basincats))
+        if len(streams) > 0:
+            v.extract(input=streams, output=output_streams, cats=basincats_str, overwrite=gscript.overwrite(), quiet=True)
 
     # If we want to output the pour point location
     if len(output_pour_point) > 0:
