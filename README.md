@@ -185,35 +185,27 @@ You can alternatively install all above mentioned packages via a docker.
 
 First pull the docker file from the repository:
 
-```
-docker pull aandrovitsanea/gsflow_grass
+```docker pull aandrovitsanea/gsflow_grass
 ```
 
 Then run the file in order to create the image:
 
-```
-docker run aandrovitsanea/gsflow_grass:latest
-
+```docker run aandrovitsanea/gsflow_grass:latest
 ```
 You will then get the message:
 
-```
-You need to run grass from a shell created by a docker exec invocation
-
+```You need to run grass from a shell created by a docker exec invocation
 ```
 Take a shell in the image as following:
 
 First run `docker ps`  in order to see the **CONTAINER ID** locally obtained:
 
-```
-docker ps
+```docker ps
 ```
 
 Then, copy this id in the following command:
 
-```
-docker exec -it CONTAINER ID bash
-
+```docker exec -it CONTAINER ID bash
 ```
 This will give you a shell where you can type `grass` in order to start the software.
 
