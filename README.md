@@ -177,6 +177,48 @@ sudo apt-get install ffmpeg
 ```
 For Windows or Mac, download via https://www.ffmpeg.org/download.html. You can select the correct version for your operating system under “More downloading options” and “Get the packages” and follow the links therein. Ffmpeg is installed by adding the executable file to your system's or user path variable. Windows installation instructions can be found here https://www.wikihow.com/Install-FFmpeg-on-Windows.
 
+### Installing all required packages with a docker file
+
+You can alternatively install all above mentioned packages via a docker.
+
+#### Linux
+
+First pull the docker file from the repository:
+
+```
+docker pull aandrovitsanea/gsflow_grass
+```
+
+Then run the file in order to create the image:
+
+```
+docker run aandrovitsanea/gsflow_grass:latest
+
+```
+You will then get the message:
+
+```
+You need to run grass from a shell created by a docker exec invocation
+
+```
+Take a shell in the image as following:
+
+First run `docker ps`  in order to see the **CONTAINER ID** locally obtained:
+
+```
+docker ps
+```
+
+Then, copy this id in the following command:
+
+```
+docker exec -it CONTAINER ID bash
+
+```
+This will give you a shell where you can type `grass` in order to start the software.
+
+Current set up doesn´t support GUI. You can therefore continue with the execution of GSFLOW-GRASS toolkits as indicated in the following steps using this shell. <!--This topic will be updated in order to enable the GUI function for the image-->
+
 ## Directory Structure
 
 **GSFLOW-GRASS** has four main directories:
