@@ -177,24 +177,31 @@ sudo apt-get install ffmpeg
 ```
 For Windows or Mac, download via https://www.ffmpeg.org/download.html. You can select the correct version for your operating system under “More downloading options” and “Get the packages” and follow the links therein. Ffmpeg is installed by adding the executable file to your system's or user path variable. Windows installation instructions can be found here https://www.wikihow.com/Install-FFmpeg-on-Windows.
 
-### Installing all required packages with a docker file
+### Installing all required packages creating a docker image
 
-You can alternatively install all above mentioned packages via a docker.
+You can alternatively install all above mentioned packages by creating a docker image.
 
 #### Linux
 
-First pull the docker file from the repository:
+Take a shell and `cd` to folder `GSFLOW-GRASS/gsflow_grass_docker`:
 
 ```
-docker pull aandrovitsanea/gsflow_grass
+cd GSFLOW-GRASS/gsflow_grass_docker
+```
+This folder includes a `docker-compose.yml` file and the folder `gsflow_grass` with the required `Dockerfile` and additional scripts called by the `Dockerfile`.
+
+Run `docker-compose build` in order to create the image:
+
+```
+docker-compose build
+```
+Then run `docker-compose up` in order to run the image:
+
+```
+docker-compose up
 ```
 
-Then run the file in order to create the image:
-
-```
-docker run aandrovitsanea/gsflow_grass:latest
-```
-You will then get the message:
+Once running the image, you will get the following message:
 
 ```
 You need to run grass from a shell created by a docker exec invocation
@@ -213,8 +220,6 @@ Then, copy this id in the following command:
 docker exec -it CONTAINER ID bash
 ```
 This will give you a shell where you can type `grass` in order to start the software.
-
-Current set up doesn´t support GUI. You can therefore continue with the execution of GSFLOW-GRASS toolkits as indicated in the following steps using this shell. <!--This topic will be updated in order to enable the GUI function for the image-->
 
 ## Directory Structure
 
