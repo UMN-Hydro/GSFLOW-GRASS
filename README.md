@@ -177,9 +177,9 @@ sudo apt-get install ffmpeg
 ```
 For Windows or Mac, download via https://www.ffmpeg.org/download.html. You can select the correct version for your operating system under “More downloading options” and “Get the packages” and follow the links therein. Ffmpeg is installed by adding the executable file to your system's or user path variable. Windows installation instructions can be found here https://www.wikihow.com/Install-FFmpeg-on-Windows.
 
-### Installing all required packages creating a docker image
+### Installing all required packages by creating a docker image
 
-You can alternatively install all above mentioned packages by creating a docker image.
+You can alternatively install all above mentioned packages and libraries by creating a docker image.
 
 #### Linux
 
