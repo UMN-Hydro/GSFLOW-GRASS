@@ -1,0 +1,22 @@
+set -x
+set -o errexit
+apt update
+
+apt install -y apt-transport-https
+apt install -y --install-recommends dirmngr
+
+apt update
+
+apt install -y wget unzip gfortran-5
+cd /tmp/
+wget -q https://github.com/UMN-Hydro/GSFLOW-1.2.0/archive/master.zip
+gsflowv="1.2.0"
+gsflowv_u=`echo $gsflowv | tr "." "_"`
+gsflow_zip="master.zip"
+cd /opt/
+unzip /tmp/${gsflow_zip}
+rm /tmp/${gsflow_zip}
+mv /opt/GSFLOW-1.2.0-master /opt/GSFLOW-1.2.0
+chmod +x /opt/GSFLOW-1.2.0/bin/*
+
+apt install -y git saga python-saga python-gdal python-numpy python-pandas python-scipy python-setuptools python-matplotlib python-pip ipython spyder python python3 ffmpeg

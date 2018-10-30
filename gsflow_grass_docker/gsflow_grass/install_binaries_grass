@@ -1,0 +1,19 @@
+#! /bin/bash
+
+set -x
+
+cd /tmp
+
+grass=grass-7.4.2svn-x86_64-pc-linux-gnu-30_09_2018
+install_script="${grass}-install.sh"
+tarball="${grass}.tar.gz"
+
+base_url="https://grass.osgeo.org/grass74/binary/linux/snapshot"
+wget -q "${base_url}/$install_script"
+wget -q "${base_url}/$tarball"
+
+chmod +x "$install_script"
+
+"./$install_script" "$tarball"
+
+ln -s "$(echo /usr/local/grass*)" /usr/local/grass74

@@ -1,0 +1,19 @@
+version: '2'
+services:
+    gsflow_grass:
+        build: 'gsflow_grass'
+        volumes:
+          - /tmp/.X11-unix/:/tmp/.X11-unix:rw
+          - /home/${USER}:/home/${USER}
+          - /media/${USER}:/media/${USER}
+        devices:
+          - /dev/dri:/dev/dri
+        environment:
+          - QT_X11_NO_MITSHM=1
+          - DISPLAY
+        cap_add:
+          - SYS_PTRACE
+        security_opt:
+          - apparmor:unconfined
+        mem_limit: 6737418240
+        memswap_limit: 0

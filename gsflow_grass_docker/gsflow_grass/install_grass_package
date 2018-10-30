@@ -1,0 +1,10 @@
+apt install -y software-properties-common
+add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+
+apt update
+apt install -y grass-dev grass-core grass
+
+# Those files are missing from the installation
+
+touch /usr/lib/grass74/docs/html/grass_logo.png
+touch /usr/lib/grass74/docs/html/grassdocs.css
