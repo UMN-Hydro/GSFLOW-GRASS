@@ -161,7 +161,7 @@ v.gsflow_reaches(segment_input=segments, grid_input=MODFLOW_grid, elevation=DEM,
 
 # GSFLOW HRU parameters
 r.slope_aspect(elevation=DEM, slope=slope, aspect=aspect, format='percent', zscale=0.01, overwrite=True)
-v.gsflow_hruparams(input=basins_inbasin, elevation=DEM, output=HRUs, slope=slope, aspect=aspect, overwrite=True)
+v.gsflow_hruparams(input=basins_inbasin, elevation=DEM, output=HRUs, slope=slope, aspect=aspect, cov_type=land_cover, soil_type=soil, overwrite=True)
 
 # GSFLOW gravity reservoirs
 v.gsflow_gravres(hru_input=HRUs, grid_input=MODFLOW_grid, output=gravity_reservoirs, overwrite=True)
