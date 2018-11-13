@@ -65,8 +65,15 @@ class Settings(object):
         
         # GRASS GIS core variables
         self.GIS_output_rootdir = self.gsflow_simdir + slashstr + 'GIS'
-        self.DEM_input = parser.get('GRASS_core', 'DEM_file_path_to_import')
         
+        # GRASS GIS DEM input raster map
+        self.DEM_input = parser.get('elevation_inputs', 'DEM_file_path_to_import')
+
+        # GRASS GIS LAND-SURFACE raster maps
+        self.LAND_COVER_file_path_to_import = parser.get('land-surface_inputs', 'LAND_COVER_file_path_to_import')
+        # Input soil raster file path
+        self.SOIL_file_path_to_import = parser.get('land-surface_inputs', 'SOIL_file_path_to_import')
+
         # GRASS GIS drainage variables
         self.drainage_threshold = parser.get('GRASS_drainage', 'threshold_drainage_area_meters2')
         self.flow_weights = parser.get('GRASS_drainage', 'flow_weights')
