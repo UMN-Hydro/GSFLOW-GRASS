@@ -457,8 +457,11 @@ par_name.append('soil_type') # only for ET calc, 1: sand, 2: loam, 3: clay
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-#par_value.append(np.ones((dim_value[ind],1)))  # merced: all 1's
-par_value.append(2*np.ones((dim_value[ind],1), int))  # sagehen: mostly 2's, some 1's
+try:
+    par_value.append(HRUdata[par_name[-1]])
+except:
+    # Deafult to loam if values not given
+    par_value.append(2*np.ones((dim_value[ind],1), int))
 
 # Below: Assumes transp_module=transp_tindex (phenolgy based on temp)
 #   Start summing max air temp on month 'transp_beg') when sum >=
@@ -497,7 +500,11 @@ par_name.append('cov_type') # 0=bare soil, 1=grasses, 2=shrubs, 3=trees, 4=conif
 par_dim_name.append('nhru')
 par_type.append(1) # 1=int, 2=single prec, 3=double prec, 4=char str
 ind = np.squeeze(np.where(np.array(dim_name) == par_dim_name[-1]))
-par_value.append(2*np.ones((dim_value[ind],1), int))  
+try:
+    par_value.append(HRUdata[par_name[-1]])
+except:
+    # Deafult to shrubs if values not given
+    par_value.append(2*np.ones((dim_value[ind],1), int))
 
 # *** CHANGE FOR SPECIFIC SITE
 par_name.append('covden_sum') # summer veg cover density [0.0 to 1.0] (for canopy interception)
