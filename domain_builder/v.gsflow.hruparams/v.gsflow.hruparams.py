@@ -393,6 +393,7 @@ def main():
         #v.rast_stats(map=HRU, raster=land_cover, method='average', column_prefix='tmp', flags='c', quiet=True)
         #v.db_update(map=HRU, column='cov_type', query_column='tmp_average', quiet=True)
         #v.db_dropcolumn(map=HRU, columns='tmp_average', quiet=True)
+        v.db_update(map=HRU, column='cov_type', value=1, quiet=True)
         v.what_rast(map=HRU, type='centroid', raster=land_cover, column='cov_type', quiet=True)
 
     # SOIL
@@ -402,6 +403,7 @@ def main():
         #v.rast_stats(map=HRU, raster=soil, method='average', column_prefix='tmp', flags='c', quiet=True)
         #v.db_update(map=HRU, column='soil_type', query_column='tmp_average', quiet=True)
         #v.db_dropcolumn(map=HRU, columns='tmp_average', quiet=True)
+        v.db_update(map=HRU, column='soil_type', value=1, quiet=True)
         v.what_rast(map=HRU, type='centroid', raster=soil, column='soil_type', quiet=True)
 
 
