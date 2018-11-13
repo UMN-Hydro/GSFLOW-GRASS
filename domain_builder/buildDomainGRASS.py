@@ -110,10 +110,10 @@ if Settings.DEM_input != '':
 
 # Import additional raster data
 if Settings.LAND_COVER_file_path_to_import is not '':
-    # Land cover (vegetation)
+    # Raster file with land cover (0=bare soil;1=grasses; 2=shrubs; 3=trees; 4=coniferous) that provides input for parameter cov_type
     r.in_gdal(input=Settings.LAND_COVER_file_path_to_import, output=land_cover, overwrite=True)
 if Settings.SOIL_file_path_to_import is not '':
-    # Soils
+    # Raster file with soil type (1=sand; 2=loam; 3=clay) that provides input for parameter soil_type
     r.in_gdal(input=Settings.SOIL_file_path_to_import, output=soil, overwrite=True)
 
 # Set region
