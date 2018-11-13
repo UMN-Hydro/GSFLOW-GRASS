@@ -46,6 +46,8 @@ from grass.pygrass.vector.geometry import Point
 
 # Internal variables: set names
 DEM_original_import = 'DEM_original_import'   # Raw DEM
+land_cover          = 'land_cover'            # Integers for vegetation types
+soil                = 'soil'                  # Integers for soil types
 DEM                 = 'DEM'                   # DEM after offmap flow removed
 DEM_MODFLOW         = 'DEM_MODFLOW'           # DEM for MODFLOW
 cellArea_meters2    = 'cellArea_meters2'      # Grid cell size
@@ -105,6 +107,14 @@ if Settings.DEM_input != '':
     # Repeat is sometimes needed
     r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
+
+# Import additional raster data
+if Settings.LAND_COVER_file_path_to_import is not '':
+    # Land cover (vegetation)
+    r.in_gdal(input=Settings.LAND_COVER_file_path_to_import, output=land_cover, overwrite=True)
+if Settings.SOIL_file_path_to_import is not '':
+    # Soils
+    r.in_gdal(input=Settings.SOIL_file_path_to_import, output=soil, overwrite=True)
 
 # Set region
 g.region(raster=DEM_original_import)
