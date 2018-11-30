@@ -8,7 +8,7 @@ These instructions are meant to take a user familiar with computers but new to (
 
 When you use GSFLOW-GRASS, please cite:
 
-**Ng, G.-H.C., Wickert, A.D., Somers, L.D., Saberi, L., Cronkite-Ratcliff, C., Niswonger, R.G., and McKenzie, J.M., 2018, [GSFLOW-GRASS v1.0.0: GIS-enabled hydrologic modeling of coupled groundwater–surface-water systems](https://www.geosci-model-dev-discuss.net/gmd-2017-321/): *Geoscientific Model Development Discussions*, doi:10.5194/gmd-2017-321.**
+**Ng, G.-H.C., Wickert, A.D., Somers, L.D., Saberi, L., Cronkite-Ratcliff, C., Niswonger, R.G., and McKenzie, J.M., 2018, [GSFLOW-GRASS v1.0.0: GIS-enabled hydrologic modeling of coupled groundwater–surface-water systems](https://www.geosci-model-dev-discuss.net/gmd-2017-321/): *Geoscientific Model Development*, doi:10.5194/gmd-11-4755-2018.**
 
 In addition, please contact us if you have questions or suggestions!
 
