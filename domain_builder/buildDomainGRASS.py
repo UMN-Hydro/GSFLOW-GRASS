@@ -9,7 +9,9 @@ import os
 from ConfigParser import SafeConfigParser # use this in the future
 
 # Import parsed config file to read in user-specified settings
-sys.path.append(os.path.join('..', 'Run'))
+_pathhere = os.path.split(sys.argv[0])[0]
+sys.path.append(os.path.join(_pathhere, '..', 'Run'))
+#from ..Run import readSettings
 from readSettings import Settings
 # Set input file
 if len(sys.argv) < 2:
