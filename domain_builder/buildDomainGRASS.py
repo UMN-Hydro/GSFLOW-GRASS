@@ -114,9 +114,13 @@ if Settings.DEM_input != '':
 if Settings.LAND_COVER_file_path_to_import is not '':
     # Raster file with land cover (0=bare soil;1=grasses; 2=shrubs; 3=trees; 4=coniferous) that provides input for parameter cov_type
     r.in_gdal(input=Settings.LAND_COVER_file_path_to_import, output=land_cover, overwrite=True)
+else:
+    land_cover = ''
 if Settings.SOIL_file_path_to_import is not '':
     # Raster file with soil type (1=sand; 2=loam; 3=clay) that provides input for parameter soil_type
     r.in_gdal(input=Settings.SOIL_file_path_to_import, output=soil, overwrite=True)
+else:
+    soil = ''
 
 # Set region
 g.region(raster=DEM_original_import)
@@ -163,6 +167,7 @@ v.gsflow_reaches(segment_input=segments, grid_input=MODFLOW_grid, elevation=DEM,
 
 # GSFLOW HRU parameters
 r.slope_aspect(elevation=DEM, slope=slope, aspect=aspect, format='percent', zscale=0.01, overwrite=True)
+
 v.gsflow_hruparams(input=basins_inbasin, elevation=DEM, output=HRUs, slope=slope, aspect=aspect, cov_type=land_cover, soil_type=soil, overwrite=True)
 
 # GSFLOW gravity reservoirs
