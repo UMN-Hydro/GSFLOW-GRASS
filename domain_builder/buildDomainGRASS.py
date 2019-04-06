@@ -110,17 +110,36 @@ if Settings.DEM_input != '':
     r.mapcalc(DEM+' = if(isnull('+accumulation_onmap+'),null(),'+DEM+')', overwrite=True)
     r.mapcalc(accumulation_onmap+' = if(isnull('+DEM+'),null(),'+accumulation_onmap+')', overwrite=True)
 
-# Import additional raster data
+# Land cover
+# Import if needed
+_hasrast = len(gscript.parse_command('g.list', type='raster', pattern='land_cover')) > 0
 if Settings.LAND_COVER_file_path_to_import is not '':
     # Raster file with land cover (0=bare soil;1=grasses; 2=shrubs; 3=trees; 4=coniferous) that provides input for parameter cov_type
     r.in_gdal(input=Settings.LAND_COVER_file_path_to_import, output=land_cover, overwrite=True)
+elif Settings.cov_type_uniform is not '':
+    land_cover = int(Settings.cov_type_uniform)
+# Did a raster exist before import?
+elif _hasrast:
+    pass #already set to this
+# Otherwise default
 else:
-    land_cover = ''
+    # bare earth, same as the default for the standalone v.gsflow.hruparams
+    land_cover = 0
+
+# Soils
+# Import if needed
+_hasrast = len(gscript.parse_command('g.list', type='raster', pattern='soil')) > 0
 if Settings.SOIL_file_path_to_import is not '':
     # Raster file with soil type (1=sand; 2=loam; 3=clay) that provides input for parameter soil_type
     r.in_gdal(input=Settings.SOIL_file_path_to_import, output=soil, overwrite=True)
+elif Settings.soil_type_uniform is not '':
+    soil = int(Settings.soil_type_uniform)
+# Did a raster exist before import?
+elif _hasrast:
+    pass
 else:
-    soil = ''
+    # loam, same as the default for the standalone v.gsflow.hruparams
+    soil = 2
 
 # Set region
 g.region(raster=DEM_original_import)

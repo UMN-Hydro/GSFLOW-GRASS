@@ -71,8 +71,9 @@ class Settings(object):
 
         # GRASS GIS LAND-SURFACE raster maps
         self.LAND_COVER_file_path_to_import = parser.get('land-surface_inputs', 'LAND_COVER_file_path_to_import')
-        # Input soil raster file path
         self.SOIL_file_path_to_import = parser.get('land-surface_inputs', 'SOIL_file_path_to_import')
+        self.cov_type_uniform = parser.get('land-surface_inputs', 'cov_type')
+        self.soil_type_uniform = parser.get('land-surface_inputs', 'soil_type')
 
         # GRASS GIS drainage variables
         self.drainage_threshold = parser.get('GRASS_drainage', 'threshold_drainage_area_meters2')
