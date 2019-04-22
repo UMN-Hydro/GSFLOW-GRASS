@@ -255,7 +255,7 @@ def main():
     reachesTopo.table.columns.add('IRCH', 'integer')
     reachesTopo.table.columns.add('JRCH', 'integer')
     reachesTopo.table.columns.add('IREACH', 'integer')
-    reachesTopo.table.columns.add('RCHLEN', 'integer')
+    reachesTopo.table.columns.add('RCHLEN', 'double precision')
     reachesTopo.table.columns.add('STRTOP', 'double precision')
     reachesTopo.table.columns.add('SLOPE', 'double precision')
     reachesTopo.table.columns.add('STRTHICK', 'double precision')
@@ -389,7 +389,7 @@ def main():
     for i in range(len(reach_cats)):
         _x = reach_x1s[i]
         _y = reach_y1s[i]
-        print _x, _y
+        #print _x, _y
         _z = float(gscript.parse_command('r.what', map=elevation, coordinates=str(_x)+','+str(_y)).keys()[0].split('|')[-1])
         zr1.append(_z)
         _x = reach_x2s[i]
