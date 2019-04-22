@@ -18,7 +18,7 @@ This manual is written in the style of a quick(-ish) start guide that allows use
 
 **Required:**
 * **GSFLOW 1.2**
-* **GRASS GIS** and extensions (described below); **7.5+** is the development version at the time of writing; **7.2.2** will soon be upgraded to **7.4** as the stable version.
+* **GRASS GIS 7.6.1** (updated for compatibility on Earth Day, 22 April 2019)
 * **Python 2.7.X**
 * **GSFLOW-GRASS Toolkit** (this software)
 
@@ -38,7 +38,7 @@ compile and install it. For windows, the pre-compiled executable file for GSFLOW
 
 GSFLOW-GRASS has been tested on **Python 2.7**, and should work (with a few possible changes) on future versions of Python 2.X. It has not been tested on Python 3.X.
 
-In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.3 or greater, above):
+In order to run properly, GSFLOW-GRASS requires the following Python modules (in addition to those that come with GRASS GIS v7.6, above.):
 * `numpy`
 * `matplotlib`
 * `pandas`
@@ -103,35 +103,27 @@ Anaconda also comes with the *Spyder* development environment, which is a helpfu
 
 ### Installing GRASS GIS
 
-***Download and install GRASS GIS 7.3+***
+***Download and install GRASS GIS 7.6***
+
+(GSFLOW-GRASS may work on the development version of GRASS GIS, v7.7 at the time of writing, but this is untested.)
 
 #### Install precompiled binaries
 
 *("Precompiled binary " = the normal kind of software that you download and just works)*
 
-Go to https://grass.osgeo.org/download/software/ and download the appropriate version of GRASS GIS.
+##### Option 1: From the GRASS GIS website (Windows, Mac, or Linux)
 
-##### Windows
+Go to https://grass.osgeo.org/download/software/ and download **GRASS GIS 7.6 (new stable version)** for your appropriate OS.
 
-**Precompiled binary strongly recommended for Windows**
+For Mac, follow the instructions to install the "framework packages" after following the links from the main download page. Note that the most recent stable version of GRASS GIS for Mac is **7.4**. This is outdated, but should still be compatible with the modern GSFLOW-GRASS. Please contact the GSFLOW-GRASS developers with specific errors if this does not work!
 
-At the time of writing, the new stable verison, GRASS GIS 7.4, is in the process of being released. Therefore, if you cannot find GRASS 7.3+ on the above website (GRASS GIS 7.3 is being phased out), go to the following to download a Windows binary of GRASS 7.4: https://wingrass.fsv.cvut.cz/grass74/x86_64/
-
-##### Mac
-
-Follow the instructions to install the "framework packages" after following the links from the main download page.
-
-##### Linux
+##### From the package manager (Linux)
 
 For Ubuntu:
-To obtain the old stable version and all dependencies:
 
 ```bash
 sudo apt-get install grass
 ```
-
-Then download and install the new binaries:
-https://grass.osgeo.org/grass74/binary/linux/snapshot/
 
 #### Compiling from source
 
