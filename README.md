@@ -259,7 +259,7 @@ This seems like a lot of work to maintain when they could just look at the actua
 
 The **Settings** file holds user-defined information that defines how GSFLOW is set up and will run.
 
-Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required, and those that are ***Boldface and italic*** font is used to represent one of a set of options that must be given, dpeending on the value of a particular switch variable that is set. Each `*.ini` file includes:
+Use `settings_template.ini` in the 'Run' folder as a template for creating your own **Settings** File, which can have any name. **Boldface** options are required, and those that are ***Boldface and italic*** font is used to represent one of a set of options that must be given, depending on the value of a particular switch variable that is set. Each `*.ini` file includes:
 
 #### "paths" section
 
@@ -270,13 +270,48 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | **gsflow_ver** | GSFLOW version number
 | **gsflow_path_simdir** | Full pathname for location where GSFLOW simulation<br>directory should go.
 
+#### "elevation_inputs" section
+
+| Option             | Description
+| ------------------ | ---------
+| **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
+
+#### "land-surface_inputs" section
+
+Land-cover classes are set as integer values as follows:
+0. Bare soil
+1. Grasses
+2. Shrubs
+3. Trees
+4. Conifers (Unsure if this is implemented, or what "trees" vs. "conifers" means)
+
+Soil classes are set as integer values as well:
+1. Sand
+2. Loam
+3. Clay
+
+GSFLOW-GRASS will obtain land-cover and soil inputs based on the first of these that is possible:
+1. Import the file given below; if this is empty
+2. Use the provided cov_type and soil_type (below) for spatially uniform properties; failing this
+3. Look for existing GRASS GIS rasters called called "land_cover" and "soil"
+4. If all of this is not possible, then default values will be chosen: (cov_type = 0, soil_type=2)
+
+Please note that for the raster values, the current implementation is crude: each HRU will import the value at the centroid of the HRU, instead of picking the modal value. This will require a new GRASS GIS module and/or an update to **v.rast.stats**.
+
+| Option             | Description
+| ------------------ | ---------
+| LAND_COVER_file_path_to_import   | Name for GDAL-compliant raster of land-cover values<br> following the classes given above
+| SOIL_file_path_to_import   | Name for GDAL-compliant raster of soil class values<br> following the classes given above
+| cov_type   | Uniform integer land-cover class
+| soil_type   | Uniform integer soil class
+
 #### "GRASS_core" section
 
 | Option             | Description
 | ------------------ | ---------
 | **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
 | gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
-| version | Optional: GRASS GIS version number without any "." characters.<br>We used **73** or **74**<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
+| version | Optional: GRASS GIS version number without any "." characters.<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
 
 #### "run_mode" section
 
@@ -292,7 +327,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | ------------------ | ---------
 | **start_date**     | Start date of simulation, format: YYYY-MM-DD
 | **end_date**       | End date of simulation, format: YYYY-MM-DD
-| **init_start_date**| Set to the **start_date** of the spinup run used as initial conditions.<br>Note that **spinup_end_date** is assumed to be 1 day previous to **start_date**.<br>Format: YYYY-MM-DD
+| **init_start_date**| Set to the date from a spinup run to be used as initial conditions.<br>If empty, will start by performing its own spin-up.<br>Note that **init_start_date** is assumed to be 1 day previous to **start_date**.<br>Format: YYYY-MM-DD
 
 #### "GRASS_drainage" section
 
@@ -300,8 +335,8 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | ------------------ | ---------
 | **threshold_drainage_area_meters2** | Threshold drainage area in square meters at which flow is considered to create<br>a channel
 | **MODFLOW_grid_resolution_meters** | Target cell side length in meters for MODFLOW grid; side lengths will not be<br>exactly this long, as the nearest value to create an integer number<br>of cells in the domain will be chosen.
-| **outlet_point_x** | Pour point approximate x (Easting) position; the nearest stream<br>segment to this point is chosen as the true pour point.
-| **outlet_point_y** | Pour point approximate y (Northing) position; the nearest stream<br>segment to this point is chosen as the true pour point.
+| **outlet_point_x** | Pour point approximate x (Easting) position; the nearest point<br>along a stream segment is chosen as the true pour point.
+| **outlet_point_y** | Pour point approximate x (Easting) position; the nearest point<br>along a stream segment is chosen as the true pour point.
 
 #### "GRASS_hydraulics" section
 
@@ -326,7 +361,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 | ------------------ | ---------
 | **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
 | ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>Format is:<br>`SITE_NAME Met station data (in degrees Celcius and mm/d)`<br>`tmax 1`<br>`tmin 1`<br>`precip 1`<br>`###########################################`<br>`YYYY MM DD HH MM SS T_max T_min Precip`<br>`...continue this pattern until the end of the data set...`<br>One line should be included per day.<br>`HH`, `MM`, and `SS` are all typically `0`
-| ***climate_hru_dir***    | **Only for *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
+| ***climate_hru_dir***    | **Only if *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
 
 #### "hydrogeologic_inputs" section
 
