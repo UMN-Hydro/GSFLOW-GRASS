@@ -377,30 +377,34 @@ Please note that for the raster values, the current implementation is crude: eac
 
 #### Launch GRASS GIS and create your location
 
-1. Launch GRASS GIS
+1. Launch GRASS GIS.
+  * If on Linux, you must start GRASS GIS from the command line to ensure that you have a window where you can type the GSFLOW-GRASS commands. If you used `apt` to install GRASS GIS, simply open a terminal window (CTRL+ALT+T) and type `grass` or `grass76` (the compatible version at the time of writing).
+  * If on Windows, a command prompt should always appear when you start GRASS GIS.
 2. Create a folder to hold your GRASS locations. This is typically called **"grassdata"** and placed in your home directory.
 3. Click on "New", and follow the prompts.
   * We recommend naming the **"Project Location"** the same as **"proj_name"**.
   * No "Location Title" is needed.
   * We suggest that you **"Read projection and datum terms from a georeferenced data file"** to set the coordinate system. Each GRASS GIS location has only one coordinate system. Your DEM **must be in a projected coordinate system**: we do not test our codes using geographic (lat/lon) coordinate systems.
-  
+
 ***Important***: Your **DEM** must be at least **2 full MODFLOW grid cells larger on each side than the catchment that you seek to model**. This will ensure that (1) offmap flow is not a problem and (2) the constant-head MODFLOW boundary condition at the outlet may properly be built. As additional cells with offmap flow inputs will be removed from the DEM, it is often wise to pad the DEM even more than this.
 
 ![GRASS GIS start-up screen](figures/GRASS_startup_screen.png)
 
-##### Choosing pour points (if needed)
-
-If you need to choose your pour point manually, we recommend that either you (a) import the DEM and find it now using GRASS, or (b) use another program like QGIS to find this location. You should still keep the path of the DEM in **DEM_file_path_to_import** until you have finished the first run of the code. Keeping this in during later runs will not cause problems; it will just take extra time as the DEM is re-imported and re-corrected.
+If you "Read projection and datum terms from a georeferenced data file", GRASS GIS will ask you if you want to import that file to the workspace. There is no need to do so -- **"build_domain_grass.py"** will do this for you -- but you can if you want to be able to start GRASS GIS and look at it.
 
 #### Start GRASS GIS session in your location
 
 With your location selected, click **"Start GRASS session"**.
 
+##### Choosing pour points (if needed)
+
+If you need to choose your pour point manually, we recommend that either you (a) import the DEM and find it now using GRASS, or (b) use another program like QGIS to find this location. You should still keep the path of the DEM in **DEM_file_path_to_import** until you have finished the first run of the code. Keeping this in during later runs will not cause problems; it will just take extra time as the DEM is re-imported and re-corrected.
+
 #### Install required GRASS GIS extensions
 
 ***First time running GRASS GIS only, or after GRASS extension updates***
 
-Either using the terminal or clicking on the "Console" tab in the GRASS GIS Layer Manager, run install all of the necessary extensions for GSFLOW-GRASS.
+Either using the terminal (highly recommended) or clicking on the "Console" tab in the GRASS GIS Layer Manager, run install all of the necessary extensions for GSFLOW-GRASS.
 
 In the terminal, this may be done as follows:
 
@@ -435,7 +439,7 @@ g.extension r.hydrodem
 
 #### Create the domain inputs for input-file-builder scripts
 
-Either using the terminal (Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, from within the "GSFLOW-GRASS" folder::
+Either using the terminal (highly recommended, Linux) or clicking on the "Console" tab in the GRASS GIS Layer Manager (Linux or Windows), run **buildDomainGRASS.py**. For example, from within the "GSFLOW-GRASS" folder::
 
 Linux
 ```sh
