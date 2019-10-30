@@ -12,7 +12,7 @@ from ConfigParser import SafeConfigParser # use this in the future
 _pathhere = os.path.split(sys.argv[0])[0]
 sys.path.append(os.path.join(_pathhere, '..', 'Run'))
 #from ..Run import readSettings
-from readSettings import Settings
+from readSettings import Settings as _settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -21,9 +21,10 @@ else:
     settings_input_file = sys.argv[1]
     print 'Using specified input file: ' + settings_input_file
 try:
-    Settings = Settings(settings_input_file)
+    Settings = _settings(settings_input_file)
 except:
-    sys.exit('Error opening or parsing input file: ' + settings_input_file)
+    print 'Error opening or parsing input file: ' + settings_input_file
+    Settings = _settings(settings_input_file)
 
 startdir = os.getcwd()
 
