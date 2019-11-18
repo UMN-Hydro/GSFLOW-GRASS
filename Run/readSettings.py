@@ -20,7 +20,7 @@ class Settings(object):
         Parses settings.ini for GSFLOW
         """
         
-        if platform.system() == 'Linux':
+        if platform.system() == 'Linux' or platform.system() == 'Darwin':
             slashstr = '/'
         else:
             slashstr = '\\'

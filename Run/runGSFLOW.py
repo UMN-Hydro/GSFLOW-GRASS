@@ -19,7 +19,7 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 elif platform.system() == 'Windows':
     slashstr = '\\'

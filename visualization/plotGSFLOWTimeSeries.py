@@ -21,7 +21,7 @@ import datetime as dt
 import matplotlib.dates as mdates
 import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'
@@ -71,6 +71,9 @@ basin_area = sum(HRUarea) * 4046.85642  # acre -> m2
 
 
 #%%
+
+if Settings.GSFLOW_ver == '1.2.2':
+    sys.exit('Need to update Time Series script to work for GSFLOW 1.2.2 outputs! Exiting...')
 
 # make sure basinppt and basinacet are listed last, because of twin y-axis
 PlotVar0 = PlotVar[:]

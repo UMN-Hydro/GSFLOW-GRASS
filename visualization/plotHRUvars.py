@@ -12,7 +12,7 @@ import platform
 import sys
 import re
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'
@@ -71,14 +71,21 @@ for filename in [HRUout_fil]:
             outfile.write(line)
 
 HRUout_fil2 = HRUout_fil + '.corrected'
-HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[11])
+
+if Settings.GSFLOW_ver == '1.2.0':
+    # 1.2.0
+    HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[11])
+elif Settings.GSFLOW_ver == '1.2.2':
+    # 1.2.2
+    HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[10]) 
 
 _shapefile = ogr.Open(HRUshp_fil)
 _shape = _shapefile.GetLayer(0)
 
 dates = sorted(list(set(list(HRU_outputs.timestamp))))
 
-
+_min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
+_max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
 _min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
 _max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
 

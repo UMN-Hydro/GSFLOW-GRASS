@@ -22,7 +22,7 @@ import matplotlib.dates as mdates
 import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
 import time
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux'  or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'

@@ -164,7 +164,7 @@ NSEW = [sdata['north'], sdata['south'], sdata['east'], sdata['west']]
 # Only ONE can be 1, others 0
 if sys.platform[:3] == 'win':
     nread = 0
-elif (platform.linux_distribution()[0] == 'Ubuntu') or (platform.linux_distribution()[0] == 'debian'):
+elif (platform.linux_distribution()[0] == 'Ubuntu') or (platform.linux_distribution()[0] == 'debian') or (platform.system() == 'Darwin'):
     nread = 1
 elif platform.linux_distribution()[0][:3] == 'Red':
     # Hope this works; haven't tried Red Hat here

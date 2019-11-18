@@ -397,7 +397,7 @@ if model_mode != 'MODFLOW':
     con_par_values.append(np.array(['hru_ppt',  # [in] Precipitation distributed to each HRU Rain
     'hru_actet',  # [in] Actual ET for each HRU
     'actet_tot_gwsz',  # [nhru] Total actual ET from each MODFLOW cell and PRMS soil zone [in]
-    'sat_recharge',  # [nhru] HRU total recharge to the saturated zone 
+#    'sat_recharge',  # [nhru] HRU total recharge to the saturated zone 
     'streamflow_sfr']))  # [nsegment] Streamflow as computed by SFR for each segment 
         
 
