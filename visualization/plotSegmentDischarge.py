@@ -84,7 +84,8 @@ for filename in [segout_fil]:
             outfile.write(line[_start:])
         else:
             outfile.write(line)            
-
+    outfile.close()
+    
 segout_fil2 = segout_fil + '.corrected'
 
 _shapefile = ogr.Open(segshp_fil)
