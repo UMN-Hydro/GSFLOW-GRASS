@@ -19,7 +19,6 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import datetime as dt
 import matplotlib.dates as mdates
-import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
 
 if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
@@ -40,19 +39,41 @@ else:
     print 'Using specified input file: ' + settings_input_file
 Settings = Settings(settings_input_file)
 
+if Settings.GSFLOW_ver == '1.2.0':
+#    sys.exit('Need to update Time Series script to work for GSFLOW 1.2.2 outputs! Exiting...')
+    import GSFLOWcsvTable as gvar  # all variable names, units, and descriptions
+elif Settings.GSFLOW_ver == '1.2.2':
+    import GSFLOWcsvTable_1p2p2 as gvar  # all variable names, units, and descriptions
+
+
+
 #%% *** SET THE FOLLOWING *****************************************************
  
-# *** enter variables to plot (see list in gsflow_csv_table.py):
+# *** enter variables to plot 
+ # (see list in gsflow_csv_table.py for GSFLOW 1.2.0 output and 
+ #gsflow_csv_table_1p2p2.py for GSFLOW 1.2.2 output and ):
 PlotVar = []
-PlotVar.append('basinstrmflow')
-PlotVar.append('uzf_recharge')
-PlotVar.append('basinsroff')
-PlotVar.append('gwflow2strms')
-#PlotVar.append('basininterflow')
-#PlotVar.append('streambed_loss')
+if Settings.GSFLOW_ver == '1.2.0':
+    PlotVar.append('basinstrmflow')
+    PlotVar.append('uzf_recharge')
+    PlotVar.append('basinsroff')
+    PlotVar.append('gwflow2strms')
+    #PlotVar.append('basininterflow')
+    #PlotVar.append('streambed_loss')
+    
+    PlotVar.append('basinppt')
+    #PlotVar.append('basinactet')
 
-PlotVar.append('basinppt')
-#PlotVar.append('basinactet')
+elif Settings.GSFLOW_ver == '1.2.2': 
+    PlotVar.append('StreamOut_Q')
+    PlotVar.append('RechargeUnsat2Sat_Q')
+    PlotVar.append('HortSroff2Stream_Q')
+    PlotVar.append('StreamExchng2Sat_Q')
+    #PlotVar.append('Interflow2Stream_Q')
+    
+    PlotVar.append('Precip_Q')
+    #PlotVar.append('CapET_Q')
+
 
 # *** save figure to this file
 savefigfile = 'fig.png'
@@ -72,15 +93,12 @@ basin_area = sum(HRUarea) * 4046.85642  # acre -> m2
 
 #%%
 
-if Settings.GSFLOW_ver == '1.2.2':
-    sys.exit('Need to update Time Series script to work for GSFLOW 1.2.2 outputs! Exiting...')
-
 # make sure basinppt and basinacet are listed last, because of twin y-axis
 PlotVar0 = PlotVar[:]
 ctr = 1
 ctr_end = len(PlotVar)
 for ii in range(len(PlotVar)):
-    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
+    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet') or (PlotVar[ii] == 'Precip_Q') or (PlotVar[ii] == 'CapET_Q'):
         PlotVar0[ctr_end-1] = PlotVar[ii]
         ctr_end = ctr_end - 1
     else:
@@ -127,7 +145,7 @@ if unit[0:2] == 'm^3':
 #plt.close("all")
 for ii in range(len(PlotVar)):
     
-    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet'):
+    if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet') or (PlotVar[ii] == 'Precip_Q') or (PlotVar[ii] == 'CapET_Q'):
         ln0 = ax2.plot(dateList, data[PlotVar[ii]], '--')
         ax2.set_ylabel(PlotVar[ii] + ' ' + unit)
     else:
