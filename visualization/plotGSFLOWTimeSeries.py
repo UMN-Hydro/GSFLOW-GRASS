@@ -60,6 +60,7 @@ if Settings.GSFLOW_ver == '1.2.0':
     PlotVar.append('gwflow2strms')
     #PlotVar.append('basininterflow')
     #PlotVar.append('streambed_loss')
+#    PlotVar.append('basinpervet')
     
     PlotVar.append('basinppt')
     #PlotVar.append('basinactet')
@@ -146,7 +147,7 @@ if unit[0:2] == 'm^3':
 for ii in range(len(PlotVar)):
     
     if (PlotVar[ii] == 'basinppt') or (PlotVar[ii] == 'basinactet') or (PlotVar[ii] == 'Precip_Q') or (PlotVar[ii] == 'CapET_Q'):
-        ln0 = ax2.plot(dateList, data[PlotVar[ii]], '--')
+        ln0 = ax2.plot(dateList, data[PlotVar[ii]], '--k')
         ax2.set_ylabel(PlotVar[ii] + ' ' + unit)
     else:
         ln0 = ax1.plot(dateList, data[PlotVar[ii]])            
