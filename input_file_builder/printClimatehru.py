@@ -18,7 +18,7 @@ import platform
 import sys
 import os
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'
@@ -183,7 +183,7 @@ if Settings.fl_print_climate_hru == 1:
         
 else:
     # Copy over climate_hru files from climate_hru_dir
-    if platform.system() == 'Linux':
+    if platform.system() == 'Linux' or platform.system() == 'Darwin':
         cmd_str = 'cp -p ' + Settings.climate_hru_dir + slashstr + '* ' + Settings.PRMSinput_dir
     elif platform.system() == 'Windows':
         print "FINISH COPYING CLIMATE_HRU_DIR FOR WINDOWS!!"

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt # matlab-like plots
 import platform
 import sys
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'

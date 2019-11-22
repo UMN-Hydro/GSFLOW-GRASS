@@ -9,7 +9,7 @@ import matplotlib.gridspec as gridspec
 import platform
 import sys
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'
