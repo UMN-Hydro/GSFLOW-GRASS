@@ -81,7 +81,7 @@ HRUout_fil2 = HRUout_fil + '.corrected'
 
 if Settings.GSFLOW_ver == '1.2.0':
     # 1.2.0
-    HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[11])
+    HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[10])
 elif Settings.GSFLOW_ver == '1.2.2':
     # 1.2.2
     HRU_outputs = pd.read_csv(HRUout_fil2, comment='#', delim_whitespace=True, error_bad_lines=False, warn_bad_lines=False, skiprows=[10]) 
@@ -93,8 +93,8 @@ dates = sorted(list(set(list(HRU_outputs.timestamp))))
 
 _min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
 _max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
-_min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
-_max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
+#_min = np.min(HRU_outputs[plotting_variable]) * inches_to_mm
+#_max = np.max(HRU_outputs[plotting_variable]) * inches_to_mm
 
 fig = plt.figure(figsize=(8,6))
 #plt.ion()

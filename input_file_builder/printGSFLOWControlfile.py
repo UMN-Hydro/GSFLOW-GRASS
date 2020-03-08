@@ -45,7 +45,7 @@ import os  # os functions
 import platform
 import sys
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     slashstr = '/'
 else:
     slashstr = '\\'
@@ -542,7 +542,7 @@ fobj.close()
 #    print 'Make sure the below parameter file is ready: \n   {}\n'.format(parfil)
 
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     cmd_str = Settings.GSFLOW_exe + ' ' + con_filname + ' 2>&1 | tee out.txt' # also save stderr and stdout to out.txt
 elif platform.system() == 'Windows':
     cmd_str = Settings.GSFLOW_exe + ' ' + con_filname
@@ -553,7 +553,7 @@ print '*** To run command-line execution --> '
 print '***   Go to ' +  Settings.control_dir
 print '***   and enter at prompt: \n  {}\n'.format(cmd_str)
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     runscriptfil = Settings.control_dir + slashstr + con_filname0 + '_' + model_mode + '.sh'
     fobj = open(runscriptfil, 'w+') 
     fobj.write('pwd0=`pwd` \n')
