@@ -17,11 +17,12 @@ if platform.system() == 'Linux' or platform.system() == 'Darwin':
 else:
     slashstr = '\\'
 
+
 # add path containing readSettings.py
 sys.path.append('..' + slashstr + 'Run')
 
 # Read in user-specified settings
-from readSettings import Settings
+from readSettings import Settings as _Settings
 # Set input file
 if len(sys.argv) < 2:
     settings_input_file = 'settings.ini'
@@ -29,7 +30,7 @@ if len(sys.argv) < 2:
 else:
     settings_input_file = sys.argv[1]
     print 'Using specified input file: ' + settings_input_file
-Settings = Settings(settings_input_file)
+Settings = _Settings(settings_input_file)
 
 #%% *** SET THE FOLLOWING *****************************************************
 
@@ -57,6 +58,9 @@ print '******************************************\n'
 inches_to_mm = 25.4
 
 for filename in [HRUout_fil]:
+    # FRAGILE because of the skiprows
+    # required for the var type row
+    #infile = pd.read_csv(filename, comment='#', skipfooter=1, sep='\t', engine='python')
     infile = file(filename, 'r')
     outfile = file(filename + '.corrected', 'w')
     for line in infile:
@@ -67,8 +71,11 @@ for filename in [HRUout_fil]:
                     break
             _start = m.start() - 4 # space for the year
             outfile.write(line[_start:])
+            #print line[_start:]
         else:
+            #print line
             outfile.write(line)
+    outfile.close()
 
 HRUout_fil2 = HRUout_fil + '.corrected'
 
