@@ -72,7 +72,7 @@ sudo apt-get install python-gdal
 
 #### Windows and Mac
 
-We recommend using **Anaconda**, which comes with most of the Python modules that one need for the execusion of the GSFLOW-GRASS codes: it includes numpy (computations and matrices), matplotlib (plotting), and pandas (database management), but does not include osgeo (geospatial libraries, labeled ``gdal'').
+We recommend using **Anaconda**, which comes with most of the Python modules that one need for the execution of the GSFLOW-GRASS codes: it includes numpy (computations and matrices), matplotlib (plotting), and pandas (database management), but does not include osgeo (geospatial libraries, labeled ``gdal'').
 
 Download Anaconda for Python 2.7+ from https://www.anaconda.com/download. When you install it, you are given the option to have it become your system-wide Python install in a set of two check boxes. We recommend that you do so (they may be by default not checked), but GSFLOW-GRASS will still run fine if they are not. These boxes make your whole system recognize Anaconda as your Python install, rather than limiting it to its enclosed environment.
 
@@ -283,7 +283,20 @@ Land-cover classes are set as integer values as follows:
 1. Grasses
 2. Shrubs
 3. Trees
+
+<!---
+
 4. Conifers (Unsure if this is implemented, or what "trees" vs. "conifers" means)
+
+PRMS implements four classes for the land cover (cov_type):
+0=bare soil; 1=grasses; 2=shrubs; 3=trees; 4=coniferous
+See [here](https://water.usgs.gov/water-resources/software/PRMS/PRMS_tables_5.1.0.pdf) at p. 28
+
+GSFLOW runs only with three classes, meaning 0=bare soil; 1=grasses; 2=shrubs; 3=trees
+See [here](https://raw.githubusercontent.com/UMN-Hydro/GSFLOW-1.2.0/master/doc/tm6d1_GSFLOW.pdf) at p. 165
+
+In the Corine2000 dataset for land-use there are mixed forests (with both deciduous and evergreen trees) and coniferous forest, which are mostly evergreen. This is why PRMS includes this scaling of 3 and 4. Deciduous trees permit more water to reach the soil and enable a higher annual discharge.
+-->
 
 Soil classes are set as integer values as well:
 1. Sand
@@ -293,7 +306,7 @@ Soil classes are set as integer values as well:
 GSFLOW-GRASS will obtain land-cover and soil inputs based on the first of these that is possible:
 1. Import the file given below; if this is empty
 2. Use the provided cov_type and soil_type (below) for spatially uniform properties; failing this
-3. Look for existing GRASS GIS rasters called called "land_cover" and "soil"
+3. Look for existing GRASS GIS rasters called "land_cover" and "soil"
 4. If all of this is not possible, then default values will be chosen: (cov_type = 0, soil_type=2)
 
 Please note that for the raster values, the current implementation is crude: each HRU will import the value at the centroid of the HRU, instead of picking the modal value. This will require a new GRASS GIS module and/or an update to **v.rast.stats**.
@@ -309,7 +322,6 @@ Please note that for the raster values, the current implementation is crude: eac
 
 | Option             | Description
 | ------------------ | ---------
-| **DEM_file_path_to_import**   | DEM for import; if blank, assumes that DEM has already been imported<br>and that the associated initial calculations (flow accumulation, offmap<br> flow converted to NULL cells) have been completed.
 | gisdb | Optional: Directory that holds grass GIS locations.<br>Typically `~/grassdata`<br>Not currently used.<br>(Will be used to run this while starting GRASS in the background)
 | version | Optional: GRASS GIS version number without any "." characters.<br>Option is not currently used.<br>(Will be used to run this while starting GRASS in the background)
 
@@ -360,7 +372,7 @@ Please note that for the raster values, the current implementation is crude: eac
 | Option             | Description
 | ------------------ | ---------
 | **fl_print_climate_hru** | **1** to print spatially uniform climate data over all HRU's<br>using climate data from file specified in *climate_data_file*.<br>**0** if user already has pre-existing HRU-distributed climate files.
-| ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`GSFLOW_print_data_climatehru_files1_metric.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>Format is:<br>`SITE_NAME Met station data (in degrees Celcius and mm/d)`<br>`tmax 1`<br>`tmin 1`<br>`precip 1`<br>`###########################################`<br>`YYYY MM DD HH MM SS T_max T_min Precip`<br>`...continue this pattern until the end of the data set...`<br>One line should be included per day.<br>`HH`, `MM`, and `SS` are all typically `0`
+| ***climate_data_file***  | **Only for *fl_print_climate_hru=1***:<br>Name of file containing climate data for single weather station site,<br>to be uniformly distributed over all HRU's using<br>`printClimatehru.py`.<br>If *fl_print_climate_hru*=0, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>Format is:<br>`SITE_NAME Met station data (in degrees Celcius and mm/d)`<br>`tmax 1`<br>`tmin 1`<br>`precip 1`<br>`###########################################`<br>`YYYY MM DD HH MM SS T_max T_min Precip`<br>`...continue this pattern until the end of the data set...`<br>One line should be included per day.<br>`HH`, `MM`, and `SS` are all typically `0`
 | ***climate_hru_dir***    | **Only if *fl_print_climate_hru*=0**:<br>Name of directory with pre-existing climate_hru data files <br>containing HRU-distributed climate inputs:<br>**tmin.day**, **tmax.day**, **precip.day**, and **empty.day**.<br>See GSFLOW manual or example files in example cases<br>(e.g., in Shullcas -> inputs -> PRMS_GSFLOW) for format of climate_hru data files.<br>**If *fl_print_climate_hru*=1**, this entry can be omitted;<br>if it is included anyway, it will be ignored.<br>
 
 #### "hydrogeologic_inputs" section
@@ -369,7 +381,7 @@ Please note that for the raster values, the current implementation is crude: eac
 | ------------------ | ---------
 | **NLAY**           | Integer number of vertical layers in the subsurface
 | **DZ**             | Layer thicknesses (in [m]).  For multiple layers (NLAY>1), enter comma-separated list,<br>starting from top layer.<br>There is a no-flow boundary condition at the base of the bottom layer.
-| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br>**\todo{Crystal: implement this in Create_hydcond.py}**
+| **fl_create_hydcond**  | **1** to implement Python script to create spatially distributed hydraulic conductivity.<br>**0** to use values or pre-existing file entered in *hydcond*<br><!---\todo{Crystal: implement this in Create_hydcond.py}-->
 | **hydcond**            | For uniform hydraulic conductivity within each layer in the saturated domain:<br>enter value(s) (in [m/d]), using comma-separated list for multiple layer domains,<br>starting with top layer.  For spatially distributed values: Enter file name containing<br>array of values (in [m/d]); if *fl_create_hydcond*=1, contents of file will be created<br>using the Python script called in the Go-GSFLOW File (see below description of<br>Go-GSFLOW File).<br>User may need to adjust hydraulic conductivity values to reach numerically<br>convergent results and to match observations.
 | finf | Optional: Only for spin-up runs; this entry is ignored (but should still be entered)<br>for restart runs. For uniform infiltration to the unsaturated zone over the watershed:<br>enter a single value (in [m/d]).  For spatially distributed values: enter file name<br>containing array of values (in [m/d]).[br] User may need to adjust this value to reach<br>numerically convergent results and for reasonable start of transient results.
 
