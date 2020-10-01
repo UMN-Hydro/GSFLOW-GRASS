@@ -115,7 +115,7 @@ if Settings.DEM_input != '':
 # Import if needed
 _hasrast = len(gscript.parse_command('g.list', type='raster', pattern='land_cover')) > 0
 if Settings.LAND_COVER_file_path_to_import is not '':
-    # Raster file with land cover (0=bare soil;1=grasses; 2=shrubs; 3=trees; 4=coniferous) that provides input for parameter cov_type
+    # Raster file with land cover (0=bare soil;1=grasses; 2=shrubs; 3=trees) that provides input for parameter cov_type
     r.in_gdal(input=Settings.LAND_COVER_file_path_to_import, output=land_cover, overwrite=True)
 elif Settings.cov_type_uniform is not '':
     land_cover = int(Settings.cov_type_uniform)
