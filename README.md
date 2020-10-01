@@ -316,8 +316,8 @@ Please note that for the raster values, the current implementation is crude: eac
 | ------------------ | ---------
 | LAND_COVER_file_path_to_import   | Name for GDAL-compliant raster of land-cover values<br> following the classes given above
 | SOIL_file_path_to_import   | Name for GDAL-compliant raster of soil class values<br> following the classes given above
-| cov_type   | Uniform integer land-cover class
-| soil_type   | Uniform integer soil class
+| cov_type   | Uniform integer land-cover class. *Leave this empty if you use a raster file at field "LAND_COVER_file_path_to_import"*
+| soil_type   | Uniform integer soil class. *Leave this empty if you use a raster file at field "SOIL_file_path_to_import"*
 
 #### "GRASS_core" section
 
