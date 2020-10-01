@@ -279,6 +279,7 @@ Use `settings_template.ini` in the 'Run' folder as a template for creating your 
 #### "land-surface_inputs" section
 
 Land-cover classes are set as integer values as follows:
+
 0. Bare soil
 1. Grasses
 2. Shrubs
