@@ -1,0 +1,11 @@
+name: gsflow-grass
+channels: !!python/tuple
+- defaults
+- conda-forge
+dependencies:
+- python=2.7.*
+- pip
+- numpy
+- GSFLOW 1.2.
+- GRASS GIS 7.6.1
+- ffmpeg
