@@ -6,5 +6,5 @@ dependencies:
 - python=2.7.*
 - pip
 - numpy
-- GRASS 7.6.*
+#- GRASS 7.6.*
 - ffmpeg
