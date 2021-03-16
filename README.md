@@ -1,4 +1,6 @@
 # GSFLOW-GRASS
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kpretz/GSFLOW-GRASS/HEAD)
+
 
 ***Python toolkit using GRASS GIS to generate inputs for the USGS hydrologic model "GSFLOW".***
 

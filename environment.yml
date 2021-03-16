@@ -1,0 +1,10 @@
+name: gsflow-grass
+channels: 
+- defaults
+- conda-forge
+dependencies:
+- python=2.7.*
+- pip
+- numpy
+- gdal
+- ffmpeg
