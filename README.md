@@ -1,6 +1,13 @@
 # GSFLOW-GRASS
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kpretz/GSFLOW-GRASS/HEAD)
 
+## Code updates and deprecation
+
+Both GSFLOW and GRASS have advanced in version since the publication of GSFLOW-GRASS, and this code base has not been updated to keep pace. Note the very specific versions below.
+
+*Anyone who would like to bring GSFLOW-GRASS up-to-date: Please do use this as a starting point. We invite you to fork and update and contact us.*
+
+## Introduction
 
 ***Python toolkit using GRASS GIS to generate inputs for the USGS hydrologic model "GSFLOW".***
 
