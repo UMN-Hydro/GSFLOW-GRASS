@@ -3,9 +3,13 @@
 set -x
 set -o errexit
 cd $HOME
-echo "" | grass74 -c EPSG:2100 /home/mezcla/grassdata
+pwd
+grass --version
+mkdir /home/dgketchum/PycharmProjects
+cd PycharmProjects
 git clone https://github.com/UMN-Hydro/GSFLOW-GRASS.git
 cd GSFLOW-GRASS
-
-grep -v ^# domain_builder/install_extensions.sh | grass74
-
+mkdir -p GSFLOW-GRASS/grassdata/upper_yellowstone
+grass -c EPSG:5107 /home/dgketchum/PycharmProjects/GSFLOW-GRASS/grassdata/upper_yellowstone
+exit
+grep -v ^# domain_builder/install_extensions.sh | grass
